@@ -21,6 +21,7 @@
 #include "Skybox.h"
 #include "FrameTimer.h"
 #include "FileSystemUtils.h"
+#include "TextureLoader.h"
 
 // Global variables
 glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 0.0f);

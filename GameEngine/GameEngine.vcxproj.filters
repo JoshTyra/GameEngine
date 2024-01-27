@@ -40,6 +40,12 @@
     <Filter Include="Header Files\rendering">
       <UniqueIdentifier>{8e941881-2505-40be-a67b-2e2480c6eea3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\textures">
+      <UniqueIdentifier>{5e1fb6c8-700b-4076-a7f2-5f9dc01781ae}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\textures">
+      <UniqueIdentifier>{62690e93-6a3c-414d-a7f9-8ccd0e6c0939}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GameEngine.cpp">
@@ -78,6 +84,9 @@
     <ClCompile Include="utilities\stb_image.cpp">
       <Filter>Source Files\utilities</Filter>
     </ClCompile>
+    <ClCompile Include="textures\TextureLoader.cpp">
+      <Filter>Source Files\textures</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CameraController.h">
@@ -94,6 +103,12 @@
     </ClInclude>
     <ClInclude Include="Skybox.h">
       <Filter>Header Files\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Texture.h">
+      <Filter>Header Files\textures</Filter>
+    </ClInclude>
+    <ClInclude Include="TextureLoader.h">
+      <Filter>Header Files\textures</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
