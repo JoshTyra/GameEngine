@@ -87,6 +87,12 @@
     <ClCompile Include="textures\TextureLoader.cpp">
       <Filter>Source Files\textures</Filter>
     </ClCompile>
+    <ClCompile Include="rendering\LevelGeometry.cpp">
+      <Filter>Source Files\rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="rendering\ModelLoader.cpp">
+      <Filter>Source Files\rendering</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CameraController.h">
@@ -109,6 +115,12 @@
     </ClInclude>
     <ClInclude Include="TextureLoader.h">
       <Filter>Header Files\textures</Filter>
+    </ClInclude>
+    <ClInclude Include="rendering\LevelGeometry.h">
+      <Filter>Header Files\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="rendering\ModelLoader.h">
+      <Filter>Header Files\rendering</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

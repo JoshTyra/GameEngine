@@ -143,6 +143,8 @@
     <ClCompile Include="imgui\imgui_tables.cpp" />
     <ClCompile Include="imgui\imgui_widgets.cpp" />
     <ClCompile Include="io\FileSystemUtils.cpp" />
+    <ClCompile Include="rendering\LevelGeometry.cpp" />
+    <ClCompile Include="rendering\ModelLoader.cpp" />
     <ClCompile Include="rendering\Skybox.cpp" />
     <ClCompile Include="textures\TextureLoader.cpp" />
     <ClCompile Include="utilities\stb_image.cpp" />
@@ -151,6 +153,8 @@
     <ClInclude Include="CameraController.h" />
     <ClInclude Include="FileSystemUtils.h" />
     <ClInclude Include="FrameTimer.h" />
+    <ClInclude Include="rendering\LevelGeometry.h" />
+    <ClInclude Include="rendering\ModelLoader.h" />
     <ClInclude Include="shader.h" />
     <ClInclude Include="Skybox.h" />
     <ClInclude Include="Texture.h" />
