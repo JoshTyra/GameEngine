@@ -136,6 +136,8 @@
     <ClCompile Include="camera\CameraController.cpp" />
     <ClCompile Include="camera\FrameTimer.cpp" />
     <ClCompile Include="GameEngine.cpp" />
+    <ClCompile Include="geometry\LevelGeometry.cpp" />
+    <ClCompile Include="geometry\ModelLoader.cpp" />
     <ClCompile Include="imgui\imgui.cpp" />
     <ClCompile Include="imgui\imgui_draw.cpp" />
     <ClCompile Include="imgui\imgui_impl_glfw.cpp" />
@@ -143,9 +145,9 @@
     <ClCompile Include="imgui\imgui_tables.cpp" />
     <ClCompile Include="imgui\imgui_widgets.cpp" />
     <ClCompile Include="io\FileSystemUtils.cpp" />
-    <ClCompile Include="rendering\LevelGeometry.cpp" />
-    <ClCompile Include="rendering\ModelLoader.cpp" />
+    <ClCompile Include="materials\MaterialParser.cpp" />
     <ClCompile Include="rendering\Skybox.cpp" />
+    <ClCompile Include="textures\stb_image.cpp" />
     <ClCompile Include="textures\TextureLoader.cpp" />
     <ClCompile Include="utilities\stb_image.cpp" />
   </ItemGroup>
@@ -153,6 +155,8 @@
     <ClInclude Include="CameraController.h" />
     <ClInclude Include="FileSystemUtils.h" />
     <ClInclude Include="FrameTimer.h" />
+    <ClInclude Include="MaterialParser.h" />
+    <ClInclude Include="Materials.h" />
     <ClInclude Include="rendering\LevelGeometry.h" />
     <ClInclude Include="rendering\ModelLoader.h" />
     <ClInclude Include="shader.h" />

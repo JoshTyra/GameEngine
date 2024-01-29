@@ -46,6 +46,18 @@
     <Filter Include="Header Files\textures">
       <UniqueIdentifier>{62690e93-6a3c-414d-a7f9-8ccd0e6c0939}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\geometry">
+      <UniqueIdentifier>{296db3cb-01c7-4793-967d-494741d25d9c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\geometry">
+      <UniqueIdentifier>{b21e74f0-84f2-4b7a-95bb-bed2e384e886}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\materials">
+      <UniqueIdentifier>{fc204e0e-8860-4ed5-b994-498eaa344b02}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\materials">
+      <UniqueIdentifier>{dcd8db33-eaf4-464c-8799-9883c6614f9f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GameEngine.cpp">
@@ -87,11 +99,17 @@
     <ClCompile Include="textures\TextureLoader.cpp">
       <Filter>Source Files\textures</Filter>
     </ClCompile>
-    <ClCompile Include="rendering\LevelGeometry.cpp">
-      <Filter>Source Files\rendering</Filter>
+    <ClCompile Include="geometry\LevelGeometry.cpp">
+      <Filter>Source Files\geometry</Filter>
     </ClCompile>
-    <ClCompile Include="rendering\ModelLoader.cpp">
-      <Filter>Source Files\rendering</Filter>
+    <ClCompile Include="geometry\ModelLoader.cpp">
+      <Filter>Source Files\geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="materials\MaterialParser.cpp">
+      <Filter>Source Files\materials</Filter>
+    </ClCompile>
+    <ClCompile Include="textures\stb_image.cpp">
+      <Filter>Source Files\textures</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -116,11 +134,17 @@
     <ClInclude Include="TextureLoader.h">
       <Filter>Header Files\textures</Filter>
     </ClInclude>
-    <ClInclude Include="rendering\LevelGeometry.h">
-      <Filter>Header Files\rendering</Filter>
-    </ClInclude>
     <ClInclude Include="rendering\ModelLoader.h">
-      <Filter>Header Files\rendering</Filter>
+      <Filter>Header Files\geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="rendering\LevelGeometry.h">
+      <Filter>Header Files\geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="MaterialParser.h">
+      <Filter>Header Files\materials</Filter>
+    </ClInclude>
+    <ClInclude Include="Materials.h">
+      <Filter>Header Files\materials</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

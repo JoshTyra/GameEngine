@@ -22,8 +22,8 @@
 #include "FrameTimer.h"
 #include "FileSystemUtils.h"
 #include "TextureLoader.h"
-#include "rendering/LevelGeometry.h"
-#include "rendering/ModelLoader.h"
+#include "LevelGeometry.h"
+#include "ModelLoader.h"
 
 // Global variables
 glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -218,12 +218,6 @@ int main() {
 	float scale = 0.25f; // Adjust this value as needed
 	planeModel = glm::scale(planeModel, glm::vec3(scale, scale, scale)); // Scale the model
 	planeModel = glm::rotate(planeModel, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // Rotate the model
-
-	// Set the shader
-	SimpleLightmap.use();
-	SimpleLightmap.setMat4("model", planeModel); // Set the model matrix for each object
-	SimpleLightmap.setMat4("view", view);   // Common view matrix
-	SimpleLightmap.setMat4("projection", projection); // Common projection matrix
 
 	const size_t FRAME_SAMPLES = 20;  // Example value, adjust as needed
 	FrameTimer frameTimer(FRAME_SAMPLES);
