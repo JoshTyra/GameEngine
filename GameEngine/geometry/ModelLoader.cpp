@@ -1,5 +1,7 @@
 #include "ModelLoader.h"
 #include "FileSystemUtils.h"
+#include <Materials.h>
+#include <MaterialParser.h>
 
 std::vector<std::unique_ptr<LevelGeometry>> ModelLoader::loadModel(const std::string& path, const std::string& materialListFile) {
     Assimp::Importer importer;
@@ -21,6 +23,12 @@ std::vector<std::unique_ptr<LevelGeometry>> ModelLoader::loadModel(const std::st
         auto geometry = processMesh(mesh, scene);  // Assuming processMesh returns LevelGeometry
 
         meshes.push_back(std::move(geometry)); // Add the unique_ptr to the vector
+    }
+
+    // In ModelLoader.cpp, inside the loadModel method
+    if (!materialListFile.empty()) {
+        Material material = MaterialParser::parseMaterialXML(materialListFile);
+        // Now, material contains the parsed data from the XML
     }
 
     return meshes; // Return the vector of unique_ptr to LevelGeometry
