@@ -108,9 +108,6 @@
     <ClCompile Include="materials\MaterialParser.cpp">
       <Filter>Source Files\materials</Filter>
     </ClCompile>
-    <ClCompile Include="textures\stb_image.cpp">
-      <Filter>Source Files\textures</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CameraController.h">
@@ -134,17 +131,17 @@
     <ClInclude Include="TextureLoader.h">
       <Filter>Header Files\textures</Filter>
     </ClInclude>
-    <ClInclude Include="rendering\ModelLoader.h">
-      <Filter>Header Files\geometry</Filter>
-    </ClInclude>
-    <ClInclude Include="rendering\LevelGeometry.h">
-      <Filter>Header Files\geometry</Filter>
-    </ClInclude>
     <ClInclude Include="MaterialParser.h">
       <Filter>Header Files\materials</Filter>
     </ClInclude>
     <ClInclude Include="Materials.h">
       <Filter>Header Files\materials</Filter>
+    </ClInclude>
+    <ClInclude Include="LevelGeometry.h">
+      <Filter>Header Files\geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="ModelLoader.h">
+      <Filter>Header Files\geometry</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
