@@ -61,17 +61,17 @@ std::unique_ptr<LevelGeometry> ModelLoader::processMesh(aiMesh* mesh, const aiSc
     }
 
     for (const auto& [unit, textureName] : material.getTextures()) {
-        auto texturePtr = TextureLoader::loadTexture(textureName); // This returns std::unique_ptr<Texture>
+        std::string fullPath = FileSystemUtils::getAssetFilePath("textures/" + textureName);
+        auto texturePtr = TextureLoader::loadTexture(fullPath); // Use the full path
         if (texturePtr) {
             Texture texture;
-            texture.id = texturePtr->id; // Correctly access the id
+            texture.id = texturePtr->id; // Access the texture ID
             texture.type = unit;
-            texture.path = textureName;
+            texture.path = fullPath; // Store the full path if needed
             textures.push_back(texture);
         }
         else {
-            // Handle the case where the texture failed to load
-            std::cerr << "Failed to load texture: " << textureName << std::endl;
+            std::cerr << "Failed to load texture: " << fullPath << std::endl;
         }
     }
 

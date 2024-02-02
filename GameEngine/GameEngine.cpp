@@ -203,15 +203,19 @@ int main() {
 
 	std::vector<std::unique_ptr<LevelGeometry>> planeGeometry;
 
-	try {
-		std::string modelPath = FileSystemUtils::getAssetFilePath("models/plane.fbx");
-		planeGeometry = ModelLoader::loadModel(modelPath);
-		std::cout << "Model loaded successfully. Number of meshes: " << planeGeometry.size() << std::endl;
-	}
-	catch (const std::exception& e) {
-		std::cerr << "Failed to load model: " << e.what() << std::endl;
-		return -1;  // Handle the error appropriately
-	}
+	//try {
+	//	std::string modelPath = FileSystemUtils::getAssetFilePath("models/plane.fbx");
+	//	planeGeometry = ModelLoader::loadModel(modelPath);
+	//	std::cout << "Model loaded successfully. Number of meshes: " << planeGeometry.size() << std::endl;
+	//}
+	//catch (const std::exception& e) {
+	//	std::cerr << "Failed to load model: " << e.what() << std::endl;
+	//	return -1;  // Handle the error appropriately
+	//}
+
+	std::string modelPath = FileSystemUtils::getAssetFilePath("models/plane.fbx");
+	std::string materialPath = FileSystemUtils::getAssetFilePath("materials/grass.xml");
+	planeGeometry = ModelLoader::loadModel(modelPath, materialPath);
 
 	// Define model matrix for the plane geometry
 	glm::mat4 planeModel = glm::mat4(1.0f);
