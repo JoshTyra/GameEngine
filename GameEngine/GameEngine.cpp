@@ -177,7 +177,7 @@ int main() {
 	// Build and compile our shader program
 	Shader SkyboxShader(FileSystemUtils::getAssetFilePath("shaders/skybox.vert"), FileSystemUtils::getAssetFilePath("shaders/skybox.frag"));
 
-	Shader SimpleLightmap(FileSystemUtils::getAssetFilePath("shaders/simple_diffuse.vert"), FileSystemUtils::getAssetFilePath("shaders/simple_diffuse.frag"));
+	Shader SimpleLightmap(FileSystemUtils::getAssetFilePath("shaders/simple_lightmap.vert"), FileSystemUtils::getAssetFilePath("shaders/simple_lightmap.frag"));
 
 	GLuint skyboxVAO, skyboxVBO;
 	glGenVertexArrays(1, &skyboxVAO);

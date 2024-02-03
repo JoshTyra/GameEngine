@@ -108,6 +108,9 @@
     <ClCompile Include="materials\MaterialParser.cpp">
       <Filter>Source Files\materials</Filter>
     </ClCompile>
+    <ClCompile Include="TechniqueParser.cpp">
+      <Filter>Source Files\materials</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CameraController.h">
@@ -142,6 +145,12 @@
     </ClInclude>
     <ClInclude Include="ModelLoader.h">
       <Filter>Header Files\geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="Technique.h">
+      <Filter>Header Files\materials</Filter>
+    </ClInclude>
+    <ClInclude Include="TechniqueParser.h">
+      <Filter>Header Files\materials</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <map>
+#include "Technique.h"
 
 class Material {
 public:
@@ -48,7 +49,19 @@ public:
         textures.erase(unit);
     }
 
+    // Method to set technique details
+    void setTechniqueDetails(const Technique& techniqueDetails) {
+        this->techniqueDetails = techniqueDetails;
+        // You might also compile and link shaders here or store shader paths for later use
+    }
+
+    // Method to retrieve technique details
+    const Technique& getTechniqueDetails() const {
+        return techniqueDetails;
+    }
+
 private:
     std::string technique;
     std::map<std::string, std::string> textures; // unit -> texture name
+    Technique techniqueDetails; // Store detailed technique information
 };
