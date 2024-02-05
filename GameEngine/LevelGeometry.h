@@ -6,8 +6,8 @@
 #include <vector>
 #include <GL/glew.h>
 #include <glm/glm.hpp>
-#include "shader.h"
 #include "Texture.h"
+#include "shader.h"
 
 // Vertex structure
 struct Vertex {
@@ -29,7 +29,7 @@ public:
     }
     LevelGeometry();
     LevelGeometry(std::vector<Vertex> vertices, std::vector<unsigned int> indices);
-    void Draw(Shader& shader); // Ensure Shader class is included or declared
+    void Draw(const glm::mat4& model, const glm::mat4& view, const glm::mat4& projection);
     void addTexture(const Texture& texture);
 
     // Getter function for textures
@@ -56,11 +56,22 @@ public:
         }
         return 0; // Return an invalid ID if not found
     }
+
+    // Method to set the shader program
+    void setShader(Shader* shader) {
+        this->shader = shader;
+    }
+
+    // Method to get the shader program
+    Shader* getShader() const {
+        return shader;
+    }
 private:
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
     std::vector<Texture> textures; // Store textures
     GLuint VAO, VBO, EBO;
+    Shader* shader;
 
     void setupMesh();
 };

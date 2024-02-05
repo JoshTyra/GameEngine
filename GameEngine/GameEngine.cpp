@@ -177,8 +177,6 @@ int main() {
 	// Build and compile our shader program
 	Shader SkyboxShader(FileSystemUtils::getAssetFilePath("shaders/skybox.vert"), FileSystemUtils::getAssetFilePath("shaders/skybox.frag"));
 
-	Shader SimpleLightmap(FileSystemUtils::getAssetFilePath("shaders/simple_lightmap.vert"), FileSystemUtils::getAssetFilePath("shaders/simple_lightmap.frag"));
-
 	GLuint skyboxVAO, skyboxVBO;
 	glGenVertexArrays(1, &skyboxVAO);
 	glGenBuffers(1, &skyboxVBO);
@@ -202,16 +200,6 @@ int main() {
 	GLuint cubemapTexture = loadCubemap(faces);
 
 	std::vector<std::unique_ptr<LevelGeometry>> planeGeometry;
-
-	//try {
-	//	std::string modelPath = FileSystemUtils::getAssetFilePath("models/plane.fbx");
-	//	planeGeometry = ModelLoader::loadModel(modelPath);
-	//	std::cout << "Model loaded successfully. Number of meshes: " << planeGeometry.size() << std::endl;
-	//}
-	//catch (const std::exception& e) {
-	//	std::cerr << "Failed to load model: " << e.what() << std::endl;
-	//	return -1;  // Handle the error appropriately
-	//}
 
 	std::string modelPath = FileSystemUtils::getAssetFilePath("models/plane.fbx");
 	std::string materialPath = FileSystemUtils::getAssetFilePath("materials/grass.xml");
@@ -275,16 +263,9 @@ int main() {
 		// Render the skybox
 		drawSkybox(skyboxVAO, cubemapTexture, SkyboxShader, view, projection);
 
-		// Set the shader
-		SimpleLightmap.use();
-		SimpleLightmap.setMat4("model", planeModel); // Set the model matrix for each object
-		SimpleLightmap.setMat4("view", view);   // Common view matrix
-		SimpleLightmap.setMat4("projection", projection); // Common projection matrix
-
-		// Render the model
 		for (auto& geometry : planeGeometry) {
 			if (geometry) {
-				geometry->Draw(SimpleLightmap); // Draw each geometry
+				geometry->Draw(planeModel, view, projection);
 			}
 		}
 
