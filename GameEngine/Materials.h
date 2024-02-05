@@ -2,66 +2,39 @@
 #include <string>
 #include <map>
 #include "Technique.h"
+#include "shader.h"
 
 class Material {
 public:
-    // Default constructor
-    Material() {}
+    Material() = default;
 
-    // Constructor with technique
-    explicit Material(const std::string& techniqueName)
-        : technique(techniqueName) {}
+    explicit Material(const std::string& techniqueName);
 
-    // Getters
-    const std::string& getTechnique() const {
-        return technique;
-    }
+    const std::string& getTechnique() const;
 
-    const std::map<std::string, std::string>& getTextures() const {
-        return textures;
-    }
+    const std::map<std::string, std::string>& getTextures() const;
 
-    // Check if a texture exists for a given unit
-    bool hasTexture(const std::string& unit) const {
-        return textures.find(unit) != textures.end();
-    }
+    bool hasTexture(const std::string& unit) const;
 
-    // Get texture by unit
-    std::string getTexture(const std::string& unit) const {
-        auto it = textures.find(unit);
-        if (it != textures.end()) {
-            return it->second;
-        }
-        return ""; // Return empty string if not found
-    }
+    std::string getTexture(const std::string& unit) const;
 
-    // Setters
-    void setTechnique(const std::string& techniqueName) {
-        technique = techniqueName;
-    }
+    void setTechnique(const std::string& techniqueName);
 
-    void addTexture(const std::string& unit, const std::string& textureName) {
-        textures[unit] = textureName;
-    }
+    void addTexture(const std::string& unit, const std::string& textureName);
 
-    // Remove a texture by unit
-    void removeTexture(const std::string& unit) {
-        textures.erase(unit);
-    }
+    void removeTexture(const std::string& unit);
 
-    // Method to set technique details
-    void setTechniqueDetails(const Technique& techniqueDetails) {
-        this->techniqueDetails = techniqueDetails;
-        // You might also compile and link shaders here or store shader paths for later use
-    }
+    void setTechniqueDetails(const Technique& techniqueDetails);
 
-    // Method to retrieve technique details
-    const Technique& getTechniqueDetails() const {
-        return techniqueDetails;
-    }
+    Shader* getShaderProgram() const;
+
+    const Technique& getTechniqueDetails();
+
+    void setShaderProgram(std::unique_ptr<Shader> shader);
 
 private:
     std::string technique;
     std::map<std::string, std::string> textures; // unit -> texture name
     Technique techniqueDetails; // Store detailed technique information
+    std::unique_ptr<Shader> shaderProgram;
 };

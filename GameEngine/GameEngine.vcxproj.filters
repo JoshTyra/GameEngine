@@ -111,6 +111,9 @@
     <ClCompile Include="TechniqueParser.cpp">
       <Filter>Source Files\materials</Filter>
     </ClCompile>
+    <ClCompile Include="Materials.cpp">
+      <Filter>Source Files\materials</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CameraController.h">

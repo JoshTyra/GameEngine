@@ -145,6 +145,7 @@
     <ClCompile Include="imgui\imgui_tables.cpp" />
     <ClCompile Include="imgui\imgui_widgets.cpp" />
     <ClCompile Include="io\FileSystemUtils.cpp" />
+    <ClCompile Include="Materials.cpp" />
     <ClCompile Include="materials\MaterialParser.cpp" />
     <ClCompile Include="rendering\Skybox.cpp" />
     <ClCompile Include="TechniqueParser.cpp" />

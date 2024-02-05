@@ -66,6 +66,7 @@ public:
     Shader* getShader() const {
         return shader;
     }
+
 private:
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
