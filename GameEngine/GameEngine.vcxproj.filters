@@ -114,6 +114,9 @@
     <ClCompile Include="Materials.cpp">
       <Filter>Source Files\materials</Filter>
     </ClCompile>
+    <ClCompile Include="Render.cpp">
+      <Filter>Source Files\rendering</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CameraController.h">
@@ -154,6 +157,9 @@
     </ClInclude>
     <ClInclude Include="TechniqueParser.h">
       <Filter>Header Files\materials</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer.h">
+      <Filter>Header Files\rendering</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

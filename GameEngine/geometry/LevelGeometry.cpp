@@ -86,3 +86,11 @@ void LevelGeometry::Draw(const glm::mat4& model, const glm::mat4& view, const gl
 void LevelGeometry::addTexture(const Texture& texture) {
     textures.push_back(texture);
 }
+
+glm::mat4 LevelGeometry::getModelMatrix() const {
+    glm::mat4 model = glm::mat4(1.0f);
+    model = glm::translate(model, position);
+    model = glm::rotate(model, glm::radians(rotationAngle), rotationAxis);
+    model = glm::scale(model, scale);
+    return model;
+}

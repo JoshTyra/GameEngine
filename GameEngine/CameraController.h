@@ -1,9 +1,8 @@
 #pragma once
-#ifndef CAMERACONTROLLER_H
-#define CAMERACONTROLLER_H
 
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 class CameraController {
 public:
@@ -12,6 +11,10 @@ public:
     static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 
     void processInput(float deltaTime);
+
+    glm::mat4 getViewMatrix() const {
+        return glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+    }
 
 private:
     GLFWwindow* window;
@@ -25,5 +28,3 @@ private:
     static bool keyAPressed;
     static bool keyDPressed;
 };
-
-#endif // CAMERACONTROLLER_H

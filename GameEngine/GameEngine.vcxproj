@@ -147,6 +147,7 @@
     <ClCompile Include="io\FileSystemUtils.cpp" />
     <ClCompile Include="Materials.cpp" />
     <ClCompile Include="materials\MaterialParser.cpp" />
+    <ClCompile Include="Render.cpp" />
     <ClCompile Include="rendering\Skybox.cpp" />
     <ClCompile Include="TechniqueParser.cpp" />
     <ClCompile Include="textures\TextureLoader.cpp" />
@@ -160,6 +161,7 @@
     <ClInclude Include="MaterialParser.h" />
     <ClInclude Include="Materials.h" />
     <ClInclude Include="ModelLoader.h" />
+    <ClInclude Include="Renderer.h" />
     <ClInclude Include="shader.h" />
     <ClInclude Include="Skybox.h" />
     <ClInclude Include="Technique.h" />
