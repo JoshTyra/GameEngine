@@ -24,13 +24,12 @@
 #include "TextureLoader.h"
 #include "LevelGeometry.h"
 #include "ModelLoader.h"
+#include "Renderer.h"
 
 // Global variables
-glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 0.0f);
-glm::vec3 cameraTarget = glm::vec3(0.0f, 0.0f, 0.0f);
-glm::vec3 cameraDirection = glm::normalize(cameraPos - cameraTarget);
-glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
-glm::vec3 cameraFront = -cameraDirection;
+glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f); // Example position
+glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f); // Up is positive Y
+glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f); // Looking towards negative Z
 
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
@@ -162,13 +161,9 @@ int main() {
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 	// Parameters
-	float fov = glm::radians(70.0f); // Field of view (in radians)
-	float aspectRatio = (float)mode->width / (float)mode->height;
 	float nearPlane = 0.5f; // Near clipping plane
 	float farPlane = 50.0f; // Far clipping plane
 
-	// Create projection matrix
-	glm::mat4 projection = glm::perspective(fov, aspectRatio, nearPlane, farPlane);
 	// View matrix
 	glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
 	// Model matrix
@@ -210,6 +205,15 @@ int main() {
 	float scale = 0.25f; // Adjust this value as needed
 	planeModel = glm::scale(planeModel, glm::vec3(scale, scale, scale)); // Scale the model
 	planeModel = glm::rotate(planeModel, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // Rotate the model
+
+	Renderer renderer;
+	renderer.setCameraController(&cameraController);
+
+	// Set the projection matrix once if it doesn't change often
+	float aspectRatio = static_cast<float>(mode->width) / static_cast<float>(mode->height);
+	glm::mat4 projection = glm::perspective(glm::radians(45.0f), aspectRatio, 0.1f, 100.0f);
+	renderer.setProjectionMatrix(projection);
+
 
 	const size_t FRAME_SAMPLES = 20;  // Example value, adjust as needed
 	FrameTimer frameTimer(FRAME_SAMPLES);
@@ -263,11 +267,8 @@ int main() {
 		// Render the skybox
 		drawSkybox(skyboxVAO, cubemapTexture, SkyboxShader, view, projection);
 
-		for (auto& geometry : planeGeometry) {
-			if (geometry) {
-				geometry->Draw(planeModel, view, projection);
-			}
-		}
+		// Use the renderer for drawing
+		renderer.render(planeGeometry);
 
 		// Render ImGui over your scene
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
