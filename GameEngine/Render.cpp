@@ -23,7 +23,7 @@ void Renderer::render(const std::vector<std::unique_ptr<LevelGeometry>>& geometr
             shader->setMat4("projection", projectionMatrix);
             glm::mat4 modelMatrix = geometry->getModelMatrix(); // Now using the new method
             shader->setMat4("model", modelMatrix);
-            geometry->Draw();
+            geometry->Draw(modelMatrix, viewMatrix, projectionMatrix);
         }
     }
 }

@@ -49,39 +49,33 @@ void LevelGeometry::Draw(const glm::mat4& model, const glm::mat4& view, const gl
     }
 
     shader->use();
-
-    // Set transformation matrices as uniforms
     shader->setMat4("model", model);
     shader->setMat4("view", view);
     shader->setMat4("projection", projection);
 
+    // Binding textures and setting uniforms for each texture type
     unsigned int diffuseNr = 1;
     unsigned int emissiveNr = 1;
     for (unsigned int i = 0; i < textures.size(); i++) {
         glActiveTexture(GL_TEXTURE0 + i); // Activate proper texture unit before binding
-
         std::string number;
         std::string name = textures[i].type;
         if (name == "texture_diffuse")
             number = std::to_string(diffuseNr++);
         else if (name == "texture_emissive")
             number = std::to_string(emissiveNr++);
-
-        // Construct the uniform name based on texture type and number
         std::string uniformName = "material." + name + number;
-        shader->setInt(uniformName, i);
+        shader->setInt(uniformName.c_str(), i);
         glBindTexture(GL_TEXTURE_2D, textures[i].id);
     }
 
-    // Debug output for texture binding and VAO usage
     std::cout << "Drawing geometry with VAO ID: " << VAO << std::endl;
-
     glBindVertexArray(VAO);
     glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
-
-    glActiveTexture(GL_TEXTURE0); // Unbind textures by resetting active texture unit
+    glActiveTexture(GL_TEXTURE0); // Reset active texture unit after binding
 }
+
 
 void LevelGeometry::addTexture(const Texture& texture) {
     textures.push_back(texture);
