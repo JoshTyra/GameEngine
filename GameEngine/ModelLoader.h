@@ -1,8 +1,5 @@
 #pragma once
 
-#ifndef MODEL_LOADER_H
-#define MODEL_LOADER_H
-
 #include <vector>
 #include <string>
 #include <assimp/Importer.hpp>
@@ -27,5 +24,3 @@ private:
     // New function to apply material to geometry
     //static void applyMaterialToGeometry(LevelGeometry& geometry, const Material& material);
 };
-
-#endif // MODEL_LOADER_H
