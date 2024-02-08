@@ -77,9 +77,7 @@ std::unique_ptr<LevelGeometry> ModelLoader::processMesh(aiMesh* mesh, const aiSc
 
     // Create LevelGeometry object with vertices, indices, and textures
     auto geometry = std::make_unique<LevelGeometry>(vertices, indices);
-    for (const auto& texture : textures) {
-        geometry->addTexture(texture); // Ensure this method exists and correctly associates textures with the geometry
-    }
+    geometry->setMaterial(std::make_unique<Material>(material));
 
     return geometry;
 }
