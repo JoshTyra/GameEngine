@@ -70,12 +70,11 @@ public:
         return shader;
     }
 
-    void setMaterial(std::unique_ptr<Material> material) {
-        this->material = std::move(material);
+    void setMaterial(std::shared_ptr<Material> mat) {
+        material = mat;
     }
-
-    Material* getMaterial() const {
-        return material.get();
+    std::shared_ptr<Material> getMaterial() const {
+        return material;
     }
 
 private:
@@ -84,7 +83,7 @@ private:
     std::vector<Texture> textures; // Store textures
     GLuint VAO, VBO, EBO;
     Shader* shader;
-    std::unique_ptr<Material> material;
+    std::shared_ptr<Material> material;
     glm::vec3 position = glm::vec3(0.0f);
     glm::vec3 rotationAxis = glm::vec3(0.0f, 1.0f, 0.0f);
     float rotationAngle = 0.0f; // In degrees
