@@ -26,7 +26,7 @@ public:
         glDeleteBuffers(1, &EBO);
     }
     LevelGeometry();
-    LevelGeometry(std::vector<Vertex> vertices, std::vector<unsigned int> indices);
+    LevelGeometry(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, const std::vector<Texture>& textures);
     void Draw(const glm::mat4& model, const glm::mat4& view, const glm::mat4& projection);
     void addTexture(const Texture& texture);
     void setPosition(const glm::vec3& pos) { position = pos; }
