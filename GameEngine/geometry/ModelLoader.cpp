@@ -2,6 +2,7 @@
 #include "FileSystemUtils.h"
 #include <Materials.h>
 #include <MaterialParser.h>
+#include <memory> // For std::shared_ptr
 
 std::vector<std::unique_ptr<LevelGeometry>> ModelLoader::loadModel(const std::string& path, const std::string& materialListFile) {
     Assimp::Importer importer;
@@ -14,23 +15,22 @@ std::vector<std::unique_ptr<LevelGeometry>> ModelLoader::loadModel(const std::st
 
     std::vector<std::unique_ptr<LevelGeometry>> meshes;
 
-    // Load and parse the material file if provided
-    Material material;
+    std::shared_ptr<Material> sharedMaterial;
     if (!materialListFile.empty()) {
-        material = MaterialParser::parseMaterialXML(materialListFile);
+        sharedMaterial = std::make_shared<Material>(MaterialParser::parseMaterialXML(materialListFile));
     }
 
     // Process each mesh in the scene
     for (unsigned int i = 0; i < scene->mNumMeshes; i++) {
         aiMesh* mesh = scene->mMeshes[i];
-        auto geometry = processMesh(mesh, scene, material); // Pass the material to processMesh
+        auto geometry = processMesh(mesh, scene, sharedMaterial); // Adjust processMesh to accept shared_ptr
         meshes.push_back(std::move(geometry));
     }
 
     return meshes;
 }
 
-std::unique_ptr<LevelGeometry> ModelLoader::processMesh(aiMesh* mesh, const aiScene* scene, const Material& material) {
+std::unique_ptr<LevelGeometry> ModelLoader::processMesh(aiMesh* mesh, const aiScene* scene, std::shared_ptr<Material> material) {
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
     std::vector<Texture> textures;
@@ -60,7 +60,7 @@ std::unique_ptr<LevelGeometry> ModelLoader::processMesh(aiMesh* mesh, const aiSc
         }
     }
 
-    for (const auto& [unit, textureName] : material.getTextures()) {
+    for (const auto& [unit, textureName] : material->getTextures()) {
         std::string fullPath = FileSystemUtils::getAssetFilePath("textures/" + textureName);
         auto texturePtr = TextureLoader::loadTexture(fullPath); // Use the full path
         if (texturePtr) {
@@ -75,9 +75,9 @@ std::unique_ptr<LevelGeometry> ModelLoader::processMesh(aiMesh* mesh, const aiSc
         }
     }
 
-    // Create LevelGeometry object with vertices, indices, and textures
-    auto geometry = std::make_unique<LevelGeometry>(vertices, indices);
-    geometry->setMaterial(std::make_unique<Material>(material));
+    // Process mesh...
+    auto geometry = std::make_unique<LevelGeometry>(vertices, indices, textures);
+    geometry->setMaterial(material); // Directly use the shared_ptr
 
     return geometry;
 }
