@@ -31,6 +31,19 @@ std::vector<std::unique_ptr<LevelGeometry>> ModelLoader::loadModel(const std::st
 }
 
 std::unique_ptr<LevelGeometry> ModelLoader::processMesh(aiMesh* mesh, const aiScene* scene, std::shared_ptr<Material> material) {
+    // Log number of meshes and current mesh pointer
+    std::cout << "[Info] Processing mesh " << scene->mNumMeshes << ", pointer: " << mesh << std::endl;
+
+    // Validate mesh pointer
+    if (!mesh) {
+        std::cerr << "[Error] Skipping mesh due to null pointer." << std::endl;
+        return nullptr;
+    }
+
+    // Log mesh vertex count
+    std::cout << "[Info] Mesh vertex count: " << mesh->mNumVertices << std::endl;
+
+    // Initialize data structures
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
     std::vector<Texture> textures;
@@ -38,30 +51,51 @@ std::unique_ptr<LevelGeometry> ModelLoader::processMesh(aiMesh* mesh, const aiSc
     // Process vertices
     for (unsigned int i = 0; i < mesh->mNumVertices; i++) {
         Vertex vertex;
-        // Positions
+
+        // Extract and log position
         vertex.Position = glm::vec3(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z);
-        // Normals
-        vertex.Normal = mesh->HasNormals() ? glm::vec3(mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z) : glm::vec3(0.0f);
-        // Texture Coordinates
-        if (mesh->mTextureCoords[0]) {
-            vertex.TexCoords = glm::vec2(mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y);
+        std::cout << "[Info] Vertex " << i << " position: (" << vertex.Position.x << ", " << vertex.Position.y << ", " << vertex.Position.z << ")" << std::endl;
+
+        // Check and handle normals
+        if (mesh->HasNormals()) {
+            vertex.Normal = glm::vec3(mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z);
+            std::cout << "[Info] Vertex " << i << " normal: (" << vertex.Normal.x << ", " << vertex.Normal.y << ", " << vertex.Normal.z << ")" << std::endl;
         }
         else {
-            vertex.TexCoords = glm::vec2(0.0f, 0.0f);
+            vertex.Normal = glm::vec3(0.0f);
+            std::cout << "[Info] Vertex " << i << " has no normal, assigning default (0, 0, 0)" << std::endl;
         }
+
+        // Check and handle texture coordinates
+        if (mesh->mTextureCoords[0]) {
+            vertex.TexCoords = glm::vec2(mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y);
+            std::cout << "[Info] Vertex " << i << " texture coordinates: (" << vertex.TexCoords.x << ", " << vertex.TexCoords.y << ")" << std::endl;
+        }
+        else {
+            vertex.TexCoords = glm::vec2(0.0f);
+            std::cout << "[Info] Vertex " << i << " has no texture coordinates, assigning default (0, 0)" << std::endl;
+        }
+
         vertices.push_back(vertex);
     }
 
     // Process indices
     for (unsigned int i = 0; i < mesh->mNumFaces; i++) {
         aiFace face = mesh->mFaces[i];
+        // Log face index and number of indices
+        std::cout << "[Info] Face " << i << ", number of indices: " << face.mNumIndices << std::endl;
+
         for (unsigned int j = 0; j < face.mNumIndices; j++) {
             indices.push_back(face.mIndices[j]);
+            std::cout << "[Info] Face " << i << ", index " << j << ": " << face.mIndices[j] << std::endl;
         }
     }
 
+    // Process textures
     for (const auto& [unit, textureName] : material->getTextures()) {
         std::string fullPath = FileSystemUtils::getAssetFilePath("textures/" + textureName);
+        std::cout << "[Info] Loading texture for unit " << unit << ": " << fullPath.c_str() << std::endl;
+
         auto texturePtr = TextureLoader::loadTexture(fullPath); // Use the full path
         if (texturePtr) {
             Texture texture;
@@ -69,6 +103,7 @@ std::unique_ptr<LevelGeometry> ModelLoader::processMesh(aiMesh* mesh, const aiSc
             texture.type = unit;
             texture.path = fullPath; // Store the full path if needed
             textures.push_back(texture);
+            std::cout << "[Info] Texture loaded successfully for unit " << unit;
         }
         else {
             std::cerr << "Failed to load texture: " << fullPath << std::endl;
