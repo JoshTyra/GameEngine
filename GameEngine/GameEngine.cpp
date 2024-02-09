@@ -200,12 +200,6 @@ int main() {
 	std::string materialPath = FileSystemUtils::getAssetFilePath("materials/grass.xml");
 	planeGeometry = ModelLoader::loadModel(modelPath, materialPath);
 
-	// Define model matrix for the plane geometry
-	glm::mat4 planeModel = glm::mat4(1.0f);
-	float scale = 0.25f; // Adjust this value as needed
-	planeModel = glm::scale(planeModel, glm::vec3(scale, scale, scale)); // Scale the model
-	planeModel = glm::rotate(planeModel, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // Rotate the model
-
 	Renderer renderer;
 	renderer.setCameraController(&cameraController);
 
@@ -213,7 +207,6 @@ int main() {
 	float aspectRatio = static_cast<float>(mode->width) / static_cast<float>(mode->height);
 	glm::mat4 projection = glm::perspective(glm::radians(45.0f), aspectRatio, 0.1f, 100.0f);
 	renderer.setProjectionMatrix(projection);
-
 
 	const size_t FRAME_SAMPLES = 20;  // Example value, adjust as needed
 	FrameTimer frameTimer(FRAME_SAMPLES);

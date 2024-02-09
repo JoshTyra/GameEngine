@@ -1,5 +1,6 @@
 #include "LevelGeometry.h"
 #include "shader.h" // Include your Shader class header
+#include "Materials.h"
 
 LevelGeometry::LevelGeometry() {
     // Initialize with empty data or default values
@@ -8,6 +9,10 @@ LevelGeometry::LevelGeometry() {
 LevelGeometry::LevelGeometry(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, const std::vector<Texture>& textures)
     : vertices(vertices), indices(indices), textures(textures) {
     setupMesh();
+    // Apply default transformations
+    setPosition(glm::vec3(0.0f)); // Set the initial position if needed
+    setScale(glm::vec3(0.25f)); // Scale the model uniformly
+    setRotation(glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // Rotate the model
 }
 
 void LevelGeometry::setupMesh() {
@@ -82,8 +87,18 @@ void LevelGeometry::addTexture(const Texture& texture) {
 
 glm::mat4 LevelGeometry::getModelMatrix() const {
     glm::mat4 model = glm::mat4(1.0f);
-    model = glm::translate(model, position);
-    model = glm::rotate(model, glm::radians(rotationAngle), rotationAxis);
-    model = glm::scale(model, scale);
+    model = glm::translate(model, position); // Apply translation last
+    model = glm::rotate(model, rotationAngle, rotationAxis); // Then apply rotation
+    model = glm::scale(model, scale); // Apply scale first
     return model;
 }
+
+void LevelGeometry::setMaterial(std::shared_ptr<Material> mat) {
+    material = mat;
+
+    // Directly assign the shader pointer from the material's shader program
+    shader = material->getShaderProgram();
+}
+
+
+

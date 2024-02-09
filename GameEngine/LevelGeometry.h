@@ -70,9 +70,8 @@ public:
         return shader;
     }
 
-    void setMaterial(std::shared_ptr<Material> mat) {
-        material = mat;
-    }
+    void setMaterial(std::shared_ptr<Material> mat);
+
     std::shared_ptr<Material> getMaterial() const {
         return material;
     }
