@@ -12,20 +12,40 @@ void Renderer::setProjectionMatrix(const glm::mat4& projectionMatrix) {
 }
 
 void Renderer::render(const std::vector<std::unique_ptr<LevelGeometry>>& geometries) {
-    if (!cameraController) return;
+    if (!cameraController) {
+        std::cerr << "Camera controller is not set." << std::endl;
+        return;
+    }
+
     glm::mat4 viewMatrix = cameraController->getViewMatrix();
+
     for (const auto& geometry : geometries) {
-        // Check if geometry is valid and has a material with a shader program
-        if (!geometry || !geometry->getMaterial() || !geometry->getMaterial()->getShaderProgram()) {
-            std::cerr << "Geometry missing material or shader program." << std::endl;
-            continue; // Skip this geometry
+        if (!geometry) {
+            std::cerr << "Encountered a null geometry." << std::endl;
+            continue;
         }
-        Shader* shader = geometry->getMaterial()->getShaderProgram();
+
+        auto material = geometry->getMaterial();
+        if (!material) {
+            std::cerr << "Geometry missing material." << std::endl;
+            continue; // Skip this geometry or handle the error as needed
+        }
+
+        auto shader = material->getShaderProgram();
+        if (!shader) {
+            std::cerr << "Material missing shader program." << std::endl;
+            continue; // Skip this geometry or handle the error as needed
+        }
+
         shader->use();
         shader->setMat4("view", viewMatrix);
         shader->setMat4("projection", projectionMatrix);
+
         glm::mat4 modelMatrix = geometry->getModelMatrix(); // Assuming getModelMatrix() is implemented
         shader->setMat4("model", modelMatrix);
+
+        // Assuming Draw no longer requires matrices as it uses the shader's current state
         geometry->Draw(modelMatrix, viewMatrix, projectionMatrix);
     }
 }
+

@@ -5,8 +5,8 @@ LevelGeometry::LevelGeometry() {
     // Initialize with empty data or default values
 }
 
-LevelGeometry::LevelGeometry(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, const std::vector<Texture>& textures) {
-    // Setup mesh (VAO, VBO, EBO)
+LevelGeometry::LevelGeometry(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, const std::vector<Texture>& textures)
+    : vertices(vertices), indices(indices), textures(textures) {
     setupMesh();
 }
 
