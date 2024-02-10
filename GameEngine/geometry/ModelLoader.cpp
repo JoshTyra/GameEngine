@@ -3,8 +3,16 @@
 #include <Materials.h>
 #include <MaterialParser.h>
 #include <memory> // For std::shared_ptr
+#include <algorithm> // For std::transform
+#include <filesystem> // For path operations
 
-std::vector<std::unique_ptr<LevelGeometry>> ModelLoader::loadModel(const std::string& path, const std::string& materialListFile) {
+// Helper function to determine file extension
+std::string getFileExtension(const std::string& filename) {
+    std::filesystem::path path(filename);
+    return path.extension().string();
+}
+
+std::vector<std::unique_ptr<LevelGeometry>> ModelLoader::loadModel(const std::string& path, const std::string& materialPath) {
     Assimp::Importer importer;
     const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
 
@@ -14,16 +22,35 @@ std::vector<std::unique_ptr<LevelGeometry>> ModelLoader::loadModel(const std::st
     }
 
     std::vector<std::unique_ptr<LevelGeometry>> meshes;
+    std::vector<std::shared_ptr<Material>> materials;
 
-    std::shared_ptr<Material> sharedMaterial;
-    if (!materialListFile.empty()) {
-        sharedMaterial = std::make_shared<Material>(MaterialParser::parseMaterialXML(materialListFile));
+    // Check file extension
+    std::string extension = getFileExtension(materialPath);
+    std::transform(extension.begin(), extension.end(), extension.begin(), ::tolower); // Ensure extension is lowercase
+
+    if (extension == ".txt") {
+        // It's a material list file
+        auto materialFiles = readMaterialList(materialPath);
+        for (const auto& materialFile : materialFiles) {
+            materials.push_back(std::make_shared<Material>(MaterialParser::parseMaterialXML(materialFile)));
+        }
+    }
+    else if (extension == ".xml") {
+        // It's a single material file
+        materials.push_back(std::make_shared<Material>(MaterialParser::parseMaterialXML(materialPath)));
     }
 
-    // Process each mesh in the scene
+    // Assuming one material per mesh, in order
     for (unsigned int i = 0; i < scene->mNumMeshes; i++) {
         aiMesh* mesh = scene->mMeshes[i];
-        auto geometry = processMesh(mesh, scene, sharedMaterial); // Adjust processMesh to accept shared_ptr
+        std::shared_ptr<Material> material = nullptr;
+
+        if (!materials.empty()) {
+            // Use the corresponding material if available, or fallback to the first material
+            material = (i < materials.size()) ? materials[i] : materials.front();
+        }
+
+        auto geometry = processMesh(mesh, scene, material);
         meshes.push_back(std::move(geometry));
     }
 
@@ -123,4 +150,18 @@ std::unique_ptr<LevelGeometry> ModelLoader::processMesh(aiMesh* mesh, const aiSc
 
     return geometry;
 }
+
+std::vector<std::string> ModelLoader::readMaterialList(const std::string& materialListFile) {
+    std::vector<std::string> materialPaths;
+    std::ifstream file(materialListFile);
+    std::string line;
+    while (std::getline(file, line)) {
+        if (!line.empty()) {
+            std::string fullPath = FileSystemUtils::getAssetFilePath("materials/" + line);
+            materialPaths.push_back(fullPath);
+        }
+    }
+    return materialPaths;
+}
+
 

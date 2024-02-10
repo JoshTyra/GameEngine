@@ -194,7 +194,7 @@ int main() {
 	std::vector<std::unique_ptr<LevelGeometry>> planeGeometry;
 
 	std::string modelPath = FileSystemUtils::getAssetFilePath("models/plane.fbx");
-	std::string materialPath = FileSystemUtils::getAssetFilePath("materials/metal panels ext.xml");
+	std::string materialPath = FileSystemUtils::getAssetFilePath("materials/plane.txt");
 	planeGeometry = ModelLoader::loadModel(modelPath, materialPath);
 
 	Renderer renderer;
