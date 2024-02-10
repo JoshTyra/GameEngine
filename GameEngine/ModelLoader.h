@@ -17,7 +17,4 @@ public:
 private:
     static std::unique_ptr<LevelGeometry> processMesh(aiMesh* mesh, const aiScene* scene, std::shared_ptr<Material> material);
     static std::vector<Texture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, const std::string& typeName, std::vector<Texture>& loadedTextures);
-
-    // New function to read material list
-    static std::vector<std::string> readMaterialList(const std::string& materialListFile);
 };
