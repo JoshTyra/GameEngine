@@ -57,19 +57,19 @@ void LevelGeometry::Draw(const glm::mat4& model, const glm::mat4& view, const gl
     shader->setMat4("view", view);
     shader->setMat4("projection", projection);
 
-    // Binding textures and setting uniforms for each texture type
-    unsigned int diffuseNr = 1;
-    unsigned int emissiveNr = 1;
+    // Initialize texture unit counters for each type of texture
+    unsigned int diffuseNr = 0; // Use 0 for the first diffuse texture
+    unsigned int emissiveNr = 1; // Use 1 for the first emissive texture, assuming you bind diffuse texture to GL_TEXTURE0
+
     for (unsigned int i = 0; i < textures.size(); i++) {
         glActiveTexture(GL_TEXTURE0 + i); // Activate proper texture unit before binding
-        std::string number;
         std::string name = textures[i].type;
-        if (name == "texture_diffuse")
-            number = std::to_string(diffuseNr++);
-        else if (name == "texture_emissive")
-            number = std::to_string(emissiveNr++);
-        std::string uniformName = "material." + name + number;
-        shader->setInt(uniformName.c_str(), i);
+        if (name == "diffuse") {
+            shader->setInt("diffuseTexture", diffuseNr); // Directly use "diffuseTexture" uniform name
+        }
+        else if (name == "emissive") {
+            shader->setInt("lightMapTexture", emissiveNr); // Directly use "lightMapTexture" uniform name
+        }
         glBindTexture(GL_TEXTURE_2D, textures[i].id);
     }
 
@@ -79,7 +79,6 @@ void LevelGeometry::Draw(const glm::mat4& model, const glm::mat4& view, const gl
     glBindVertexArray(0);
     glActiveTexture(GL_TEXTURE0); // Reset active texture unit after binding
 }
-
 
 void LevelGeometry::addTexture(const Texture& texture) {
     textures.push_back(texture);

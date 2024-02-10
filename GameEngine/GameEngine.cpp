@@ -155,9 +155,6 @@ int main() {
 	// Don't render faces with normals facing away from the camera
 	glEnable(GL_CULL_FACE);
 
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 	// Parameters
@@ -197,7 +194,7 @@ int main() {
 	std::vector<std::unique_ptr<LevelGeometry>> planeGeometry;
 
 	std::string modelPath = FileSystemUtils::getAssetFilePath("models/plane.fbx");
-	std::string materialPath = FileSystemUtils::getAssetFilePath("materials/grass.xml");
+	std::string materialPath = FileSystemUtils::getAssetFilePath("materials/metal panels ext.xml");
 	planeGeometry = ModelLoader::loadModel(modelPath, materialPath);
 
 	Renderer renderer;

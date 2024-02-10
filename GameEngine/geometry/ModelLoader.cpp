@@ -76,6 +76,13 @@ std::unique_ptr<LevelGeometry> ModelLoader::processMesh(aiMesh* mesh, const aiSc
             std::cout << "[Info] Vertex " << i << " has no texture coordinates, assigning default (0, 0)" << std::endl;
         }
 
+        if (mesh->HasTextureCoords(1)) { // Check for the existence of the second UV set
+            vertex.LightMapTexCoords = glm::vec2(mesh->mTextureCoords[1][i].x, mesh->mTextureCoords[1][i].y);
+        }
+        else {
+            vertex.LightMapTexCoords = glm::vec2(0.0f); // or some default value
+        }
+
         vertices.push_back(vertex);
     }
 

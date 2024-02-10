@@ -41,10 +41,9 @@ void Renderer::render(const std::vector<std::unique_ptr<LevelGeometry>>& geometr
         shader->setMat4("view", viewMatrix);
         shader->setMat4("projection", projectionMatrix);
 
-        glm::mat4 modelMatrix = geometry->getModelMatrix(); // Assuming getModelMatrix() is implemented
+        glm::mat4 modelMatrix = geometry->getModelMatrix();
         shader->setMat4("model", modelMatrix);
 
-        // Assuming Draw no longer requires matrices as it uses the shader's current state
         geometry->Draw(modelMatrix, viewMatrix, projectionMatrix);
     }
 }
