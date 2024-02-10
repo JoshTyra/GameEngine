@@ -20,7 +20,4 @@ private:
 
     // New function to read material list
     static std::vector<std::string> readMaterialList(const std::string& materialListFile);
-
-    // New function to apply material to geometry
-    //static void applyMaterialToGeometry(LevelGeometry& geometry, const Material& material);
 };
