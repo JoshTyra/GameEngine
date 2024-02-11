@@ -25,6 +25,7 @@
 #include "LevelGeometry.h"
 #include "ModelLoader.h"
 #include "Renderer.h"
+#include "AudioManager.h"
 
 // Global variables
 glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f); // Example position
@@ -68,6 +69,20 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
 	front.y = sin(glm::radians(pitch));
 	front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
 	cameraFront = glm::normalize(front);
+}
+
+AudioManager audioManager;
+
+void initAudio() {
+	// Convert the relative path to a full path using the file utilities
+	std::string audioPath = FileSystemUtils::getAssetFilePath("audio/wind.ogg");
+	if (!audioManager.loadSound("ambient_wind", audioPath)) {
+		std::cerr << "Failed to load wind sound." << std::endl;
+		return;
+	}
+
+	// Play the sound at the origin, looping it for ambient effect
+	audioManager.playSound("ambient_wind", glm::vec3(0.0f, 0.0f, 3.0f), true);
 }
 
 int main() {
@@ -204,6 +219,9 @@ int main() {
 	float aspectRatio = static_cast<float>(mode->width) / static_cast<float>(mode->height);
 	glm::mat4 projection = glm::perspective(glm::radians(45.0f), aspectRatio, 0.1f, 100.0f);
 	renderer.setProjectionMatrix(projection);
+
+	// Call our ambience sound effect
+	initAudio();
 
 	const size_t FRAME_SAMPLES = 20;  // Example value, adjust as needed
 	FrameTimer frameTimer(FRAME_SAMPLES);
