@@ -63,7 +63,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
 	// Clamping pitch value
 	pitch = glm::clamp(pitch, -89.0f, 89.0f);
 
-	glm::vec3 front;
+	glm::vec3 front{};
 	front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
 	front.y = sin(glm::radians(pitch));
 	front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));

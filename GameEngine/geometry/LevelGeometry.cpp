@@ -2,12 +2,13 @@
 #include "shader.h" // Include your Shader class header
 #include "Materials.h"
 
-LevelGeometry::LevelGeometry() {
+LevelGeometry::LevelGeometry()
+    : VAO(0), VBO(0), EBO(0), shader(nullptr) {
     // Initialize with empty data or default values
 }
 
 LevelGeometry::LevelGeometry(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, const std::vector<Texture>& textures)
-    : vertices(vertices), indices(indices), textures(textures) {
+    : vertices(vertices), indices(indices), textures(textures), VAO(0), VBO(0), EBO(0), shader(nullptr) {
     setupMesh();
     // Apply default transformations
     setPosition(glm::vec3(0.0f)); // Set the initial position if needed
@@ -75,7 +76,7 @@ void LevelGeometry::Draw(const glm::mat4& model, const glm::mat4& view, const gl
 
     std::cout << "Drawing geometry with VAO ID: " << VAO << std::endl;
     glBindVertexArray(VAO);
-    glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(indices.size()), GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
     glActiveTexture(GL_TEXTURE0); // Reset active texture unit after binding
 }

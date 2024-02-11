@@ -1,6 +1,4 @@
 #pragma once
-#ifndef FRAMETIMER_H
-#define FRAMETIMER_H
 
 #include <vector>
 
@@ -17,5 +15,3 @@ private:
     float accumulatedTime;
     size_t frameSampleSize;
 };
-
-#endif // FRAMETIMER_H

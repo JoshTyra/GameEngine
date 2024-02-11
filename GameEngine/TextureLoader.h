@@ -1,8 +1,5 @@
 #pragma once
 
-#ifndef TEXTURE_LOADER_H
-#define TEXTURE_LOADER_H
-
 #include "Texture.h"
 #include <memory>
 #include <GL/glew.h>
@@ -12,5 +9,3 @@ class TextureLoader {
 public:
     static std::unique_ptr<Texture> loadTexture(const std::string& path);
 };
-
-#endif // TEXTURE_LOADER_H

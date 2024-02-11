@@ -1,7 +1,7 @@
 #include "Renderer.h"
 #include <glm/gtc/matrix_transform.hpp>
 
-Renderer::Renderer() : cameraController(nullptr) {}
+Renderer::Renderer(): cameraController(nullptr), projectionMatrix(glm::mat4(1.0f)) {}
 
 void Renderer::setCameraController(CameraController* cameraController) {
     this->cameraController = cameraController;

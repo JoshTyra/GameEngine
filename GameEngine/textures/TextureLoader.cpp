@@ -11,11 +11,11 @@ std::unique_ptr<Texture> TextureLoader::loadTexture(const std::string& path) {
     int width, height, nrChannels;
     unsigned char* data = stbi_load(path.c_str(), &width, &height, &nrChannels, 0);
     if (data) {
-        GLenum format;
+        GLenum format = GL_RGB; // Default format
         if (nrChannels == 1)
             format = GL_RED;
         else if (nrChannels == 3)
-            format = GL_RGB;
+            format = GL_RGB; // This line could technically be omitted since format is already GL_RGB
         else if (nrChannels == 4)
             format = GL_RGBA;
 
