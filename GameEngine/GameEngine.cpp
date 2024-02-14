@@ -73,16 +73,17 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
 
 AudioManager audioManager;
 
-void initAudio() {
-	// Convert the relative path to a full path using the file utilities
-	std::string audioPath = FileSystemUtils::getAssetFilePath("audio/wind.ogg");
+void initAudio(glm::vec3 ambiencePosition) {
+	std::string audioPath = FileSystemUtils::getAssetFilePath("audio/wind2.ogg");
+
+	// Load the sound without specifying a position
 	if (!audioManager.loadSound("ambient_wind", audioPath)) {
 		std::cerr << "Failed to load wind sound." << std::endl;
 		return;
 	}
 
-	// Play the sound at the origin, looping it for ambient effect
-	audioManager.playSound("ambient_wind", glm::vec3(0.0f, 0.0f, 3.0f), true);
+	// Specify the position when playing the sound
+	audioManager.playSound("ambient_wind", ambiencePosition, true, 1.0f, 1.0f, 500.0f);
 }
 
 int main() {
@@ -131,6 +132,12 @@ int main() {
 		std::cerr << "Failed to initialize GLEW\n";
 		return -1;
 	}
+
+	// Set the distance model for sound attenuation
+	alDistanceModel(AL_INVERSE_DISTANCE_CLAMPED);
+
+	// Proceed with loading sounds and other initializations
+	initAudio({ 0.0f, 0.0f, 0.0f });
 
 	// Setup Dear ImGui context
 	IMGUI_CHECKVERSION();
@@ -220,9 +227,6 @@ int main() {
 	glm::mat4 projection = glm::perspective(glm::radians(45.0f), aspectRatio, 0.1f, 100.0f);
 	renderer.setProjectionMatrix(projection);
 
-	// Call our ambience sound effect
-	initAudio();
-
 	const size_t FRAME_SAMPLES = 20;  // Example value, adjust as needed
 	FrameTimer frameTimer(FRAME_SAMPLES);
 
@@ -237,14 +241,19 @@ int main() {
 
 		cameraController.processInput(smoothedDeltaTime);
 
-		// Start the ImGui frame
+		cameraController.updateAudioListener();
+
+		// Update positions of all active audio sources
+		audioManager.updateSourcePositions();
+
+		audioManager.cleanupSources();
+
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 
-		// Use the screen resolution for positioning
-		ImVec2 windowPos = ImVec2(mode->width - 260, 10); // Adjust the X value to fit the window size
-		ImVec2 windowPivot = ImVec2(0.0f, 0.0f); // Pivot at the top-left corner of the window
+		ImVec2 windowPos = ImVec2(mode->width - 260, 10);
+		ImVec2 windowPivot = ImVec2(0.0f, 0.0f);
 		ImGui::SetNextWindowPos(windowPos, ImGuiCond_Always, windowPivot);
 
 		// Create a window to display FPS
@@ -288,13 +297,14 @@ int main() {
 	// Cleanup
 	glDeleteVertexArrays(1, &skyboxVAO);
 	glDeleteBuffers(1, &skyboxVBO);
-	glDeleteTextures(1, &cubemapTexture); // If you created a cubemap texture for the skybox
+	glDeleteTextures(1, &cubemapTexture);
 
 	// Cleanup
 	ImGui_ImplOpenGL3_Shutdown();
 	ImGui_ImplGlfw_Shutdown();
 	ImGui::DestroyContext();
 
+	audioManager.cleanUp();
 	glfwDestroyWindow(window);
 	glfwTerminate();
 	return 0;

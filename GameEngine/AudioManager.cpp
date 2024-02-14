@@ -53,7 +53,7 @@ bool AudioManager::loadSound(const std::string& name, const std::string& filePat
     return true;
 }
 
-void AudioManager::playSound(const std::string& name, const glm::vec3& position, bool loop) {
+void AudioManager::playSound(const std::string& name, const glm::vec3& position, bool loop, float rolloffFactor, float referenceDistance, float maxDistance) {
     auto it = soundBuffers.find(name);
     if (it == soundBuffers.end()) {
         std::cerr << "Sound not found: " << name << std::endl;
@@ -61,26 +61,76 @@ void AudioManager::playSound(const std::string& name, const glm::vec3& position,
     }
 
     ALuint source;
-    alGenSources(1, &source);
-    alSourcei(source, AL_BUFFER, it->second);
-    alSourcei(source, AL_LOOPING, loop ? AL_TRUE : AL_FALSE);
-    alSource3f(source, AL_POSITION, position.x, position.y, position.z);
-    alSourcePlay(source);
+    alGenSources(1, &source); // Generate a new source
+    alSourcei(source, AL_BUFFER, it->second); // Attach the buffer to the source
+    alSourcei(source, AL_LOOPING, loop ? AL_TRUE : AL_FALSE); // Set looping
+    alSource3f(source, AL_POSITION, position.x, position.y, position.z); // Set the source's position
 
-    // Note: In a complete implementation, you might want to keep track of sources to manage their lifecycle
+    // Update or add the source information
+    activeSources[name] = { source, position };
+
+    // Debug output for sound source position
+    std::cout << "Sound Source Position: X=" << position.x << " Y=" << position.y << " Z=" << position.z << std::endl;
+
+    // Set attenuation properties
+    alSourcef(source, AL_ROLLOFF_FACTOR, rolloffFactor);
+    alSourcef(source, AL_REFERENCE_DISTANCE, referenceDistance);
+    alSourcef(source, AL_MAX_DISTANCE, maxDistance);
+
+    // Print detailed info about the sound being played
+    std::cout << "Playing sound: " << name << std::endl;
+    std::cout << "Looping: " << (loop ? "Yes" : "No") << std::endl;
+    std::cout << "Rolloff Factor: " << rolloffFactor << std::endl;
+    std::cout << "Reference Distance: " << referenceDistance << std::endl;
+    std::cout << "Max Distance: " << maxDistance << std::endl;
+
+    alSourcePlay(source); // Play the source
+}
+
+void AudioManager::cleanupSources() {
+    auto it = activeSources.begin();
+    while (it != activeSources.end()) {
+        ALint state;
+        alGetSourcei(it->second.sourceID, AL_SOURCE_STATE, &state);
+        if (state != AL_PLAYING && state != AL_PAUSED) {
+            alDeleteSources(1, &it->second.sourceID); // Delete the source
+            it = activeSources.erase(it); // Remove from the map and get the next iterator
+        }
+        else {
+            ++it;
+        }
+    }
 }
 
 void AudioManager::cleanUp() {
+    // Delete any active sources to ensure no sources are left playing or allocated
+    for (auto& pair : activeSources) {
+        alDeleteSources(1, &pair.second.sourceID);
+    }
+    activeSources.clear(); // Clear the map of active sources
+
+    // Delete the buffers as before
     for (auto& entry : soundBuffers) {
         alDeleteBuffers(1, &entry.second);
     }
     soundBuffers.clear();
 
+    // Clean up the OpenAL context and device as before
     if (context) {
         alcMakeContextCurrent(nullptr);
         alcDestroyContext(context);
+        context = nullptr; // Set to nullptr to avoid dangling pointers
     }
     if (device) {
         alcCloseDevice(device);
+        device = nullptr; // Set to nullptr for safety
+    }
+}
+
+void AudioManager::updateSourcePositions() {
+    for (auto& pair : activeSources) {
+        const SourceInfo& info = pair.second;
+        std::cout << "Updated source position for: " << pair.first << " to X=" << info.position.x << " Y=" << info.position.y << " Z=" << info.position.z << std::endl;
+        alSource3f(info.sourceID, AL_POSITION, info.position.x, info.position.y, info.position.z);
     }
 }

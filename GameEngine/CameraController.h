@@ -12,6 +12,8 @@ public:
 
     void processInput(float deltaTime);
 
+    void updateAudioListener();
+
     glm::mat4 getViewMatrix() const {
         return glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
     }
