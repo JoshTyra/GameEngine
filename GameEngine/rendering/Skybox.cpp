@@ -5,6 +5,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 #include <shader.h>
+#include "Debug.h"
 
 // Skybox vertices definition
 GLfloat skyboxVertices[] = {
@@ -68,7 +69,7 @@ GLuint loadCubemap(std::vector<std::string> faces) {
             stbi_image_free(data);
         }
         else {
-            std::cout << "Cubemap texture failed to load at path: " << faces[i] << std::endl;
+            DEBUG_COUT << "Cubemap texture failed to load at path: " << faces[i] << std::endl;
             stbi_image_free(data);
         }
     }

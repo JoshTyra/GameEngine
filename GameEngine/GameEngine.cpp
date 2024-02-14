@@ -26,6 +26,7 @@
 #include "ModelLoader.h"
 #include "Renderer.h"
 #include "AudioManager.h"
+#include "Debug.h"
 
 // Global variables
 glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f); // Example position
@@ -159,7 +160,7 @@ int main() {
 	// After creating the OpenGL context, check the depth buffer size
 	int depthBits;
 	glGetIntegerv(GL_DEPTH_BITS, &depthBits);
-	std::cout << "Depth buffer bit depth: " << depthBits << " bits" << std::endl;
+	DEBUG_COUT << "Depth buffer bit depth: " << depthBits << " bits" << std::endl;
 
 	glfwSetCursorPosCallback(window, mouse_callback);
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);

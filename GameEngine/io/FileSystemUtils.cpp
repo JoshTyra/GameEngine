@@ -2,6 +2,7 @@
 #include <string>
 #include <algorithm>
 #include <iostream>
+#include "Debug.h"
 
 #if defined(_WIN32) || defined(_WIN64)
 // Windows specific includes
@@ -60,6 +61,6 @@ std::string FileSystemUtils::getExecutablePath() {
 std::string FileSystemUtils::getMaterialFilePath(const std::string& materialFileName) {
     std::string exePath = getExecutablePath();
     std::string materialPath = exePath + "/media/materials/" + materialFileName;
-    std::cout << "Constructed Material File Path: " << materialPath << std::endl;
+    DEBUG_COUT << "Constructed Material File Path: " << materialPath << std::endl;
     return materialPath;
 }

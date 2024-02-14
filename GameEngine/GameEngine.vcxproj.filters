@@ -182,5 +182,8 @@
     <ClInclude Include="stb_vorbis.h">
       <Filter>Header Files\utilities</Filter>
     </ClInclude>
+    <ClInclude Include="Debug.h">
+      <Filter>Header Files\utilities</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

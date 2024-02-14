@@ -1,6 +1,7 @@
 #include "LevelGeometry.h"
-#include "shader.h" // Include your Shader class header
+#include "shader.h"
 #include "Materials.h"
+#include "Debug.h"
 
 LevelGeometry::LevelGeometry()
     : VAO(0), VBO(0), EBO(0), shader(nullptr) {
@@ -74,7 +75,7 @@ void LevelGeometry::Draw(const glm::mat4& model, const glm::mat4& view, const gl
         glBindTexture(GL_TEXTURE_2D, textures[i].id);
     }
 
-    //std::cout << "Drawing geometry with VAO ID: " << VAO << std::endl;
+    DEBUG_COUT << "Drawing geometry with VAO ID: " << VAO << std::endl;
     glBindVertexArray(VAO);
     glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(indices.size()), GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);

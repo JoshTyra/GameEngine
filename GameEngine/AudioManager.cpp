@@ -1,6 +1,7 @@
 #include "AudioManager.h"
 #include <iostream>
 #include "stb_vorbis.h"
+#include "Debug.h"
 
 AudioManager::AudioManager() : device(nullptr), context(nullptr) {
     device = alcOpenDevice(nullptr);
@@ -70,7 +71,7 @@ void AudioManager::playSound(const std::string& name, const glm::vec3& position,
     activeSources[name] = { source, position };
 
     // Debug output for sound source position
-    std::cout << "Sound Source Position: X=" << position.x << " Y=" << position.y << " Z=" << position.z << std::endl;
+    DEBUG_COUT << "Sound Source Position: X=" << position.x << " Y=" << position.y << " Z=" << position.z << std::endl;
 
     // Set attenuation properties
     alSourcef(source, AL_ROLLOFF_FACTOR, rolloffFactor);
@@ -78,11 +79,11 @@ void AudioManager::playSound(const std::string& name, const glm::vec3& position,
     alSourcef(source, AL_MAX_DISTANCE, maxDistance);
 
     // Print detailed info about the sound being played
-    std::cout << "Playing sound: " << name << std::endl;
-    std::cout << "Looping: " << (loop ? "Yes" : "No") << std::endl;
-    std::cout << "Rolloff Factor: " << rolloffFactor << std::endl;
-    std::cout << "Reference Distance: " << referenceDistance << std::endl;
-    std::cout << "Max Distance: " << maxDistance << std::endl;
+    DEBUG_COUT << "Playing sound: " << name << std::endl;
+    DEBUG_COUT << "Looping: " << (loop ? "Yes" : "No") << std::endl;
+    DEBUG_COUT << "Rolloff Factor: " << rolloffFactor << std::endl;
+    DEBUG_COUT << "Reference Distance: " << referenceDistance << std::endl;
+    DEBUG_COUT << "Max Distance: " << maxDistance << std::endl;
 
     alSourcePlay(source); // Play the source
 }
@@ -130,7 +131,7 @@ void AudioManager::cleanUp() {
 void AudioManager::updateSourcePositions() {
     for (auto& pair : activeSources) {
         const SourceInfo& info = pair.second;
-        std::cout << "Updated source position for: " << pair.first << " to X=" << info.position.x << " Y=" << info.position.y << " Z=" << info.position.z << std::endl;
+        DEBUG_COUT << "Updated source position for: " << pair.first << " to X=" << info.position.x << " Y=" << info.position.y << " Z=" << info.position.z << std::endl;
         alSource3f(info.sourceID, AL_POSITION, info.position.x, info.position.y, info.position.z);
     }
 }

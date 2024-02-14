@@ -9,10 +9,11 @@
 
 // Vertex structure
 struct Vertex {
-    glm::vec3 Position;
-    glm::vec3 Normal;
-    glm::vec2 TexCoords;
-    glm::vec2 LightMapTexCoords;
+    glm::vec3 Position{ 0.0f, 0.0f, 0.0f };
+    glm::vec3 Normal{ 0.0f, 0.0f, 0.0f };
+    glm::vec2 TexCoords{ 0.0f, 0.0f };
+    glm::vec2 LightMapTexCoords{ 0.0f, 0.0f };
+    // Initialize other members with appropriate default values
 };
 
 // LevelGeometry class

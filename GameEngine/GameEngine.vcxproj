@@ -163,6 +163,7 @@
   <ItemGroup>
     <ClInclude Include="AudioManager.h" />
     <ClInclude Include="CameraController.h" />
+    <ClInclude Include="Debug.h" />
     <ClInclude Include="FileSystemUtils.h" />
     <ClInclude Include="FrameTimer.h" />
     <ClInclude Include="LevelGeometry.h" />

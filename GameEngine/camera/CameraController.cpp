@@ -1,6 +1,7 @@
 #include "CameraController.h"
 #include <al.h>
 #include <iostream>
+#include "Debug.h"
 
 bool CameraController::keyWPressed = false;
 bool CameraController::keySPressed = false;
@@ -40,7 +41,7 @@ void CameraController::updateAudioListener() {
 	alListener3f(AL_POSITION, cameraPos.x, cameraPos.y, cameraPos.z);
 
 	// Debug output for listener position
-	//std::cout << "Listener Position: X=" << cameraPos.x << " Y=" << cameraPos.y << " Z=" << cameraPos.z << std::endl;
+	DEBUG_COUT << "Listener Position: X=" << cameraPos.x << " Y=" << cameraPos.y << " Z=" << cameraPos.z << std::endl;
 
 	// Set listener orientation
 	glm::vec3 cameraRight = glm::normalize(glm::cross(cameraFront, cameraUp));
@@ -50,6 +51,6 @@ void CameraController::updateAudioListener() {
 	alListenerfv(AL_ORIENTATION, listenerOri);
 
 	// Debug output for listener orientation
-	//std::cout << "Listener Orientation (At): X=" << cameraDirection.x << " Y=" << cameraDirection.y << " Z=" << cameraDirection.z << std::endl;
-	//std::cout << "Listener Orientation (Up): X=" << cameraUp.x << " Y=" << cameraUp.y << " Z=" << cameraUp.z << std::endl;
+	DEBUG_COUT << "Listener Orientation (At): X=" << cameraDirection.x << " Y=" << cameraDirection.y << " Z=" << cameraDirection.z << std::endl;
+	DEBUG_COUT << "Listener Orientation (Up): X=" << cameraUp.x << " Y=" << cameraUp.y << " Z=" << cameraUp.z << std::endl;
 }
