@@ -60,3 +60,9 @@ Shader* Material::getShaderProgram() const {
 void Material::setShaderProgram(std::unique_ptr<Shader> shader) {
     shaderProgram = std::move(shader);
 }
+
+const Technique& Material::getTechniqueDetails() const {
+    return this->techniqueDetails;
+}
+
+

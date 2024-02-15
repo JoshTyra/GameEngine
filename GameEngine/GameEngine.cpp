@@ -175,11 +175,6 @@ int main() {
 	// Configure global OpenGL state
 	glEnable(GL_DEPTH_TEST);
 
-	// Don't render faces with normals facing away from the camera
-	glEnable(GL_CULL_FACE);
-
-	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
 	// Parameters
 	float nearPlane = 0.5f; // Near clipping plane
 	float farPlane = 50.0f; // Far clipping plane

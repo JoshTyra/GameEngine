@@ -10,5 +10,8 @@ struct ShaderInfo {
 
 struct Technique {
     std::vector<ShaderInfo> shaders; // All shaders used in this technique
-    // Add other technique-related properties here
+    bool enableFaceCulling;
+
+    Technique() : enableFaceCulling(false) {} // Default to face culling disabled
 };
+

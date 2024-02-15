@@ -16,8 +16,14 @@ Technique TechniqueParser::parseTechniqueXML(const std::string& filename) {
                 shader.filePath = shaderElement->Attribute("file");
                 technique.shaders.push_back(shader);
             }
-            // Since your current structure does not support multiple passes explicitly,
-            // the loop adds all shaders to the technique. Adjust if multi-pass support is added.
+
+            tinyxml2::XMLElement* renderStateElement = root->FirstChildElement("renderState");
+            if (renderStateElement) {
+                tinyxml2::XMLElement* cullElement = renderStateElement->FirstChildElement("enableFaceCulling");
+                if (cullElement) {
+                    technique.enableFaceCulling = (std::string(cullElement->GetText()) == "true");
+                }
+            }
         }
     }
 

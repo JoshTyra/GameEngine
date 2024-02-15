@@ -28,7 +28,7 @@ public:
 
     Shader* getShaderProgram() const;
 
-    const Technique& getTechniqueDetails();
+    const Technique& getTechniqueDetails() const;
 
     void setShaderProgram(std::unique_ptr<Shader> shader);
 

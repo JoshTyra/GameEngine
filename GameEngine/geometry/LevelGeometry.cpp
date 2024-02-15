@@ -54,6 +54,21 @@ void LevelGeometry::Draw(const glm::mat4& model, const glm::mat4& view, const gl
         return;
     }
 
+    // Apply technique-specific render states
+    if (material) {
+        const Technique& technique = material->getTechniqueDetails();
+
+        // Check and apply face culling state
+        if (technique.enableFaceCulling) {
+            glEnable(GL_CULL_FACE);
+        }
+        else {
+            glDisable(GL_CULL_FACE);
+        }
+
+        // Additional render states can be applied here similarly
+    }
+
     shader->use();
     shader->setMat4("model", model);
     shader->setMat4("view", view);
