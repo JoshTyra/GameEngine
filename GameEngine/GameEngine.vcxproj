@@ -144,6 +144,7 @@
     <ClCompile Include="GameEngine.cpp" />
     <ClCompile Include="geometry\LevelGeometry.cpp" />
     <ClCompile Include="geometry\ModelLoader.cpp" />
+    <ClCompile Include="GLEnumUtils.cpp" />
     <ClCompile Include="imgui\imgui.cpp" />
     <ClCompile Include="imgui\imgui_draw.cpp" />
     <ClCompile Include="imgui\imgui_impl_glfw.cpp" />
@@ -166,6 +167,7 @@
     <ClInclude Include="Debug.h" />
     <ClInclude Include="FileSystemUtils.h" />
     <ClInclude Include="FrameTimer.h" />
+    <ClInclude Include="GLEnumUtils.h" />
     <ClInclude Include="LevelGeometry.h" />
     <ClInclude Include="MaterialParser.h" />
     <ClInclude Include="Materials.h" />

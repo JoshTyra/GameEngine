@@ -132,6 +132,9 @@
     <ClCompile Include="utilities\stb_vorbis.cpp">
       <Filter>Source Files\utilities</Filter>
     </ClCompile>
+    <ClCompile Include="GLEnumUtils.cpp">
+      <Filter>Source Files\utilities</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CameraController.h">
@@ -183,6 +186,9 @@
       <Filter>Header Files\utilities</Filter>
     </ClInclude>
     <ClInclude Include="Debug.h">
+      <Filter>Header Files\utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="GLEnumUtils.h">
       <Filter>Header Files\utilities</Filter>
     </ClInclude>
   </ItemGroup>

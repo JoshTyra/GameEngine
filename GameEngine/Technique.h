@@ -20,4 +20,9 @@ struct Technique {
     std::vector<ShaderInfo> shaders; // All shaders used in this technique
     bool enableFaceCulling = false; // Default to face culling disabled
     BlendingInfo blending; // Blending state
+    bool enableDepthTest;
+    GLenum depthFunc;
+
+    // Constructor
+    Technique() : enableDepthTest(true), depthFunc(GL_LESS) {}
 };

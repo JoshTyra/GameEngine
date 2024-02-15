@@ -74,6 +74,14 @@ void LevelGeometry::Draw(const glm::mat4& model, const glm::mat4& view, const gl
         else {
             glDisable(GL_BLEND);
         }
+
+        if (technique.enableDepthTest) {
+            glEnable(GL_DEPTH_TEST);
+            glDepthFunc(technique.depthFunc);
+        }
+        else {
+            glDisable(GL_DEPTH_TEST);
+        }
     }
 
     shader->use();
