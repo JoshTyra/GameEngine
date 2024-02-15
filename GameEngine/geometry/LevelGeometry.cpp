@@ -54,7 +54,6 @@ void LevelGeometry::Draw(const glm::mat4& model, const glm::mat4& view, const gl
         return;
     }
 
-    // Apply technique-specific render states
     if (material) {
         const Technique& technique = material->getTechniqueDetails();
 
@@ -66,7 +65,15 @@ void LevelGeometry::Draw(const glm::mat4& model, const glm::mat4& view, const gl
             glDisable(GL_CULL_FACE);
         }
 
-        // Additional render states can be applied here similarly
+        // Apply blending state
+        if (technique.blending.enabled) {
+            glEnable(GL_BLEND);
+            glBlendFunc(technique.blending.src, technique.blending.dest);
+            glBlendEquation(technique.blending.equation);
+        }
+        else {
+            glDisable(GL_BLEND);
+        }
     }
 
     shader->use();
