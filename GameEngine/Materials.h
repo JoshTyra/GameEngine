@@ -32,9 +32,18 @@ public:
 
     void setShaderProgram(std::unique_ptr<Shader> shader);
 
+    void addParameter(const std::string& name, float value);
+
+    float getParameter(const std::string& name) const;
+
+    bool hasParameter(const std::string& name) const;
+
+    static const std::map<std::string, std::string> textureUniformMap;
+
 private:
     std::string technique;
     std::map<std::string, std::string> textures; // unit -> texture name
+    std::map<std::string, float> parameters;
     Technique techniqueDetails; // Store detailed technique information
     std::unique_ptr<Shader> shaderProgram;
 };

@@ -2,6 +2,7 @@
 #include "TechniqueParser.h"
 #include "FileSystemUtils.h"
 #include <tinyxml2.h>
+#include <string>
 
 Material MaterialParser::parseMaterialXML(const std::string& filename) {
     tinyxml2::XMLDocument doc;
@@ -14,10 +15,9 @@ Material MaterialParser::parseMaterialXML(const std::string& filename) {
         tinyxml2::XMLElement* techniqueElement = root->FirstChildElement("technique");
         if (techniqueElement) {
             std::string techniqueName = techniqueElement->Attribute("name");
-            // Use TechniqueParser to parse the technique file
             std::string techniqueFilePath = FileSystemUtils::getAssetFilePath("techniques/" + techniqueName);
             Technique technique = TechniqueParser::parseTechniqueXML(techniqueFilePath);
-            material.setTechniqueDetails(technique); // Assuming Material can store Technique details
+            material.setTechniqueDetails(technique);
         }
 
         // Parse textures
@@ -25,6 +25,13 @@ Material MaterialParser::parseMaterialXML(const std::string& filename) {
             std::string unit = textureElement->Attribute("unit");
             std::string textureName = textureElement->Attribute("name");
             material.addTexture(unit, textureName);
+        }
+
+        // Parse parameters
+        for (tinyxml2::XMLElement* parameterElement = root->FirstChildElement("parameter"); parameterElement != nullptr; parameterElement = parameterElement->NextSiblingElement("parameter")) {
+            std::string name = parameterElement->Attribute("name");
+            float value = parameterElement->FloatAttribute("value");
+            material.addParameter(name, value);
         }
     }
 

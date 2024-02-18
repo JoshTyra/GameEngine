@@ -65,4 +65,25 @@ const Technique& Material::getTechniqueDetails() const {
     return this->techniqueDetails;
 }
 
+void Material::addParameter(const std::string& name, float value) {
+    parameters[name] = value;
+}
+
+float Material::getParameter(const std::string& name) const {
+    auto it = parameters.find(name);
+    return it != parameters.end() ? it->second : 0.0f; // Return 0 if not found
+}
+
+bool Material::hasParameter(const std::string& name) const {
+    return parameters.find(name) != parameters.end();
+}
+
+// Initialize the static map
+const std::map<std::string, std::string> Material::textureUniformMap = {
+    {"diffuse", "textures[0]"},
+    {"emissive", "textures[1]"},
+    {"detail1", "textures[2]"},
+    {"detail2", "textures[3]"}
+};
+
 

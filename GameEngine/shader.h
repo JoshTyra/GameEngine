@@ -41,6 +41,11 @@ public:
         glUniform1i(glGetUniformLocation(this->Program, name.c_str()), value);
     }
 
+    // Method to set a float uniform
+    void setFloat(const std::string& name, float value) const {
+        glUniform1f(glGetUniformLocation(this->Program, name.c_str()), value);
+    }
+
     bool isSuccessfullyCompiled() const {
         GLint success;
         glGetProgramiv(this->Program, GL_LINK_STATUS, &success);
