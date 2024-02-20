@@ -156,6 +156,7 @@
     <ClCompile Include="materials\MaterialParser.cpp" />
     <ClCompile Include="Render.cpp" />
     <ClCompile Include="rendering\Skybox.cpp" />
+    <ClCompile Include="state\GameState.cpp" />
     <ClCompile Include="TechniqueParser.cpp" />
     <ClCompile Include="textures\TextureLoader.cpp" />
     <ClCompile Include="utilities\stb_image.cpp" />
@@ -175,6 +176,7 @@
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="shader.h" />
     <ClInclude Include="Skybox.h" />
+    <ClInclude Include="state\GameState.h" />
     <ClInclude Include="stb_vorbis.h" />
     <ClInclude Include="Technique.h" />
     <ClInclude Include="TechniqueParser.h" />

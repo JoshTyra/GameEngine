@@ -1,5 +1,6 @@
 // GameState.cpp
 #include "GameState.h"
+#include <iostream>
 
 GameStateManager::GameStateManager() : currentState(GameState::MENU) {
     // Constructor initialization list sets the initial state

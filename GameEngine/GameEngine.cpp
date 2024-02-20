@@ -27,6 +27,7 @@
 #include "Renderer.h"
 #include "AudioManager.h"
 #include "Debug.h"
+#include <state/GameState.h>
 
 // Global variables
 glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f); // Example position
@@ -43,6 +44,9 @@ float lastX = 2560.0f / 2.0f;  // Set to window width divided by 2
 float lastY = 1080.0f / 2.0f;   // Set to window height divided by 2
 float sensitivity = 0.1f;
 bool firstMouse = true;
+
+AudioManager audioManager;
+GameStateManager stateManager;
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
 	if (firstMouse) {
@@ -71,8 +75,6 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
 	front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
 	cameraFront = glm::normalize(front);
 }
-
-AudioManager audioManager;
 
 void initAudio(glm::vec3 ambiencePosition) {
 	std::string audioPath = FileSystemUtils::getAssetFilePath("audio/wind2.ogg");
@@ -140,6 +142,9 @@ int main() {
 	// Proceed with loading sounds and other initializations
 	initAudio({ 0.0f, 0.0f, 0.0f });
 
+	glfwSetCursorPosCallback(window, mouse_callback);
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
 	// Setup Dear ImGui context
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
@@ -152,7 +157,7 @@ int main() {
 
 	// Setup Platform/Renderer backends
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
-	ImGui_ImplOpenGL3_Init("#version 330 core");
+	ImGui_ImplOpenGL3_Init("#version 420 core");
 
 	// Enable VSync (1 = on, 0 = off)
 	glfwSwapInterval(1);
@@ -161,9 +166,6 @@ int main() {
 	int depthBits;
 	glGetIntegerv(GL_DEPTH_BITS, &depthBits);
 	DEBUG_COUT << "Depth buffer bit depth: " << depthBits << " bits" << std::endl;
-
-	glfwSetCursorPosCallback(window, mouse_callback);
-	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 	// Enable multisampling
 	glEnable(GL_MULTISAMPLE);
@@ -227,6 +229,7 @@ int main() {
 	FrameTimer frameTimer(FRAME_SAMPLES);
 
 	while (!glfwWindowShouldClose(window)) {
+		glfwPollEvents();
 
 		float currentFrameTime = glfwGetTime();
 		float deltaTime = currentFrameTime - lastFrame;
@@ -235,59 +238,101 @@ int main() {
 		frameTimer.update(deltaTime);
 		float smoothedDeltaTime = frameTimer.getSmoothedDeltaTime();
 
-		cameraController.processInput(smoothedDeltaTime);
+		switch (stateManager.getCurrentState()) {
+		case GameState::MENU: {
+			// Show the mouse cursor when in the menu
+			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 
-		cameraController.updateAudioListener();
+			// Handle menu interactions
+			ImGui_ImplOpenGL3_NewFrame();
+			ImGui_ImplGlfw_NewFrame();
+			ImGui::NewFrame();
 
-		// Update positions of all active audio sources
-		audioManager.updateSourcePositions();
+			// Center the menu on the screen
+			ImGui::SetNextWindowPos(ImVec2(mode->width / 2, mode->height / 2), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
 
-		audioManager.cleanupSources();
+			ImGui::SetNextWindowFocus();
 
-		ImGui_ImplOpenGL3_NewFrame();
-		ImGui_ImplGlfw_NewFrame();
-		ImGui::NewFrame();
+			// Begin the menu window
+			ImGui::Begin("Main Menu", NULL, ImGuiWindowFlags_AlwaysAutoResize);
+			if (ImGui::Button("Start Game", ImVec2(200, 0))) {
+				stateManager.changeState(GameState::GAME);
+				// Hide the cursor when the game starts
+				glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+			}
+			if (ImGui::Button("Exit", ImVec2(200, 0))) {
+				glfwSetWindowShouldClose(window, GLFW_TRUE);
+			}
+			ImGui::End();
 
-		ImVec2 windowPos = ImVec2(mode->width - 260, 10);
-		ImVec2 windowPivot = ImVec2(0.0f, 0.0f);
-		ImGui::SetNextWindowPos(windowPos, ImGuiCond_Always, windowPivot);
+			// Render the menu UI
+			ImGui::Render();
+			int display_w, display_h;
+			glfwGetFramebufferSize(window, &display_w, &display_h);
+			glViewport(0, 0, display_w, display_h);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+			break;
+		}
+		case GameState::GAME:
+			// Hide the cursor when the game starts
+			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-		// Create a window to display FPS
-		ImGui::Begin("Performance");
-		ImGui::Text("Average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-		ImGui::End();
+			cameraController.processInput(smoothedDeltaTime);
 
-		// Use the screen resolution for positioning
-		ImVec2 windowPos2 = ImVec2(mode->width - 260, 70); // Adjust the X value to fit the window size
-		ImVec2 windowPivot2 = ImVec2(0.0f, 0.0f); // Pivot at the top-left corner of the window
-		ImGui::SetNextWindowPos(windowPos2, ImGuiCond_Always, windowPivot2);
+			cameraController.updateAudioListener();
 
-		// Create a window to display Camera Position
-		ImGui::Begin("Camera Position");
-		ImGui::Text("Position: %.2f, %.2f, %.2f", cameraPos.x, cameraPos.y, cameraPos.z);
-		ImGui::End();
+			// Update positions of all active audio sources
+			audioManager.updateSourcePositions();
 
-		// Rendering
-		ImGui::Render();
-		int display_w, display_h;
-		glfwGetFramebufferSize(window, &display_w, &display_h);
-		glViewport(0, 0, display_w, display_h);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			audioManager.cleanupSources();
 
-		// Update view matrix
-		view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+			ImGui_ImplOpenGL3_NewFrame();
+			ImGui_ImplGlfw_NewFrame();
+			ImGui::NewFrame();
 
-		// Render the skybox
-		drawSkybox(skyboxVAO, cubemapTexture, SkyboxShader, view, projection);
+			ImVec2 windowPos = ImVec2(mode->width - 260, 10);
+			ImVec2 windowPivot = ImVec2(0.0f, 0.0f);
+			ImGui::SetNextWindowPos(windowPos, ImGuiCond_Always, windowPivot);
 
-		// Use the renderer for drawing
-		renderer.render(planeGeometry);
+			// Create a window to display FPS
+			ImGui::Begin("Performance");
+			ImGui::Text("Average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+			ImGui::End();
 
-		// Render ImGui over your scene
-		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+			// Use the screen resolution for positioning
+			ImVec2 windowPos2 = ImVec2(mode->width - 260, 70); // Adjust the X value to fit the window size
+			ImVec2 windowPivot2 = ImVec2(0.0f, 0.0f); // Pivot at the top-left corner of the window
+			ImGui::SetNextWindowPos(windowPos2, ImGuiCond_Always, windowPivot2);
+
+			// Create a window to display Camera Position
+			ImGui::Begin("Camera Position");
+			ImGui::Text("Position: %.2f, %.2f, %.2f", cameraPos.x, cameraPos.y, cameraPos.z);
+			ImGui::End();
+
+			// Rendering
+			ImGui::Render();
+			int display_w, display_h;
+			glfwGetFramebufferSize(window, &display_w, &display_h);
+			glViewport(0, 0, display_w, display_h);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+			// Update view matrix
+			view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+
+			// Render the skybox
+			drawSkybox(skyboxVAO, cubemapTexture, SkyboxShader, view, projection);
+
+			// Use the renderer for drawing
+			renderer.render(planeGeometry);
+
+			// Render ImGui over your scene
+			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+			break;
+		}
 
 		glfwSwapBuffers(window);
-		glfwPollEvents();
 	}
 
 	// Cleanup

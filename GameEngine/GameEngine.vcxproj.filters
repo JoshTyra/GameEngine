@@ -67,6 +67,12 @@
     <Filter Include="Header Files\utilities">
       <UniqueIdentifier>{7ff5820b-d9f2-4e69-9a4f-efb871091a2f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\state">
+      <UniqueIdentifier>{67c69ec2-ec9d-46ef-9c57-9516aa22ab3d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\state">
+      <UniqueIdentifier>{1f9625ac-e775-436e-89f1-2065c89bda56}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GameEngine.cpp">
@@ -135,6 +141,9 @@
     <ClCompile Include="GLEnumUtils.cpp">
       <Filter>Source Files\utilities</Filter>
     </ClCompile>
+    <ClCompile Include="state\GameState.cpp">
+      <Filter>Source Files\state</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CameraController.h">
@@ -190,6 +199,9 @@
     </ClInclude>
     <ClInclude Include="GLEnumUtils.h">
       <Filter>Header Files\utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="state\GameState.h">
+      <Filter>Header Files\state</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
