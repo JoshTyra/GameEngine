@@ -140,5 +140,60 @@ void LevelGeometry::setMaterial(std::shared_ptr<Material> mat) {
 	shader = material->getShaderProgram();
 }
 
+btCollisionShape* LevelGeometry::createBulletCollisionShape() const {
+	auto mesh = new btTriangleMesh();
+
+	for (size_t i = 0; i < indices.size(); i += 3) {
+		int index0 = indices[i];
+		int index1 = indices[i + 1];
+		int index2 = indices[i + 2];
+
+		const Vertex& v0 = vertices[index0];
+		const Vertex& v1 = vertices[index1];
+		const Vertex& v2 = vertices[index2];
+
+		btVector3 vertex0(v0.Position.x, v0.Position.y, v0.Position.z);
+		btVector3 vertex1(v1.Position.x, v1.Position.y, v1.Position.z);
+		btVector3 vertex2(v2.Position.x, v2.Position.y, v2.Position.z);
+
+		mesh->addTriangle(vertex0, vertex1, vertex2);
+	}
+
+	// Use the mesh to create a collision shape
+	// Note: For static geometry, `useQuantizedAabbCompression = true` is recommended for performance
+	auto shape = new btBvhTriangleMeshShape(mesh, true);
+	return shape;
+}
+
+void LevelGeometry::addToPhysicsWorld(btDiscreteDynamicsWorld* dynamicsWorld) {
+	btCollisionShape* shape = createBulletCollisionShape();
+
+	// Obtain the model matrix that combines position, rotation, and scale
+	glm::mat4 modelMatrix = getModelMatrix();
+
+	// Convert glm::mat4 to btTransform
+	btTransform transform;
+	transform.setFromOpenGLMatrix(&modelMatrix[0][0]);
+
+	// Use the transformed btDefaultMotionState for accurate positioning
+	btDefaultMotionState* motionState = new btDefaultMotionState(transform);
+
+	// Since the object is static (mass = 0), the local inertia is zero
+	btVector3 localInertia(0, 0, 0);
+
+	// Construct rigid body info using the mass, motion state, shape, and inertia
+	btRigidBody::btRigidBodyConstructionInfo rbInfo(0, motionState, shape, localInertia);
+
+	btRigidBody* body = new btRigidBody(rbInfo);
+
+	// Optionally, store the body in a member variable if needed for later access or modification
+	// rigidBody = std::unique_ptr<btRigidBody>(body);
+
+	dynamicsWorld->addRigidBody(body);
+}
+
+
+
+
 
 

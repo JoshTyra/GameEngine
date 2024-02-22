@@ -15,6 +15,7 @@
 #include <imstb_truetype.h>
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_opengl3.h>
+#include <btBulletDynamicsCommon.h>
 
 #include "CameraController.h"
 #include "shader.h"
@@ -28,6 +29,7 @@
 #include "AudioManager.h"
 #include "Debug.h"
 #include <state/GameState.h>
+#include "physics/PhysicsDebugDrawer.h"
 
 // Global variables
 glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f); // Example position
@@ -225,6 +227,30 @@ int main() {
 	glm::mat4 projection = glm::perspective(glm::radians(45.0f), aspectRatio, 0.1f, 100.0f);
 	renderer.setProjectionMatrix(projection);
 
+	// Bullet Physics initialization
+	btDefaultCollisionConfiguration* collisionConfiguration = new btDefaultCollisionConfiguration();
+	btCollisionDispatcher* dispatcher = new btCollisionDispatcher(collisionConfiguration);
+	btBroadphaseInterface* overlappingPairCache = new btDbvtBroadphase();
+	btSequentialImpulseConstraintSolver* solver = new btSequentialImpulseConstraintSolver;
+	btDiscreteDynamicsWorld* dynamicsWorld = new btDiscreteDynamicsWorld(dispatcher, overlappingPairCache, solver, collisionConfiguration);
+
+	dynamicsWorld->setGravity(btVector3(0, -10, 0)); // Set gravity (example value)
+
+	PhysicsDebugDrawer* debugDrawer = new PhysicsDebugDrawer(
+		FileSystemUtils::getAssetFilePath("shaders/debug_vertex.glsl"),
+		FileSystemUtils::getAssetFilePath("shaders/debug_fragment.glsl"),
+		&renderer,
+		&cameraController
+	);
+
+	for (auto& geom : planeGeometry) {
+		geom->addToPhysicsWorld(dynamicsWorld);
+	}
+
+	dynamicsWorld->setDebugDrawer(debugDrawer);
+
+	debugDrawer->setDebugMode(btIDebugDraw::DBG_DrawWireframe | btIDebugDraw::DBG_DrawContactPoints);
+
 	const size_t FRAME_SAMPLES = 20;  // Example value, adjust as needed
 	FrameTimer frameTimer(FRAME_SAMPLES);
 
@@ -325,6 +351,14 @@ int main() {
 
 			// Use the renderer for drawing
 			renderer.render(planeGeometry);
+
+			// Step the physics simulation
+			dynamicsWorld->stepSimulation(deltaTime);
+
+			// Draw physics debug information
+			dynamicsWorld->debugDrawWorld();
+
+			debugDrawer->render();
 
 			// Render ImGui over your scene
 			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

@@ -71,8 +71,8 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>C:\Users\JT\Desktop\glfw-3.3.8.bin.WIN64\include;C:\Users\JT\Desktop\glew-2.1.0\include;C:\Users\JT\Desktop\glm-master;C:\Users\JT\Desktop\stb-master;C:\Users\JT\source\repos\GameEngine\GameEngine;C:\Users\JT\Desktop\assimp-master\build\include;C:\Users\JT\Desktop\assimp-master\include;C:\Users\JT\Desktop\imgui-master;C:\Users\JT\Desktop\imgui-master\backends;C:\Users\JT\Desktop\tinyxml2-master;C:\Program Files %28x86%29\OpenAL 1.1 SDK\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\JT\Desktop\glfw-3.3.8.bin.WIN64\lib-vc2022;C:\Users\JT\Desktop\glew-2.1.0\lib\Release\x64;C:\Users\JT\Desktop\assimp-master\build\lib\Debug;C:\Users\JT\Desktop\tinyxml2-master\build\Debug;C:\Program Files %28x86%29\OpenAL 1.1 SDK\libs\Win64;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\Users\JT\Desktop\glfw-3.3.8.bin.WIN64\include;C:\Users\JT\Desktop\glew-2.1.0\include;C:\Users\JT\Desktop\glm-master;C:\Users\JT\Desktop\stb-master;C:\Users\JT\source\repos\GameEngine\GameEngine;C:\Users\JT\Desktop\assimp-master\build\include;C:\Users\JT\Desktop\assimp-master\include;C:\Users\JT\Desktop\imgui-master;C:\Users\JT\Desktop\imgui-master\backends;C:\Users\JT\Desktop\tinyxml2-master;C:\Program Files %28x86%29\OpenAL 1.1 SDK\include;C:\Users\JT\Desktop\bullet3-master\src;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\JT\Desktop\glfw-3.3.8.bin.WIN64\lib-vc2022;C:\Users\JT\Desktop\glew-2.1.0\lib\Release\x64;C:\Users\JT\Desktop\assimp-master\build\lib\Debug;C:\Users\JT\Desktop\tinyxml2-master\build\Debug;C:\Program Files %28x86%29\OpenAL 1.1 SDK\libs\Win64;C:\Users\JT\Desktop\bullet3-master\build\lib\Debug;$(LibraryPath)</LibraryPath>
     <RunCodeAnalysis>true</RunCodeAnalysis>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -114,7 +114,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>glew32.lib;glfw3.lib;glew32s.lib;opengl32.lib;assimp-vc143-mtd.lib;tinyxml2.lib;OpenAL32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glew32.lib;glfw3.lib;glew32s.lib;opengl32.lib;assimp-vc143-mtd.lib;tinyxml2.lib;OpenAL32.lib;Bullet3Common_Debug.lib;BulletCollision_Debug.lib;BulletDynamics_Debug.lib;LinearMath_Debug.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>
@@ -154,6 +154,7 @@
     <ClCompile Include="io\FileSystemUtils.cpp" />
     <ClCompile Include="Materials.cpp" />
     <ClCompile Include="materials\MaterialParser.cpp" />
+    <ClCompile Include="physics\PhysicsDebugDrawer.cpp" />
     <ClCompile Include="Render.cpp" />
     <ClCompile Include="rendering\Skybox.cpp" />
     <ClCompile Include="state\GameState.cpp" />
@@ -173,6 +174,7 @@
     <ClInclude Include="MaterialParser.h" />
     <ClInclude Include="Materials.h" />
     <ClInclude Include="ModelLoader.h" />
+    <ClInclude Include="physics\PhysicsDebugDrawer.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="shader.h" />
     <ClInclude Include="Skybox.h" />

@@ -3,6 +3,7 @@
 #include <vector>
 #include <GL/glew.h>
 #include <glm/glm.hpp>
+#include <btBulletDynamicsCommon.h>
 #include "Texture.h"
 #include "shader.h"
 #include "Materials.h"
@@ -33,6 +34,8 @@ public:
     void setPosition(const glm::vec3& pos) { position = pos; }
     void setRotation(float angle, const glm::vec3& axis) { rotationAngle = angle; rotationAxis = axis; }
     void setScale(const glm::vec3& scl) { scale = scl; }
+    btCollisionShape* createBulletCollisionShape() const; // Creates and returns the Bullet collision shape
+    void addToPhysicsWorld(btDiscreteDynamicsWorld* dynamicsWorld); // Adds the geometry to the specified Bullet dynamics world
 
     glm::mat4 getModelMatrix() const;
 
@@ -88,6 +91,10 @@ private:
     glm::vec3 rotationAxis = glm::vec3(0.0f, 1.0f, 0.0f);
     float rotationAngle = 0.0f; // In degrees
     glm::vec3 scale = glm::vec3(1.0f);
+
+    // Optional: Store Bullet physics objects if needed
+    // std::unique_ptr<btCollisionShape> collisionShape; // Use smart pointers for automatic memory management
+    // std::unique_ptr<btRigidBody> rigidBody;
 
     void setupMesh();
 };

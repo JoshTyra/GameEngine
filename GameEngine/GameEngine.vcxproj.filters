@@ -73,6 +73,12 @@
     <Filter Include="Source Files\state">
       <UniqueIdentifier>{1f9625ac-e775-436e-89f1-2065c89bda56}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\physics">
+      <UniqueIdentifier>{d990e30a-430a-432a-b8e1-c67250fbfe5c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\physics">
+      <UniqueIdentifier>{afe16587-9955-4b95-b605-64e256fd5524}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GameEngine.cpp">
@@ -144,6 +150,9 @@
     <ClCompile Include="state\GameState.cpp">
       <Filter>Source Files\state</Filter>
     </ClCompile>
+    <ClCompile Include="physics\PhysicsDebugDrawer.cpp">
+      <Filter>Source Files\physics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CameraController.h">
@@ -202,6 +211,9 @@
     </ClInclude>
     <ClInclude Include="state\GameState.h">
       <Filter>Header Files\state</Filter>
+    </ClInclude>
+    <ClInclude Include="physics\PhysicsDebugDrawer.h">
+      <Filter>Header Files\physics</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
