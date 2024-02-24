@@ -153,6 +153,15 @@
     <ClCompile Include="physics\PhysicsDebugDrawer.cpp">
       <Filter>Source Files\physics</Filter>
     </ClCompile>
+    <ClCompile Include="physics\PhysicsManager.cpp">
+      <Filter>Source Files\physics</Filter>
+    </ClCompile>
+    <ClCompile Include="state\GameStateManager.cpp">
+      <Filter>Source Files\state</Filter>
+    </ClCompile>
+    <ClCompile Include="state\MenuState.cpp">
+      <Filter>Source Files\state</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CameraController.h">
@@ -166,9 +175,6 @@
     </ClInclude>
     <ClInclude Include="shader.h">
       <Filter>Header Files\graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="Skybox.h">
-      <Filter>Header Files\rendering</Filter>
     </ClInclude>
     <ClInclude Include="Texture.h">
       <Filter>Header Files\textures</Filter>
@@ -214,6 +220,21 @@
     </ClInclude>
     <ClInclude Include="physics\PhysicsDebugDrawer.h">
       <Filter>Header Files\physics</Filter>
+    </ClInclude>
+    <ClInclude Include="physics\PhysicsManager.h">
+      <Filter>Header Files\physics</Filter>
+    </ClInclude>
+    <ClInclude Include="rendering\Skybox.h">
+      <Filter>Header Files\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="state\GameStateManager.h">
+      <Filter>Header Files\state</Filter>
+    </ClInclude>
+    <ClInclude Include="state\GameStateType.h">
+      <Filter>Header Files\state</Filter>
+    </ClInclude>
+    <ClInclude Include="state\MenuState.h">
+      <Filter>Header Files\state</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

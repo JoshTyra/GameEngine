@@ -19,7 +19,7 @@
 
 #include "CameraController.h"
 #include "shader.h"
-#include "Skybox.h"
+#include "rendering/Skybox.h"
 #include "FrameTimer.h"
 #include "FileSystemUtils.h"
 #include "TextureLoader.h"
@@ -28,6 +28,7 @@
 #include "Renderer.h"
 #include "AudioManager.h"
 #include "Debug.h"
+#include "state/GameStateManager.h"
 #include <state/GameState.h>
 #include "physics/PhysicsDebugDrawer.h"
 
@@ -48,7 +49,6 @@ float sensitivity = 0.1f;
 bool firstMouse = true;
 
 AudioManager audioManager;
-GameStateManager stateManager;
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
 	if (firstMouse) {
@@ -172,6 +172,10 @@ int main() {
 	// Enable multisampling
 	glEnable(GL_MULTISAMPLE);
 
+	GameStateManager stateManager;
+
+	Renderer renderer;
+
 	// Set the key callback
 	CameraController cameraController(window, cameraPos, cameraFront, cameraUp, cameraSpeed);
 	glfwSetKeyCallback(window, CameraController::keyCallback);
@@ -188,38 +192,12 @@ int main() {
 	// Model matrix
 	glm::mat4 model = glm::mat4(1.0f); // Initialize to identity matrix
 
-	// Build and compile our shader program
-	Shader SkyboxShader(FileSystemUtils::getAssetFilePath("shaders/skybox.vert"), FileSystemUtils::getAssetFilePath("shaders/skybox.frag"));
-
-	GLuint skyboxVAO, skyboxVBO;
-	glGenVertexArrays(1, &skyboxVAO);
-	glGenBuffers(1, &skyboxVBO);
-	glBindVertexArray(skyboxVAO);
-	glBindBuffer(GL_ARRAY_BUFFER, skyboxVBO);
-	glBufferData(GL_ARRAY_BUFFER, skyboxVerticesSize, skyboxVertices, GL_STATIC_DRAW);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
-	glBindVertexArray(0);
-
-
-	std::vector<std::string> faces{
-		FileSystemUtils::getAssetFilePath("skybox/clouds1_east.bmp"),   // Right
-		FileSystemUtils::getAssetFilePath("skybox/clouds1_west.bmp"),   // Left
-		FileSystemUtils::getAssetFilePath("skybox/clouds1_up.bmp"),     // Top
-		FileSystemUtils::getAssetFilePath("skybox/clouds1_down.bmp"),   // Bottom
-		FileSystemUtils::getAssetFilePath("skybox/clouds1_north.bmp"),  // Front
-		FileSystemUtils::getAssetFilePath("skybox/clouds1_south.bmp")   // Back
-	};
-
-	GLuint cubemapTexture = loadCubemap(faces);
-
 	std::vector<std::unique_ptr<LevelGeometry>> planeGeometry;
 
 	std::string modelPath = FileSystemUtils::getAssetFilePath("models/tutorial.fbx");
 	std::string materialPath = FileSystemUtils::getAssetFilePath("materials/tutorial.txt");
 	planeGeometry = ModelLoader::loadModel(modelPath, materialPath);
 
-	Renderer renderer;
 	renderer.setCameraController(&cameraController);
 
 	// Set the projection matrix once if it doesn't change often
@@ -227,152 +205,32 @@ int main() {
 	glm::mat4 projection = glm::perspective(glm::radians(45.0f), aspectRatio, 0.1f, 100.0f);
 	renderer.setProjectionMatrix(projection);
 
-	// Bullet Physics initialization
-	btDefaultCollisionConfiguration* collisionConfiguration = new btDefaultCollisionConfiguration();
-	btCollisionDispatcher* dispatcher = new btCollisionDispatcher(collisionConfiguration);
-	btBroadphaseInterface* overlappingPairCache = new btDbvtBroadphase();
-	btSequentialImpulseConstraintSolver* solver = new btSequentialImpulseConstraintSolver;
-	btDiscreteDynamicsWorld* dynamicsWorld = new btDiscreteDynamicsWorld(dispatcher, overlappingPairCache, solver, collisionConfiguration);
-
-	dynamicsWorld->setGravity(btVector3(0, -10, 0)); // Set gravity (example value)
-
-	PhysicsDebugDrawer* debugDrawer = new PhysicsDebugDrawer(
-		FileSystemUtils::getAssetFilePath("shaders/debug_vertex.glsl"),
-		FileSystemUtils::getAssetFilePath("shaders/debug_fragment.glsl"),
-		&renderer,
-		&cameraController
-	);
-
-	for (auto& geom : planeGeometry) {
-		geom->addToPhysicsWorld(dynamicsWorld);
-	}
-
-	dynamicsWorld->setDebugDrawer(debugDrawer);
-
-	debugDrawer->setDebugMode(btIDebugDraw::DBG_DrawWireframe | btIDebugDraw::DBG_DrawContactPoints);
-
 	const size_t FRAME_SAMPLES = 20;  // Example value, adjust as needed
 	FrameTimer frameTimer(FRAME_SAMPLES);
 
 	while (!glfwWindowShouldClose(window)) {
-		glfwPollEvents();
+		glfwPollEvents(); // Handle window events.
 
 		float currentFrameTime = glfwGetTime();
-		float deltaTime = currentFrameTime - lastFrame;
+		deltaTime = currentFrameTime - lastFrame;
 		lastFrame = currentFrameTime;
-
 		frameTimer.update(deltaTime);
 		float smoothedDeltaTime = frameTimer.getSmoothedDeltaTime();
 
-		switch (stateManager.getCurrentState()) {
-		case GameState::MENU: {
-			// Show the mouse cursor when in the menu
-			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+		// Update game state and camera based on inputs.
+		cameraController.processInput(smoothedDeltaTime);
+		stateManager.update(smoothedDeltaTime);
 
-			// Handle menu interactions
-			ImGui_ImplOpenGL3_NewFrame();
-			ImGui_ImplGlfw_NewFrame();
-			ImGui::NewFrame();
+		// Clear the screen.
+		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-			// Center the menu on the screen
-			ImGui::SetNextWindowPos(ImVec2(mode->width / 2, mode->height / 2), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
+		// Render current game state.
+		stateManager.render();
 
-			ImGui::SetNextWindowFocus();
-
-			// Begin the menu window
-			ImGui::Begin("Main Menu", NULL, ImGuiWindowFlags_AlwaysAutoResize);
-			if (ImGui::Button("Start Game", ImVec2(200, 0))) {
-				stateManager.changeState(GameState::GAME);
-				// Hide the cursor when the game starts
-				glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-			}
-			if (ImGui::Button("Exit", ImVec2(200, 0))) {
-				glfwSetWindowShouldClose(window, GLFW_TRUE);
-			}
-			ImGui::End();
-
-			// Render the menu UI
-			ImGui::Render();
-			int display_w, display_h;
-			glfwGetFramebufferSize(window, &display_w, &display_h);
-			glViewport(0, 0, display_w, display_h);
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-			break;
-		}
-		case GameState::GAME:
-			// Hide the cursor when the game starts
-			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-
-			cameraController.processInput(smoothedDeltaTime);
-
-			cameraController.updateAudioListener();
-
-			// Update positions of all active audio sources
-			audioManager.updateSourcePositions();
-
-			audioManager.cleanupSources();
-
-			ImGui_ImplOpenGL3_NewFrame();
-			ImGui_ImplGlfw_NewFrame();
-			ImGui::NewFrame();
-
-			ImVec2 windowPos = ImVec2(mode->width - 260, 10);
-			ImVec2 windowPivot = ImVec2(0.0f, 0.0f);
-			ImGui::SetNextWindowPos(windowPos, ImGuiCond_Always, windowPivot);
-
-			// Create a window to display FPS
-			ImGui::Begin("Performance");
-			ImGui::Text("Average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-			ImGui::End();
-
-			// Use the screen resolution for positioning
-			ImVec2 windowPos2 = ImVec2(mode->width - 260, 70); // Adjust the X value to fit the window size
-			ImVec2 windowPivot2 = ImVec2(0.0f, 0.0f); // Pivot at the top-left corner of the window
-			ImGui::SetNextWindowPos(windowPos2, ImGuiCond_Always, windowPivot2);
-
-			// Create a window to display Camera Position
-			ImGui::Begin("Camera Position");
-			ImGui::Text("Position: %.2f, %.2f, %.2f", cameraPos.x, cameraPos.y, cameraPos.z);
-			ImGui::End();
-
-			// Rendering
-			ImGui::Render();
-			int display_w, display_h;
-			glfwGetFramebufferSize(window, &display_w, &display_h);
-			glViewport(0, 0, display_w, display_h);
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-			// Update view matrix
-			view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
-
-			// Render the skybox
-			drawSkybox(skyboxVAO, cubemapTexture, SkyboxShader, view, projection);
-
-			// Use the renderer for drawing
-			renderer.render(planeGeometry);
-
-			// Step the physics simulation
-			dynamicsWorld->stepSimulation(deltaTime);
-
-			// Draw physics debug information
-			dynamicsWorld->debugDrawWorld();
-
-			debugDrawer->render();
-
-			// Render ImGui over your scene
-			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
-			break;
-		}
-
+		// Swap buffers and poll IO events.
 		glfwSwapBuffers(window);
 	}
-
-	// Cleanup
-	glDeleteVertexArrays(1, &skyboxVAO);
-	glDeleteBuffers(1, &skyboxVBO);
-	glDeleteTextures(1, &cubemapTexture);
 
 	// Cleanup
 	ImGui_ImplOpenGL3_Shutdown();

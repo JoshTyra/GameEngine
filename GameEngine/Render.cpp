@@ -1,6 +1,11 @@
 #include "Renderer.h"
 #include <glm/gtc/matrix_transform.hpp>
 
+Renderer::~Renderer() {
+    // Clean up the UBO
+    glDeleteBuffers(1, &uboMatrices);
+}
+
 Renderer::Renderer() : cameraController(nullptr), projectionMatrix(glm::mat4(1.0f)) {
     glGenBuffers(1, &uboMatrices);
     glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);

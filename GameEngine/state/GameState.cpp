@@ -1,19 +1,21 @@
-// GameState.cpp
+// MenuState.h
 #include "GameState.h"
-#include <iostream>
 
-GameStateManager::GameStateManager() : currentState(GameState::MENU) {
-    // Constructor initialization list sets the initial state
-}
+class MenuState : public GameState {
+public:
+    void enter() override {
+        // Initialization for entering the menu state
+    }
 
-GameStateManager::~GameStateManager() {
-    // Destructor, if you need to clean up resources
-}
+    void exit() override {
+        // Cleanup for exiting the menu state
+    }
 
-void GameStateManager::changeState(GameState newState) {
-    currentState = newState;
-}
+    void update(float deltaTime) override {
+        // Update logic for the menu state
+    }
 
-GameState GameStateManager::getCurrentState() const {
-    return currentState;
-}
+    void render() override {
+        // Rendering logic for the menu state
+    }
+};
