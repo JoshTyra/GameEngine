@@ -1,30 +1,63 @@
 #include "MenuState.h"
+#include "imgui.h"
+#include "backends/imgui_impl_glfw.h"
+#include "backends/imgui_impl_opengl3.h"
 #include <iostream>
-// Include other necessary headers, like those for rendering and input handling
+
+MenuState::MenuState(GLFWwindow* window) : window(window) {}
+
+MenuState::~MenuState() {}
 
 void MenuState::enter() {
-    // Perform setup necessary when entering the menu state.
-    // This could involve loading menu graphics, setting up menu options, etc.
     std::cout << "Entering Menu State" << std::endl;
 }
 
 void MenuState::exit() {
-    // Clean up when leaving the menu state.
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
     std::cout << "Exiting Menu State" << std::endl;
 }
 
 void MenuState::update(float deltaTime) {
-    // Update the menu state. This could involve handling menu navigation, responding to user input, etc.
-    // Example: Check for input to start the game or exit the application.
-
-    // Placeholder for input handling
-    // if (input == startGame) {
-    //     GameStateManager::changeState(std::make_unique<GameplayState>());
-    // }
+    // Your update logic here
 }
 
 void MenuState::render() {
-    // Render the menu. This would involve drawing the menu graphics to the screen.
-    std::cout << "Rendering Menu" << std::endl;
-    // Placeholder for rendering logic
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+
+    // Show the mouse cursor when in the menu
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+
+    int windowWidth, windowHeight;
+    glfwGetWindowSize(window, &windowWidth, &windowHeight);
+
+    // Set the window to appear in the center of the screen
+    ImGui::SetNextWindowPos(ImVec2(windowWidth / 2.0f, windowHeight / 2.0f), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
+    ImGui::SetNextWindowFocus();
+
+    // Begin the menu window
+    ImGui::Begin("Main Menu", NULL, ImGuiWindowFlags_AlwaysAutoResize);
+    if (ImGui::Button("Start Game", ImVec2(200, 0))) {
+        // TODO: Replace this with actual state change logic
+        std::cout << "Start Game button pressed." << std::endl;
+        // Hide the cursor when the game starts
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    }
+    if (ImGui::Button("Exit", ImVec2(200, 0))) {
+        // TODO: Implement exiting the game
+        std::cout << "Exit button pressed." << std::endl;
+        glfwSetWindowShouldClose(window, GLFW_TRUE);
+    }
+    ImGui::End();
+
+    // Render the menu UI
+    ImGui::Render();
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+}
+
+void MenuState::setWindowContext(GLFWwindow* newWindow) {
+    window = newWindow;
 }

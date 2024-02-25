@@ -236,5 +236,8 @@
     <ClInclude Include="state\MenuState.h">
       <Filter>Header Files\state</Filter>
     </ClInclude>
+    <ClInclude Include="state\GameplayState.h">
+      <Filter>Header Files\state</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

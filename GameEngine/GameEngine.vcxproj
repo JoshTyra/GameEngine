@@ -182,6 +182,7 @@
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="rendering\Skybox.h" />
     <ClInclude Include="shader.h" />
+    <ClInclude Include="state\GameplayState.h" />
     <ClInclude Include="state\GameState.h" />
     <ClInclude Include="state\GameStateManager.h" />
     <ClInclude Include="state\GameStateType.h" />

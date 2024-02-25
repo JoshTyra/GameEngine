@@ -31,6 +31,7 @@
 #include "state/GameStateManager.h"
 #include <state/GameState.h>
 #include "physics/PhysicsDebugDrawer.h"
+#include "state/MenuState.h"
 
 // Global variables
 glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f); // Example position
@@ -138,12 +139,6 @@ int main() {
 		return -1;
 	}
 
-	// Set the distance model for sound attenuation
-	alDistanceModel(AL_INVERSE_DISTANCE_CLAMPED);
-
-	// Proceed with loading sounds and other initializations
-	initAudio({ 0.0f, 0.0f, 0.0f });
-
 	glfwSetCursorPosCallback(window, mouse_callback);
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
@@ -161,6 +156,16 @@ int main() {
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init("#version 420 core");
 
+	GameStateManager& stateManager = GameStateManager::instance();
+	stateManager.setWindowContext(window); // Make sure this is called before changing state
+	stateManager.changeState(std::make_unique<MenuState>(window));
+
+	// Set the distance model for sound attenuation
+	alDistanceModel(AL_INVERSE_DISTANCE_CLAMPED);
+
+	// Proceed with loading sounds and other initializations
+	initAudio({ 0.0f, 0.0f, 0.0f });
+
 	// Enable VSync (1 = on, 0 = off)
 	glfwSwapInterval(1);
 
@@ -171,8 +176,6 @@ int main() {
 
 	// Enable multisampling
 	glEnable(GL_MULTISAMPLE);
-
-	GameStateManager stateManager;
 
 	Renderer renderer;
 
@@ -222,7 +225,7 @@ int main() {
 		stateManager.update(smoothedDeltaTime);
 
 		// Clear the screen.
-		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		// Render current game state.

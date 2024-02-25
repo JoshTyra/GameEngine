@@ -1,14 +1,22 @@
 // GameStateManager.cpp
 #include "GameStateManager.h"
 #include "MenuState.h" // Example state
+#include <iostream>
+
+void GameStateManager::setWindowContext(GLFWwindow* window) {
+    this->window = window;
+}
 
 GameStateManager::~GameStateManager() {
     // Perform any necessary cleanup tasks here
 }
 
+GameStateManager& GameStateManager::instance() {
+    static GameStateManager instance;
+    return instance;
+}
+
 GameStateManager::GameStateManager() {
-    // Initialize with a default state, for example, MenuState
-    currentState = std::make_unique<MenuState>();
 }
 
 void GameStateManager::changeState(std::unique_ptr<GameState> newState) {
@@ -16,7 +24,8 @@ void GameStateManager::changeState(std::unique_ptr<GameState> newState) {
         currentState->exit();
     }
     currentState = std::move(newState);
-    if (currentState) {
+    if (currentState && window) {
+        currentState->setWindowContext(window); // Ensure the new state has the window context
         currentState->enter();
     }
 }
@@ -29,6 +38,10 @@ void GameStateManager::update(float deltaTime) {
 
 void GameStateManager::render() {
     if (currentState) {
+        std::cout << "GameStateManager calling render on current state." << std::endl;
         currentState->render();
+    }
+    else {
+        std::cout << "No current state to render." << std::endl;
     }
 }
