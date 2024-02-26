@@ -2,37 +2,42 @@
 #define GAME_STATE_MANAGER_H
 
 #include <memory>
-#include <GLFW/glfw3.h> // Include GLFW for window context
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
 #include "GameState.h"
-#include "CameraController.h" // Include CameraController definition
+#include "CameraController.h"
+#include "rendering/Skybox.h"
 
 class GameStateManager {
 public:
-    static GameStateManager& instance(); // Singleton access method
+    static GameStateManager& instance();
 
     ~GameStateManager();
-
     void changeState(std::unique_ptr<GameState> newState);
     void update(float deltaTime);
     void render();
     void requestExit();
     bool shouldExitRequested() const;
 
-    // Window context and camera controller management
     void setWindowContext(GLFWwindow* window);
     GLFWwindow* getWindowContext() const;
-    void setCameraController(CameraController* cameraController);
-    CameraController* getCameraController() const;
+
+    void setCameraController(std::shared_ptr<CameraController> cameraController);
+    std::shared_ptr<CameraController> getCameraController() const;
+
+    void setSkybox(std::unique_ptr<Skybox> newSkybox);
+    Skybox* getSkybox() const;
 
 private:
     GameStateManager();
-    GameStateManager(const GameStateManager&) = delete; // Prevent copying
-    GameStateManager& operator=(const GameStateManager&) = delete; // Prevent assignment
+    GameStateManager(const GameStateManager&) = delete;
+    GameStateManager& operator=(const GameStateManager&) = delete;
 
     std::unique_ptr<GameState> currentState;
     bool exitRequested = false;
-    GLFWwindow* window = nullptr; // Holds the GLFW window context
-    CameraController* cameraController = nullptr; // Holds the camera controller
+    GLFWwindow* window = nullptr;
+    std::shared_ptr<CameraController> cameraController;
+    std::unique_ptr<Skybox> skybox;
 };
 
 #endif // GAME_STATE_MANAGER_H

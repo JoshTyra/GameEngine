@@ -15,20 +15,30 @@ GameStateManager& GameStateManager::instance() {
     return instance;
 }
 
-void GameStateManager::setWindowContext(GLFWwindow* window) {
-    this->window = window;
+// Implement other methods as necessary
+
+void GameStateManager::setWindowContext(GLFWwindow* newWindow) {
+    window = newWindow;
 }
 
 GLFWwindow* GameStateManager::getWindowContext() const {
     return window;
 }
 
-void GameStateManager::setCameraController(CameraController* cameraController) {
-    this->cameraController = cameraController;
+void GameStateManager::setCameraController(std::shared_ptr<CameraController> newCameraController) {
+    cameraController = newCameraController;
 }
 
-CameraController* GameStateManager::getCameraController() const {
+std::shared_ptr<CameraController> GameStateManager::getCameraController() const {
     return cameraController;
+}
+
+void GameStateManager::setSkybox(std::unique_ptr<Skybox> newSkybox) {
+    skybox = std::move(newSkybox);
+}
+
+Skybox* GameStateManager::getSkybox() const {
+    return skybox.get();
 }
 
 void GameStateManager::changeState(std::unique_ptr<GameState> newState) {

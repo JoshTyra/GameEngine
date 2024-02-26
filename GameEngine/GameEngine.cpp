@@ -177,17 +177,31 @@ int main() {
 	Renderer renderer;
 
 	// Initialize the CameraController
-	CameraController cameraController(window, cameraPos, cameraFront, cameraUp, cameraSpeed);
+	std::shared_ptr<CameraController> cameraController = std::make_shared<CameraController>(window, cameraPos, cameraFront, cameraUp, cameraSpeed);
 	glfwSetKeyCallback(window, CameraController::keyCallback);
 
 	// Retrieve the singleton instance of GameStateManager
 	GameStateManager& stateManager = GameStateManager::instance();
 
-	// Set the window context and camera controller in GameStateManager
+	// Set the window context in GameStateManager
 	stateManager.setWindowContext(window);
-	stateManager.setCameraController(&cameraController); // Make sure you have a method to set this in GameStateManager
 
-	// Create and set the initial game state to MenuState instead of GameplayState
+	// Set the camera controller in GameStateManager
+	stateManager.setCameraController(cameraController);
+
+	std::vector<std::string> faces{
+		FileSystemUtils::getAssetFilePath("skybox/clouds1_east.bmp"),   // Right
+		FileSystemUtils::getAssetFilePath("skybox/clouds1_west.bmp"),   // Left
+		FileSystemUtils::getAssetFilePath("skybox/clouds1_up.bmp"),     // Top
+		FileSystemUtils::getAssetFilePath("skybox/clouds1_down.bmp"),   // Bottom
+		FileSystemUtils::getAssetFilePath("skybox/clouds1_north.bmp"),  // Front
+		FileSystemUtils::getAssetFilePath("skybox/clouds1_south.bmp")   // Back
+	};
+
+	auto skybox = std::make_unique<Skybox>(faces);
+	stateManager.setSkybox(std::move(skybox));
+
+	// Create and set the initial game state to MenuState
 	auto menuState = std::make_unique<MenuState>();
 	stateManager.changeState(std::move(menuState));
 
@@ -209,7 +223,7 @@ int main() {
 	std::string materialPath = FileSystemUtils::getAssetFilePath("materials/tutorial.txt");
 	planeGeometry = ModelLoader::loadModel(modelPath, materialPath);
 
-	renderer.setCameraController(&cameraController);
+	renderer.setCameraController(cameraController);
 
 	// Set the projection matrix once if it doesn't change often
 	float aspectRatio = static_cast<float>(mode->width) / static_cast<float>(mode->height);
@@ -229,7 +243,7 @@ int main() {
 		float smoothedDeltaTime = frameTimer.getSmoothedDeltaTime();
 
 		// Update game state and camera based on inputs.
-		cameraController.processInput(smoothedDeltaTime);
+		cameraController->processInput(smoothedDeltaTime);
 		stateManager.update(smoothedDeltaTime);
 
 		// Clear the screen.

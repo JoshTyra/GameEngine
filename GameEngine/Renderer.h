@@ -9,7 +9,7 @@ class Renderer {
 public:
     ~Renderer();
     Renderer();
-    void setCameraController(CameraController* cameraController);
+    void setCameraController(std::shared_ptr<CameraController> cameraController); // Updated to use shared_ptr
     void setProjectionMatrix(const glm::mat4& projectionMatrix);
     void render(const std::vector<std::unique_ptr<LevelGeometry>>& geometries);
 
@@ -18,7 +18,7 @@ public:
     }
 
 private:
-    CameraController* cameraController;
+    std::shared_ptr<CameraController> cameraController; // Updated to use shared_ptr
     glm::mat4 projectionMatrix;
     GLuint uboMatrices;
 };

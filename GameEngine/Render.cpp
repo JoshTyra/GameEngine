@@ -1,12 +1,13 @@
 #include "Renderer.h"
 #include <glm/gtc/matrix_transform.hpp>
+#include <iostream> // For std::cerr
 
 Renderer::~Renderer() {
     // Clean up the UBO
     glDeleteBuffers(1, &uboMatrices);
 }
 
-Renderer::Renderer() : cameraController(nullptr), projectionMatrix(glm::mat4(1.0f)) {
+Renderer::Renderer() : projectionMatrix(glm::mat4(1.0f)) {
     glGenBuffers(1, &uboMatrices);
     glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
     glBufferData(GL_UNIFORM_BUFFER, 2 * sizeof(glm::mat4), NULL, GL_STATIC_DRAW);
@@ -14,7 +15,7 @@ Renderer::Renderer() : cameraController(nullptr), projectionMatrix(glm::mat4(1.0
     glBindBufferBase(GL_UNIFORM_BUFFER, 0, uboMatrices);
 }
 
-void Renderer::setCameraController(CameraController* cameraController) {
+void Renderer::setCameraController(std::shared_ptr<CameraController> cameraController) {
     this->cameraController = cameraController;
 }
 

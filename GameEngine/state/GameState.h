@@ -1,7 +1,8 @@
 #ifndef GAME_STATE_H
 #define GAME_STATE_H
 
-#include <GLFW/glfw3.h> // Ensure GLFW is included for GLFWwindow*
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
 
 class GameState {
 public:

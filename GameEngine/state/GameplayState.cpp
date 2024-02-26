@@ -23,7 +23,7 @@ void GameplayState::update(float deltaTime) {
 
 void GameplayState::render() {
     GLFWwindow* window = GameStateManager::instance().getWindowContext();
-    CameraController* cameraController = GameStateManager::instance().getCameraController();
+    auto cameraController = GameStateManager::instance().getCameraController(); // Use auto for simplicity
 
     int windowWidth, windowHeight;
     glfwGetFramebufferSize(window, &windowWidth, &windowHeight);
@@ -42,11 +42,18 @@ void GameplayState::render() {
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    // Use the cameraController to get the view and projection matrices
-    glm::mat4 view = cameraController->getViewMatrix();
-    glm::mat4 projection = glm::perspective(glm::radians(45.0f), static_cast<float>(windowWidth) / static_cast<float>(windowHeight), 0.1f, 100.0f);
+    if (cameraController) { // Check if cameraController is valid
+        // Use the cameraController to get the view and projection matrices
+        glm::mat4 view = cameraController->getViewMatrix();
+        glm::mat4 projection = glm::perspective(glm::radians(45.0f), static_cast<float>(windowWidth) / static_cast<float>(windowHeight), 0.1f, 100.0f);
 
-    // Render your scene here
+        // Assuming you pass these matrices to your renderer or directly to your shaders
+        // Update your rendering logic here accordingly
+    }
+    else {
+        // Handle the case where the camera controller is not available, if necessary
+        std::cerr << "Camera controller not available for rendering." << std::endl;
+    }
 
     // Render ImGui over your scene
     ImGui::Render();
