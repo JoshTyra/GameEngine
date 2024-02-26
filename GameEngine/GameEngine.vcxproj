@@ -158,6 +158,7 @@
     <ClCompile Include="physics\PhysicsManager.cpp" />
     <ClCompile Include="Render.cpp" />
     <ClCompile Include="rendering\Skybox.cpp" />
+    <ClCompile Include="state\GameplayState.cpp" />
     <ClCompile Include="state\GameState.cpp" />
     <ClCompile Include="state\GameStateManager.cpp" />
     <ClCompile Include="state\MenuState.cpp" />

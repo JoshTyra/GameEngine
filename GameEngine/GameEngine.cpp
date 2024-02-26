@@ -32,6 +32,7 @@
 #include <state/GameState.h>
 #include "physics/PhysicsDebugDrawer.h"
 #include "state/MenuState.h"
+#include "state/GameplayState.h"
 
 // Global variables
 glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f); // Example position
@@ -156,10 +157,6 @@ int main() {
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init("#version 420 core");
 
-	GameStateManager& stateManager = GameStateManager::instance();
-	stateManager.setWindowContext(window); // Make sure this is called before changing state
-	stateManager.changeState(std::make_unique<MenuState>(window));
-
 	// Set the distance model for sound attenuation
 	alDistanceModel(AL_INVERSE_DISTANCE_CLAMPED);
 
@@ -179,9 +176,20 @@ int main() {
 
 	Renderer renderer;
 
-	// Set the key callback
+	// Initialize the CameraController
 	CameraController cameraController(window, cameraPos, cameraFront, cameraUp, cameraSpeed);
 	glfwSetKeyCallback(window, CameraController::keyCallback);
+
+	// Retrieve the singleton instance of GameStateManager
+	GameStateManager& stateManager = GameStateManager::instance();
+
+	// Set the window context and camera controller in GameStateManager
+	stateManager.setWindowContext(window);
+	stateManager.setCameraController(&cameraController); // Make sure you have a method to set this in GameStateManager
+
+	// Create and set the initial game state to MenuState instead of GameplayState
+	auto menuState = std::make_unique<MenuState>();
+	stateManager.changeState(std::move(menuState));
 
 	// Configure global OpenGL state
 	glEnable(GL_DEPTH_TEST);

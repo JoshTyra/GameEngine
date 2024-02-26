@@ -162,6 +162,9 @@
     <ClCompile Include="state\MenuState.cpp">
       <Filter>Source Files\state</Filter>
     </ClCompile>
+    <ClCompile Include="state\GameplayState.cpp">
+      <Filter>Source Files\state</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CameraController.h">

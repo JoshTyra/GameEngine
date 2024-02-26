@@ -1,14 +1,13 @@
-// GameStateManager.cpp
 #include "GameStateManager.h"
-#include "MenuState.h" // Example state
+#include "MenuState.h"
 #include <iostream>
 
-void GameStateManager::setWindowContext(GLFWwindow* window) {
-    this->window = window;
+GameStateManager::GameStateManager() {
+    // Initialization code here
 }
 
 GameStateManager::~GameStateManager() {
-    // Perform any necessary cleanup tasks here
+    // Cleanup code here
 }
 
 GameStateManager& GameStateManager::instance() {
@@ -16,7 +15,20 @@ GameStateManager& GameStateManager::instance() {
     return instance;
 }
 
-GameStateManager::GameStateManager() {
+void GameStateManager::setWindowContext(GLFWwindow* window) {
+    this->window = window;
+}
+
+GLFWwindow* GameStateManager::getWindowContext() const {
+    return window;
+}
+
+void GameStateManager::setCameraController(CameraController* cameraController) {
+    this->cameraController = cameraController;
+}
+
+CameraController* GameStateManager::getCameraController() const {
+    return cameraController;
 }
 
 void GameStateManager::changeState(std::unique_ptr<GameState> newState) {
