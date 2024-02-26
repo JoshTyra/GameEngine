@@ -16,6 +16,12 @@ public:
 
     glm::mat4 getViewMatrix() const;
 
+    // Accessor methods for camera properties
+    glm::vec3 getCameraPosition() const { return cameraPos; }
+    glm::vec3 getCameraFront() const { return cameraFront; }
+    glm::vec3 getCameraUp() const { return cameraUp; }
+    float getCameraSpeed() const { return cameraSpeed; }
+
 private:
     GLFWwindow* window;
     glm::vec3 cameraPos;

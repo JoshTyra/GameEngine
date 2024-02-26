@@ -38,6 +38,14 @@ void GameplayState::render() {
     ImGui::Text("Average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
     ImGui::End();
 
+    // Access the camera position
+    glm::vec3 cameraPos = cameraController->getCameraPosition();
+
+    // Create a window to display Camera Position
+    ImGui::Begin("Camera Position");
+    ImGui::Text("Position: %.2f, %.2f, %.2f", cameraPos.x, cameraPos.y, cameraPos.z);
+    ImGui::End();
+
     // Clear the screen
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
