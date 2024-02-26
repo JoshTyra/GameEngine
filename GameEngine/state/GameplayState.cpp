@@ -17,8 +17,15 @@ void GameplayState::exit() {
 }
 
 void GameplayState::update(float deltaTime) {
-    // Process input, update game logic, move characters, etc.
-    // Check for game over, level completion, etc.
+    // Ensure the camera controller is available
+    auto cameraController = GameStateManager::instance().getCameraController();
+    if (cameraController) {
+        // Process input for the camera controller
+        cameraController->processInput(deltaTime);
+
+        // Update the camera controller's position or other properties as needed
+        // This might include checking for input, moving the camera, etc.
+    }
 }
 
 void GameplayState::render() {
