@@ -168,12 +168,12 @@ int main() {
 	stateManager.setRenderer(renderer); // This is the missing call
 
 	std::vector<std::string> faces{
-		FileSystemUtils::getAssetFilePath("skybox/clouds1_east.bmp"),   // Right
-		FileSystemUtils::getAssetFilePath("skybox/clouds1_west.bmp"),   // Left
-		FileSystemUtils::getAssetFilePath("skybox/clouds1_up.bmp"),     // Top
-		FileSystemUtils::getAssetFilePath("skybox/clouds1_down.bmp"),   // Bottom
-		FileSystemUtils::getAssetFilePath("skybox/clouds1_north.bmp"),  // Front
-		FileSystemUtils::getAssetFilePath("skybox/clouds1_south.bmp")   // Back
+		"clouds1_east.bmp",   // Right
+		"clouds1_west.bmp",   // Left
+		"clouds1_up.bmp",     // Top
+		"clouds1_down.bmp",   // Bottom
+		"clouds1_north.bmp",  // Front
+		"clouds1_south.bmp"   // Back
 	};
 
 	auto skybox = std::make_unique<Skybox>(faces);
@@ -185,15 +185,6 @@ int main() {
 
 	// Configure global OpenGL state
 	glEnable(GL_DEPTH_TEST);
-
-	// Parameters
-	float nearPlane = 0.5f; // Near clipping plane
-	float farPlane = 50.0f; // Far clipping plane
-
-	// View matrix
-	glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
-	// Model matrix
-	glm::mat4 model = glm::mat4(1.0f); // Initialize to identity matrix
 
 	const size_t FRAME_SAMPLES = 20;  // Example value, adjust as needed
 	FrameTimer frameTimer(FRAME_SAMPLES);

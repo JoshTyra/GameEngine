@@ -57,11 +57,8 @@ void Renderer::render(const std::vector<std::unique_ptr<LevelGeometry>>& geometr
 
         shader->use();
 
-        // Removed the direct setting of the view and projection matrices here
-        // as they are now being passed via UBO.
-
         glm::mat4 modelMatrix = geometry->getModelMatrix();
-        shader->setMat4("model", modelMatrix); // You still need to set the model matrix as it's unique per geometry
+        shader->setMat4("model", modelMatrix);
 
         geometry->Draw(modelMatrix, viewMatrix, projectionMatrix);
     }
