@@ -60,3 +60,32 @@ void CameraController::updateAudioListener() {
     DEBUG_COUT << "Listener Orientation (At): X=" << cameraDirection.x << " Y=" << cameraDirection.y << " Z=" << cameraDirection.z << std::endl;
     DEBUG_COUT << "Listener Orientation (Up): X=" << cameraUp.x << " Y=" << cameraUp.y << " Z=" << cameraUp.z << std::endl;
 }
+
+void CameraController::mouseCallback(GLFWwindow* window, double xpos, double ypos) {
+    if (firstMouse) {
+        lastX = xpos;
+        lastY = ypos;
+        firstMouse = false;
+    }
+
+    float xoffset = xpos - lastX;
+    float yoffset = lastY - ypos; // Reversed since y-coordinates go from bottom to top
+    lastX = xpos;
+    lastY = ypos;
+
+    xoffset *= sensitivity;
+    yoffset *= sensitivity;
+
+    yaw += xoffset;
+    pitch += yoffset;
+
+    // Clamping the pitch value to prevent screen flip
+    pitch = std::max(std::min(pitch, 89.0f), -89.0f);
+
+    glm::vec3 front;
+    front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+    front.y = sin(glm::radians(pitch));
+    front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+    cameraFront = glm::normalize(front);
+}
+

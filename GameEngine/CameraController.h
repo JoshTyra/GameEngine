@@ -13,6 +13,7 @@ public:
 
     void processInput(float deltaTime);
     void updateAudioListener();
+    void mouseCallback(GLFWwindow* window, double xpos, double ypos);
 
     glm::mat4 getViewMatrix() const;
 
@@ -28,6 +29,12 @@ private:
     glm::vec3 cameraFront;
     glm::vec3 cameraUp;
     float cameraSpeed;
+    float lastX = 2560.0f / 2.0; 
+    float lastY = 1080.0f / 2.0; 
+    bool firstMouse = true;
+    float sensitivity = 0.1f;
+    float yaw = -90.0f; 
+    float pitch = 0.0f;
 
     static bool keyWPressed;
     static bool keySPressed;

@@ -43,42 +43,7 @@ float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 float cameraSpeed = 6.0f;
 
-float yaw = -90.0f;   // Yaw is initialized to -90.0 degrees since a yaw of 0.0 results in a direction vector pointing to the right
-float pitch = 0.0f;
-float lastX = 2560.0f / 2.0f;  // Set to window width divided by 2
-float lastY = 1080.0f / 2.0f;   // Set to window height divided by 2
-float sensitivity = 0.1f;
-bool firstMouse = true;
-
 AudioManager audioManager;
-
-void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
-	if (firstMouse) {
-		lastX = xpos;
-		lastY = ypos;
-		firstMouse = false;
-	}
-
-	float xoffset = xpos - lastX;
-	float yoffset = lastY - ypos; // Reversed since y-coordinates go from bottom to top
-	lastX = xpos;
-	lastY = ypos;
-
-	xoffset *= sensitivity;
-	yoffset *= sensitivity;
-
-	yaw += xoffset;
-	pitch += yoffset;
-
-	// Clamping pitch value
-	pitch = glm::clamp(pitch, -89.0f, 89.0f);
-
-	glm::vec3 front{};
-	front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-	front.y = sin(glm::radians(pitch));
-	front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-	cameraFront = glm::normalize(front);
-}
 
 void initAudio(glm::vec3 ambiencePosition) {
 	std::string audioPath = FileSystemUtils::getAssetFilePath("audio/wind2.ogg");
@@ -140,22 +105,7 @@ int main() {
 		return -1;
 	}
 
-	glfwSetCursorPosCallback(window, mouse_callback);
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-
-	// Setup Dear ImGui context
-	IMGUI_CHECKVERSION();
-	ImGui::CreateContext();
-	ImGuiIO& io = ImGui::GetIO(); (void)io;
-	//io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard Controls
-
-	// Setup Dear ImGui style
-	ImGui::StyleColorsDark();
-	//ImGui::StyleColorsClassic();
-
-	// Setup Platform/Renderer backends
-	ImGui_ImplGlfw_InitForOpenGL(window, true);
-	ImGui_ImplOpenGL3_Init("#version 420 core");
 
 	// Set the distance model for sound attenuation
 	alDistanceModel(AL_INVERSE_DISTANCE_CLAMPED);
@@ -180,6 +130,32 @@ int main() {
 	// Initialize the CameraController
 	std::shared_ptr<CameraController> cameraController = std::make_shared<CameraController>(window, cameraPos, cameraFront, cameraUp, cameraSpeed);
 	glfwSetKeyCallback(window, CameraController::keyCallback);
+
+	// After initializing the CameraController
+	glfwSetWindowUserPointer(window, cameraController.get()); // Link the camera controller to the GLFW window
+
+	GLFWcursorposfun cursorPosCallback = [](GLFWwindow* window, double xpos, double ypos) {
+		auto* controller = static_cast<CameraController*>(glfwGetWindowUserPointer(window));
+		if (controller) {
+			controller->mouseCallback(window, xpos, ypos);
+		}
+	};
+
+	glfwSetCursorPosCallback(window, cursorPosCallback);
+
+	// Setup Dear ImGui context
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGuiIO& io = ImGui::GetIO(); (void)io;
+	//io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard Controls
+
+	// Setup Dear ImGui style
+	ImGui::StyleColorsDark();
+	//ImGui::StyleColorsClassic();
+
+	// Setup Platform/Renderer backends
+	ImGui_ImplGlfw_InitForOpenGL(window, true);
+	ImGui_ImplOpenGL3_Init("#version 420 core");
 
 	// Retrieve the singleton instance of GameStateManager
 	GameStateManager& stateManager = GameStateManager::instance();
