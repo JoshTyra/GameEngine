@@ -7,6 +7,7 @@
 #include "GameState.h"
 #include "CameraController.h"
 #include "rendering/Skybox.h"
+#include "Renderer.h"
 
 class GameStateManager {
 public:
@@ -28,6 +29,10 @@ public:
     void setSkybox(std::unique_ptr<Skybox> newSkybox);
     Skybox* getSkybox() const;
 
+    // Renderer access methods
+    void setRenderer(std::shared_ptr<Renderer> renderer); // Assume using shared_ptr for simplicity
+    std::shared_ptr<Renderer> getRenderer() const;
+
 private:
     GameStateManager();
     GameStateManager(const GameStateManager&) = delete;
@@ -38,6 +43,7 @@ private:
     GLFWwindow* window = nullptr;
     std::shared_ptr<CameraController> cameraController;
     std::unique_ptr<Skybox> skybox;
+    std::shared_ptr<Renderer> renderer; // Renderer instance
 };
 
 #endif // GAME_STATE_MANAGER_H

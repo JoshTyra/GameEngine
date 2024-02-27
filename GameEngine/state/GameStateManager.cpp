@@ -15,8 +15,6 @@ GameStateManager& GameStateManager::instance() {
     return instance;
 }
 
-// Implement other methods as necessary
-
 void GameStateManager::setWindowContext(GLFWwindow* newWindow) {
     window = newWindow;
 }
@@ -39,6 +37,14 @@ void GameStateManager::setSkybox(std::unique_ptr<Skybox> newSkybox) {
 
 Skybox* GameStateManager::getSkybox() const {
     return skybox.get();
+}
+
+void GameStateManager::setRenderer(std::shared_ptr<Renderer> renderer) {
+    this->renderer = std::move(renderer);
+}
+
+std::shared_ptr<Renderer> GameStateManager::getRenderer() const {
+    return renderer;
 }
 
 void GameStateManager::changeState(std::unique_ptr<GameState> newState) {

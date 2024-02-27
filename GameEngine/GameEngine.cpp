@@ -174,7 +174,8 @@ int main() {
 	// Enable multisampling
 	glEnable(GL_MULTISAMPLE);
 
-	Renderer renderer;
+	// Create the Renderer instance
+	std::shared_ptr<Renderer> renderer = std::make_shared<Renderer>(); // Make sure Renderer is managed by a shared_ptr
 
 	// Initialize the CameraController
 	std::shared_ptr<CameraController> cameraController = std::make_shared<CameraController>(window, cameraPos, cameraFront, cameraUp, cameraSpeed);
@@ -188,6 +189,9 @@ int main() {
 
 	// Set the camera controller in GameStateManager
 	stateManager.setCameraController(cameraController);
+
+	// Set the Renderer in GameStateManager
+	stateManager.setRenderer(renderer); // This is the missing call
 
 	std::vector<std::string> faces{
 		FileSystemUtils::getAssetFilePath("skybox/clouds1_east.bmp"),   // Right
@@ -216,19 +220,6 @@ int main() {
 	glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
 	// Model matrix
 	glm::mat4 model = glm::mat4(1.0f); // Initialize to identity matrix
-
-	std::vector<std::unique_ptr<LevelGeometry>> planeGeometry;
-
-	std::string modelPath = FileSystemUtils::getAssetFilePath("models/tutorial.fbx");
-	std::string materialPath = FileSystemUtils::getAssetFilePath("materials/tutorial.txt");
-	planeGeometry = ModelLoader::loadModel(modelPath, materialPath);
-
-	renderer.setCameraController(cameraController);
-
-	// Set the projection matrix once if it doesn't change often
-	float aspectRatio = static_cast<float>(mode->width) / static_cast<float>(mode->height);
-	glm::mat4 projection = glm::perspective(glm::radians(45.0f), aspectRatio, 0.1f, 100.0f);
-	renderer.setProjectionMatrix(projection);
 
 	const size_t FRAME_SAMPLES = 20;  // Example value, adjust as needed
 	FrameTimer frameTimer(FRAME_SAMPLES);

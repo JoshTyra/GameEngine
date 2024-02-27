@@ -1,5 +1,7 @@
 #include "GameplayState.h"
 #include "GameStateManager.h"
+#include "FileSystemUtils.h"
+#include "ModelLoader.h"
 #include "imgui.h"
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_opengl3.h"
@@ -9,6 +11,10 @@
 void GameplayState::enter() {
     GLFWwindow* window = GameStateManager::instance().getWindowContext();
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+    std::string modelPath = FileSystemUtils::getAssetFilePath("models/tutorial.fbx");
+    std::string materialPath = FileSystemUtils::getAssetFilePath("materials/tutorial.txt");
+    planeGeometry = ModelLoader::loadModel(modelPath, materialPath);
 }
 
 void GameplayState::exit() {
@@ -29,8 +35,10 @@ void GameplayState::update(float deltaTime) {
 }
 
 void GameplayState::render() {
-    GLFWwindow* window = GameStateManager::instance().getWindowContext();
-    auto cameraController = GameStateManager::instance().getCameraController(); // Use auto for simplicity
+    auto window = GameStateManager::instance().getWindowContext();
+    auto cameraController = GameStateManager::instance().getCameraController();
+    auto renderer = GameStateManager::instance().getRenderer();
+    auto skybox = GameStateManager::instance().getSkybox(); 
 
     int windowWidth, windowHeight;
     glfwGetFramebufferSize(window, &windowWidth, &windowHeight);
@@ -40,15 +48,13 @@ void GameplayState::render() {
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-    // Example: Display FPS in an ImGui window
+    // Display FPS in an ImGui window
     ImGui::Begin("Performance");
     ImGui::Text("Average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
     ImGui::End();
 
-    // Access the camera position
-    glm::vec3 cameraPos = cameraController->getCameraPosition();
-
     // Create a window to display Camera Position
+    auto cameraPos = cameraController->getCameraPosition();
     ImGui::Begin("Camera Position");
     ImGui::Text("Position: %.2f, %.2f, %.2f", cameraPos.x, cameraPos.y, cameraPos.z);
     ImGui::End();
@@ -57,20 +63,29 @@ void GameplayState::render() {
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    if (cameraController) { // Check if cameraController is valid
-        // Use the cameraController to get the view and projection matrices
-        glm::mat4 view = cameraController->getViewMatrix();
-        glm::mat4 projection = glm::perspective(glm::radians(45.0f), static_cast<float>(windowWidth) / static_cast<float>(windowHeight), 0.1f, 100.0f);
+    if (cameraController && renderer) {
+        // Setup view and projection matrices
+        auto view = cameraController->getViewMatrix();
+        auto projection = glm::perspective(glm::radians(45.0f), static_cast<float>(windowWidth) / static_cast<float>(windowHeight), 0.1f, 100.0f);
 
-        // Assuming you pass these matrices to your renderer or directly to your shaders
-        // Update your rendering logic here accordingly
+        // Update renderer with the latest view and projection matrices
+        renderer->setCameraController(cameraController);
+        renderer->setProjectionMatrix(projection);
+
+        // Render the skybox first
+        if (skybox) {
+            glDepthMask(GL_FALSE); // Turn off depth writing for skybox
+            skybox->draw(view, projection);
+            glDepthMask(GL_TRUE); // Turn depth writing back on
+        }
     }
     else {
-        // Handle the case where the camera controller is not available, if necessary
-        std::cerr << "Camera controller not available for rendering." << std::endl;
+        std::cerr << "Rendering setup incomplete: Camera controller or renderer not available." << std::endl;
     }
 
     // Render ImGui over your scene
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
+
+
