@@ -10,13 +10,11 @@
 MenuState::~MenuState() {}
 
 void MenuState::enter() {
-    std::cout << "Entering Menu State" << std::endl;
     // Setup ImGui context here if needed
 }
 
 void MenuState::exit() {
     // Clean up ImGui context here if it was set up in enter()
-    std::cout << "Exiting Menu State" << std::endl;
 }
 
 void MenuState::update(float deltaTime) {

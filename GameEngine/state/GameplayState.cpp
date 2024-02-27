@@ -78,6 +78,11 @@ void GameplayState::render() {
             skybox->draw(view, projection);
             glDepthMask(GL_TRUE); // Turn depth writing back on
         }
+
+        // Render each piece of geometry
+        for (const auto& geometry : planeGeometry) {
+            renderer->render(planeGeometry);
+        }
     }
     else {
         std::cerr << "Rendering setup incomplete: Camera controller or renderer not available." << std::endl;

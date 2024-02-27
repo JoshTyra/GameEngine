@@ -66,7 +66,6 @@ void GameStateManager::update(float deltaTime) {
 
 void GameStateManager::render() {
     if (currentState) {
-        std::cout << "GameStateManager calling render on current state." << std::endl;
         currentState->render();
     }
     else {

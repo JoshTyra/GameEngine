@@ -147,11 +147,9 @@ int main() {
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO(); (void)io;
-	//io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard Controls
 
 	// Setup Dear ImGui style
 	ImGui::StyleColorsDark();
-	//ImGui::StyleColorsClassic();
 
 	// Setup Platform/Renderer backends
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
@@ -209,8 +207,6 @@ int main() {
 		frameTimer.update(deltaTime);
 		float smoothedDeltaTime = frameTimer.getSmoothedDeltaTime();
 
-		// Update game state and camera based on inputs.
-		cameraController->processInput(smoothedDeltaTime);
 		stateManager.update(smoothedDeltaTime);
 
 		// Clear the screen.
