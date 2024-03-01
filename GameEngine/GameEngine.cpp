@@ -124,24 +124,34 @@ int main() {
 	// Enable multisampling
 	glEnable(GL_MULTISAMPLE);
 
-	// Create the Renderer instance
-	std::shared_ptr<Renderer> renderer = std::make_shared<Renderer>(); // Make sure Renderer is managed by a shared_ptr
-
 	// Initialize the CameraController
-	std::shared_ptr<CameraController> cameraController = std::make_shared<CameraController>(window, cameraPos, cameraFront, cameraUp, cameraSpeed);
+	// Create the CameraController instance
+	std::shared_ptr<CameraController> cameraController = std::make_shared<CameraController>(
+		window,
+		cameraPos,    // Initial camera position
+		cameraFront,  // Initial camera front vector
+		cameraUp,     // Initial camera up vector
+		cameraSpeed   // Camera movement speed
+	);
+
 	glfwSetKeyCallback(window, CameraController::keyCallback);
-
-	// After initializing the CameraController
-	glfwSetWindowUserPointer(window, cameraController.get()); // Link the camera controller to the GLFW window
-
 	GLFWcursorposfun cursorPosCallback = [](GLFWwindow* window, double xpos, double ypos) {
 		auto* controller = static_cast<CameraController*>(glfwGetWindowUserPointer(window));
 		if (controller) {
 			controller->mouseCallback(window, xpos, ypos);
 		}
 	};
-
 	glfwSetCursorPosCallback(window, cursorPosCallback);
+	glfwSetWindowUserPointer(window, cameraController.get());
+
+	// Create the Renderer instance
+	std::shared_ptr<Renderer> renderer = std::make_shared<Renderer>();
+
+	// IMPORTANT: Set the CameraController in the Renderer
+	renderer->setCameraController(cameraController);
+
+	auto projectionMatrix = glm::perspective(glm::radians(45.0f), mode->width / (float)mode->height, 0.1f, 100.0f);
+	renderer->setProjectionMatrix(projectionMatrix);
 
 	// Setup Dear ImGui context
 	IMGUI_CHECKVERSION();
@@ -158,16 +168,13 @@ int main() {
 	// Retrieve the singleton instance of GameStateManager
 	GameStateManager& stateManager = GameStateManager::instance();
 
-	// Set the window context in GameStateManager
+	// Set the window context, camera controller, and renderer in GameStateManager
 	stateManager.setWindowContext(window);
-
-	// Set the camera controller in GameStateManager
 	stateManager.setCameraController(cameraController);
+	stateManager.setRenderer(renderer);
 
-	// Set the Renderer in GameStateManager
-	stateManager.setRenderer(renderer); // This is the missing call
-
-	std::vector<std::string> faces{
+	// Initialize the Skybox and set it in the GameStateManager
+	std::vector<std::string> faces = {
 		"clouds1_east.bmp",   // Right
 		"clouds1_west.bmp",   // Left
 		"clouds1_up.bmp",     // Top
@@ -175,7 +182,6 @@ int main() {
 		"clouds1_north.bmp",  // Front
 		"clouds1_south.bmp"   // Back
 	};
-
 	auto skybox = std::make_unique<Skybox>(faces);
 	stateManager.setSkybox(std::move(skybox));
 

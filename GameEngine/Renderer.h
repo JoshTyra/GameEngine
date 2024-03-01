@@ -4,21 +4,29 @@
 #include <memory>
 #include "LevelGeometry.h"
 #include "CameraController.h"
+#include "rendering/Skybox.h"
 
 class Renderer {
 public:
-    ~Renderer();
     Renderer();
-    void setCameraController(std::shared_ptr<CameraController> cameraController); // Updated to use shared_ptr
-    void setProjectionMatrix(const glm::mat4& projectionMatrix);
-    void render(const std::vector<std::unique_ptr<LevelGeometry>>& geometries);
+    ~Renderer();
 
-    const glm::mat4& getProjectionMatrix() const {
-        return projectionMatrix;
-    }
+    void setCameraController(std::shared_ptr<CameraController> cameraController);
+    void setProjectionMatrix(const glm::mat4& projectionMatrix);
+    void setSkybox(std::shared_ptr<Skybox> skybox);
+
+    // New method to encapsulate the entire frame rendering process
+    void renderFrame(const std::vector<std::unique_ptr<LevelGeometry>>& geometries);
 
 private:
-    std::shared_ptr<CameraController> cameraController; // Updated to use shared_ptr
+    void prepareFrame();
+    void renderSkybox() const;
+    void renderGeometries(const std::vector<std::unique_ptr<LevelGeometry>>& geometries);
+    void finalizeFrame();
+
+    std::shared_ptr<CameraController> cameraController;
     glm::mat4 projectionMatrix;
     GLuint uboMatrices;
+    std::shared_ptr<Skybox> skybox;
 };
+

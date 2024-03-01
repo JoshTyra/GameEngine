@@ -11,7 +11,7 @@ class Skybox {
 public:
     Skybox(const std::vector<std::string>& faces);
     ~Skybox();
-    void draw(const glm::mat4& view, const glm::mat4& projection);
+    void draw(const glm::mat4& view, const glm::mat4& projection) const;
     void updateCubemap(const std::vector<std::string>& faces); // For dynamic skybox updates
 
 private:

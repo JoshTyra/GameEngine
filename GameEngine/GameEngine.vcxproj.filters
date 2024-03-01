@@ -79,6 +79,12 @@
     <Filter Include="Source Files\physics">
       <UniqueIdentifier>{afe16587-9955-4b95-b605-64e256fd5524}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\postprocessing">
+      <UniqueIdentifier>{7ce9a1b4-e7c5-4329-803a-2ade6a79bea6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\postprocessing">
+      <UniqueIdentifier>{9f3c4fe1-18ac-4723-833d-2e0e1217f2b6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GameEngine.cpp">
@@ -165,6 +171,12 @@
     <ClCompile Include="state\GameplayState.cpp">
       <Filter>Source Files\state</Filter>
     </ClCompile>
+    <ClCompile Include="post-processing\PostProcessingShader.cpp">
+      <Filter>Source Files\postprocessing</Filter>
+    </ClCompile>
+    <ClCompile Include="post-processing\ScreenQuad.cpp">
+      <Filter>Source Files\postprocessing</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CameraController.h">
@@ -241,6 +253,12 @@
     </ClInclude>
     <ClInclude Include="state\GameplayState.h">
       <Filter>Header Files\state</Filter>
+    </ClInclude>
+    <ClInclude Include="post-processing\PostProcessingShader.h">
+      <Filter>Header Files\postprocessing</Filter>
+    </ClInclude>
+    <ClInclude Include="post-processing\ScreenQuad.h">
+      <Filter>Header Files\postprocessing</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

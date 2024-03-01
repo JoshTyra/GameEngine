@@ -156,6 +156,8 @@
     <ClCompile Include="materials\MaterialParser.cpp" />
     <ClCompile Include="physics\PhysicsDebugDrawer.cpp" />
     <ClCompile Include="physics\PhysicsManager.cpp" />
+    <ClCompile Include="post-processing\PostProcessingShader.cpp" />
+    <ClCompile Include="post-processing\ScreenQuad.cpp" />
     <ClCompile Include="Render.cpp" />
     <ClCompile Include="rendering\Skybox.cpp" />
     <ClCompile Include="state\GameplayState.cpp" />
@@ -180,6 +182,8 @@
     <ClInclude Include="ModelLoader.h" />
     <ClInclude Include="physics\PhysicsDebugDrawer.h" />
     <ClInclude Include="physics\PhysicsManager.h" />
+    <ClInclude Include="post-processing\PostProcessingShader.h" />
+    <ClInclude Include="post-processing\ScreenQuad.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="rendering\Skybox.h" />
     <ClInclude Include="shader.h" />

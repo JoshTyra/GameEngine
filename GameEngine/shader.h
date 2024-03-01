@@ -144,7 +144,7 @@ public:
     }
 
     // Use the current shader
-    void use() {
+    void use() const {
         glUseProgram(this->Program);
     }
 };

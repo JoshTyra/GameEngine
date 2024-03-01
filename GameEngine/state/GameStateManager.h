@@ -26,7 +26,7 @@ public:
     void setCameraController(std::shared_ptr<CameraController> cameraController);
     std::shared_ptr<CameraController> getCameraController() const;
 
-    void setSkybox(std::unique_ptr<Skybox> newSkybox);
+    void setSkybox(std::shared_ptr<Skybox> newSkybox);
     Skybox* getSkybox() const;
 
     // Renderer access methods
@@ -42,7 +42,7 @@ private:
     bool exitRequested = false;
     GLFWwindow* window = nullptr;
     std::shared_ptr<CameraController> cameraController;
-    std::unique_ptr<Skybox> skybox;
+    std::shared_ptr<Skybox> skybox;
     std::shared_ptr<Renderer> renderer; // Renderer instance
 };
 

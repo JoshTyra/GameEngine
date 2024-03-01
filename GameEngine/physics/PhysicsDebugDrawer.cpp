@@ -58,16 +58,13 @@ int PhysicsDebugDrawer::getDebugMode() const {
     return m_debugMode;
 }
 
-void PhysicsDebugDrawer::render() {
+void PhysicsDebugDrawer::render(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix) {
     debugShader.use();
 
-    if (!renderer || !cameraController) {
-        std::cerr << "Renderer or CameraController is not set in PhysicsDebugDrawer." << std::endl;
+    if (!cameraController) {
+        std::cerr << "CameraController is not set in PhysicsDebugDrawer." << std::endl;
         return;
     }
-
-    glm::mat4 viewMatrix = cameraController->getViewMatrix();
-    glm::mat4 projectionMatrix = renderer->getProjectionMatrix();
 
     debugShader.setMat4("view", viewMatrix);
     debugShader.setMat4("projection", projectionMatrix);

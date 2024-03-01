@@ -24,7 +24,8 @@ public:
     virtual void setDebugMode(int debugMode) override;
     virtual int getDebugMode() const override;
 
-    void render();
+    void render(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix);
+
     void clearLines();
 
 private:

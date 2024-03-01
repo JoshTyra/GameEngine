@@ -31,8 +31,12 @@ std::shared_ptr<CameraController> GameStateManager::getCameraController() const 
     return cameraController;
 }
 
-void GameStateManager::setSkybox(std::unique_ptr<Skybox> newSkybox) {
-    skybox = std::move(newSkybox);
+void GameStateManager::setSkybox(std::shared_ptr<Skybox> newSkybox) {
+    this->skybox = std::move(newSkybox);
+    // Update the renderer with the new skybox
+    if (this->renderer) {
+        this->renderer->setSkybox(this->skybox);
+    }
 }
 
 Skybox* GameStateManager::getSkybox() const {
@@ -40,7 +44,11 @@ Skybox* GameStateManager::getSkybox() const {
 }
 
 void GameStateManager::setRenderer(std::shared_ptr<Renderer> renderer) {
-    this->renderer = std::move(renderer);
+    this->renderer = renderer;
+    // If a skybox has already been set, ensure the renderer knows about it.
+    if (this->skybox) {
+        this->renderer->setSkybox(this->skybox);
+    }
 }
 
 std::shared_ptr<Renderer> GameStateManager::getRenderer() const {

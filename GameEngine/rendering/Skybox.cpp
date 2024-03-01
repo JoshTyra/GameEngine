@@ -103,7 +103,7 @@ GLuint Skybox::loadCubemap(const std::vector<std::string>& faces) {
     return textureID;
 }
 
-void Skybox::draw(const glm::mat4& view, const glm::mat4& projection) {
+void Skybox::draw(const glm::mat4& view, const glm::mat4& projection) const {
     glDepthFunc(GL_LEQUAL); // Change depth function so depth test passes when values are equal to depth buffer's content
     skyboxShader.use();
     skyboxShader.setMat4("view", glm::mat4(glm::mat3(view))); // Remove translation from the view matrix

@@ -28,9 +28,6 @@ void GameplayState::update(float deltaTime) {
     if (cameraController) {
         // Process input for the camera controller
         cameraController->processInput(deltaTime);
-
-        // Update the camera controller's position or other properties as needed
-        // This might include checking for input, moving the camera, etc.
     }
 }
 
@@ -38,7 +35,6 @@ void GameplayState::render() {
     auto window = GameStateManager::instance().getWindowContext();
     auto cameraController = GameStateManager::instance().getCameraController();
     auto renderer = GameStateManager::instance().getRenderer();
-    auto skybox = GameStateManager::instance().getSkybox(); 
 
     int windowWidth, windowHeight;
     glfwGetFramebufferSize(window, &windowWidth, &windowHeight);
@@ -64,25 +60,7 @@ void GameplayState::render() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     if (cameraController && renderer) {
-        // Setup view and projection matrices
-        auto view = cameraController->getViewMatrix();
-        auto projection = glm::perspective(glm::radians(45.0f), static_cast<float>(windowWidth) / static_cast<float>(windowHeight), 0.1f, 100.0f);
-
-        // Update renderer with the latest view and projection matrices
-        renderer->setCameraController(cameraController);
-        renderer->setProjectionMatrix(projection);
-
-        // Render the skybox first
-        if (skybox) {
-            glDepthMask(GL_FALSE); // Turn off depth writing for skybox
-            skybox->draw(view, projection);
-            glDepthMask(GL_TRUE); // Turn depth writing back on
-        }
-
-        // Render each piece of geometry
-        for (const auto& geometry : planeGeometry) {
-            renderer->render(planeGeometry);
-        }
+        renderer->renderFrame(planeGeometry);
     }
     else {
         std::cerr << "Rendering setup incomplete: Camera controller or renderer not available." << std::endl;
