@@ -18,13 +18,29 @@ bool AudioManager::loadSound(const std::string& name, const std::string& filePat
     return true;
 }
 
-void AudioManager::playSound(const std::string& filePath, const irrklang::vec3df& position, bool loop) {
-    if (soundEngine) {
-        soundEngine->play3D(filePath.c_str(), position, loop, false, true);
+void AudioManager::playSound(const std::string& name, const std::string& filePath, const irrklang::vec3df& position, bool loop, float minDistance) {
+    if (!soundEngine) {
+        std::cerr << "Sound engine not initialized." << std::endl;
+        return;
     }
-    else {
-        std::cerr << "Sound engine not initialized or sound file not found: " << filePath << std::endl;
+
+    // Check if the sound source is already loaded
+    auto it = soundSources.find(name);
+    if (it == soundSources.end()) {
+        // Load the sound source if it hasn't been loaded yet
+        ISoundSource* source = soundEngine->addSoundSourceFromFile(filePath.c_str());
+        if (source) {
+            source->setDefaultMinDistance(minDistance);
+            soundSources[name] = source;
+        }
+        else {
+            std::cerr << "Failed to load sound file: " << filePath << std::endl;
+            return;
+        }
     }
+
+    // Play the sound with the specified properties
+    soundEngine->play3D(soundSources[name], position, loop, false, true);
 }
 
 void AudioManager::stopSound(const std::string& name) {

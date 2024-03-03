@@ -20,7 +20,7 @@ public:
     ~AudioManager();
 
     bool loadSound(const std::string& name, const std::string& filePath);
-    void playSound(const std::string& filePath, const irrklang::vec3df& position, bool loop);
+    void playSound(const std::string& name, const std::string& filePath, const irrklang::vec3df& position, bool loop, float minDistance);
     void stopSound(const std::string& name);
     void updateListenerPosition(const irrklang::vec3df& position, const irrklang::vec3df& lookDirection, const irrklang::vec3df& upVector);
     void cleanUp();
@@ -28,4 +28,5 @@ public:
 private:
     ISoundEngine* soundEngine;
     std::unordered_map<std::string, std::string> soundPaths; // Maps sound names to file paths
+    std::unordered_map<std::string, ISoundSource*> soundSources; // Cache of sound sources
 };
