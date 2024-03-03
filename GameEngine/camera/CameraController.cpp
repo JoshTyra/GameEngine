@@ -1,5 +1,4 @@
 #include "CameraController.h"
-#include <al.h>
 #include <iostream>
 #include "Debug.h"
 
@@ -9,8 +8,9 @@ bool CameraController::keyAPressed = false;
 bool CameraController::keyDPressed = false;
 
 // Correctly defined constructor
-CameraController::CameraController(GLFWwindow* window, glm::vec3 cameraPos, glm::vec3 cameraFront, glm::vec3 cameraUp, float cameraSpeed)
-    : window(window), cameraPos(cameraPos), cameraFront(cameraFront), cameraUp(cameraUp), cameraSpeed(cameraSpeed) {
+CameraController::CameraController(GLFWwindow* window, glm::vec3 cameraPos, glm::vec3 cameraFront, glm::vec3 cameraUp, float cameraSpeed, std::shared_ptr<AudioManager> audioManager)
+    : window(window), cameraPos(cameraPos), cameraFront(cameraFront), cameraUp(cameraUp), cameraSpeed(cameraSpeed), audioManager(audioManager)
+{
 }
 
 glm::mat4 CameraController::getViewMatrix() const {
@@ -43,22 +43,19 @@ void CameraController::processInput(float deltaTime) {
 }
 
 void CameraController::updateAudioListener() {
-    // Set listener position
-    alListener3f(AL_POSITION, cameraPos.x, cameraPos.y, cameraPos.z);
+    if (audioManager) {
+        // The look direction can be derived from the camera's front vector.
+        glm::vec3 lookDirection = cameraFront; // Assuming this is already normalized
+        glm::vec3 upVector = cameraUp;
 
-    // Debug output for listener position
-    DEBUG_COUT << "Listener Position: X=" << cameraPos.x << " Y=" << cameraPos.y << " Z=" << cameraPos.z << std::endl;
+        // Convert glm::vec3 to irrklang::vec3df before passing.
+        irrklang::vec3df position(cameraPos.x, cameraPos.y, cameraPos.z);
+        irrklang::vec3df direction(lookDirection.x, lookDirection.y, lookDirection.z);
+        irrklang::vec3df up(upVector.x, upVector.y, upVector.z);
 
-    // Set listener orientation
-    glm::vec3 cameraRight = glm::normalize(glm::cross(cameraFront, cameraUp));
-    glm::vec3 cameraDirection = glm::normalize(cameraFront); // Ensure the camera direction is normalized
-    ALfloat listenerOri[] = { cameraDirection.x, cameraDirection.y, cameraDirection.z, cameraUp.x, cameraUp.y, cameraUp.z };
-
-    alListenerfv(AL_ORIENTATION, listenerOri);
-
-    // Debug output for listener orientation
-    DEBUG_COUT << "Listener Orientation (At): X=" << cameraDirection.x << " Y=" << cameraDirection.y << " Z=" << cameraDirection.z << std::endl;
-    DEBUG_COUT << "Listener Orientation (Up): X=" << cameraUp.x << " Y=" << cameraUp.y << " Z=" << cameraUp.z << std::endl;
+        // Update the audio listener's position and orientation in irrKlang
+        audioManager->updateListenerPosition(position, direction, up);
+    }
 }
 
 void CameraController::mouseCallback(GLFWwindow* window, double xpos, double ypos) {

@@ -1,13 +1,13 @@
-#ifndef GAME_STATE_MANAGER_H
-#define GAME_STATE_MANAGER_H
+#pragma once
 
 #include <memory>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
-#include "GameState.h"
-#include "CameraController.h"
-#include "rendering/Skybox.h"
 #include "Renderer.h"
+#include "CameraController.h"
+#include "GameState.h"
+#include "rendering/Skybox.h"
+#include "AudioManager.h"
 
 class GameStateManager {
 public:
@@ -33,6 +33,11 @@ public:
     void setRenderer(std::shared_ptr<Renderer> renderer); // Assume using shared_ptr for simplicity
     std::shared_ptr<Renderer> getRenderer() const;
 
+    void setAudioManager(std::shared_ptr<AudioManager> audioManager);
+    std::shared_ptr<AudioManager> getAudioManager() const;
+
+    void initializeCameraController(GLFWwindow* window, glm::vec3 cameraPos, glm::vec3 cameraFront, glm::vec3 cameraUp, float cameraSpeed);
+
 private:
     GameStateManager();
     GameStateManager(const GameStateManager&) = delete;
@@ -43,7 +48,6 @@ private:
     GLFWwindow* window = nullptr;
     std::shared_ptr<CameraController> cameraController;
     std::shared_ptr<Skybox> skybox;
-    std::shared_ptr<Renderer> renderer; // Renderer instance
+    std::shared_ptr<Renderer> renderer;
+    std::shared_ptr<AudioManager> audioManager;
 };
-
-#endif // GAME_STATE_MANAGER_H

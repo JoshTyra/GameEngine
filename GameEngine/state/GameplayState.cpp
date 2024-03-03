@@ -15,6 +15,21 @@ void GameplayState::enter() {
     std::string modelPath = FileSystemUtils::getAssetFilePath("models/tutorial.fbx");
     std::string materialPath = FileSystemUtils::getAssetFilePath("materials/tutorial.txt");
     planeGeometry = ModelLoader::loadModel(modelPath, materialPath);
+
+    auto audioManager = GameStateManager::instance().getAudioManager();
+    if (audioManager) {
+        // Directly use the fully qualified path to the sound file
+        std::string audioPath = FileSystemUtils::getAssetFilePath("audio/wind2.ogg");
+
+        // Example position using glm::vec3
+        glm::vec3 ambiencePosition = glm::vec3(0.0f, 0.0f, 0.0f);
+
+        // Convert the glm::vec3 position to irrKlang's vec3df format
+        irrklang::vec3df irrPosition(ambiencePosition.x, ambiencePosition.y, ambiencePosition.z);
+
+        // Play the sound using the direct path and converted position
+        audioManager->playSound(audioPath, irrPosition, true);
+    }
 }
 
 void GameplayState::exit() {
@@ -25,9 +40,23 @@ void GameplayState::exit() {
 void GameplayState::update(float deltaTime) {
     // Ensure the camera controller is available
     auto cameraController = GameStateManager::instance().getCameraController();
-    if (cameraController) {
+    auto audioManager = GameStateManager::instance().getAudioManager(); // Ensure you have access to the audio manager
+    if (cameraController && audioManager) {
         // Process input for the camera controller
         cameraController->processInput(deltaTime);
+
+        // Update the audio listener position and orientation to match the camera
+        glm::vec3 cameraPos = cameraController->getCameraPosition();
+        glm::vec3 cameraFront = cameraController->getCameraFront();
+        glm::vec3 cameraUp = cameraController->getCameraUp();
+
+        // Convert glm::vec3 to irrklang::vec3df for irrKlang compatibility
+        irrklang::vec3df irrCameraPos(cameraPos.x, cameraPos.y, cameraPos.z);
+        irrklang::vec3df irrCameraFront(cameraFront.x, cameraFront.y, cameraFront.z);
+        irrklang::vec3df irrCameraUp(cameraUp.x, cameraUp.y, cameraUp.z);
+
+        // Update listener position in the audio manager
+        audioManager->updateListenerPosition(irrCameraPos, irrCameraFront, irrCameraUp);
     }
 }
 

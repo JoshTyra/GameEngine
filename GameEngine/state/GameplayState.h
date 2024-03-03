@@ -4,7 +4,9 @@
 #include <vector>
 #include <memory>
 #include "GameState.h"
-#include "LevelGeometry.h" // Ensure this is correctly included or forward declared
+#include "LevelGeometry.h"
+#include "CameraController.h"
+#include "Renderer.h"
 
 class GameplayState : public GameState {
 public:
@@ -15,7 +17,6 @@ public:
 
 private:
     std::vector<std::unique_ptr<LevelGeometry>> planeGeometry; // Model storage
-    // Other member variables and methods...
 };
 
 #endif // GAMEPLAY_STATE_H

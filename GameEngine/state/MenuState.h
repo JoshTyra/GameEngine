@@ -2,6 +2,8 @@
 #define MENU_STATE_H
 
 #include "GameState.h"
+#include "GameStateManager.h"
+#include "GameplayState.h"
 
 class MenuState : public GameState {
 public:

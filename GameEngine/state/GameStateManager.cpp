@@ -1,4 +1,5 @@
 #include "GameStateManager.h"
+#include "CameraController.h"
 #include "MenuState.h"
 #include <iostream>
 
@@ -13,6 +14,18 @@ GameStateManager::~GameStateManager() {
 GameStateManager& GameStateManager::instance() {
     static GameStateManager instance;
     return instance;
+}
+
+void GameStateManager::initializeCameraController(GLFWwindow* window, glm::vec3 cameraPos, glm::vec3 cameraFront, glm::vec3 cameraUp, float cameraSpeed) {
+    // Make sure audioManager is already initialized and set in GameStateManager
+    if (audioManager) {
+        auto cameraController = std::make_shared<CameraController>(window, cameraPos, cameraFront, cameraUp, cameraSpeed, audioManager);
+        setCameraController(cameraController);
+    }
+    else {
+        // Handle the case where audioManager is not set, if necessary
+        std::cerr << "AudioManager not initialized before CameraController setup." << std::endl;
+    }
 }
 
 void GameStateManager::setWindowContext(GLFWwindow* newWindow) {
@@ -79,4 +92,12 @@ void GameStateManager::render() {
     else {
         std::cout << "No current state to render." << std::endl;
     }
+}
+
+void GameStateManager::setAudioManager(std::shared_ptr<AudioManager> audioManager) {
+    this->audioManager = audioManager;
+}
+
+std::shared_ptr<AudioManager> GameStateManager::getAudioManager() const {
+    return audioManager;
 }

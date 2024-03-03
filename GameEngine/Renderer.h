@@ -2,8 +2,8 @@
 #include <glm/glm.hpp>
 #include <vector>
 #include <memory>
-#include "LevelGeometry.h"
 #include "CameraController.h"
+#include "LevelGeometry.h"
 #include "rendering/Skybox.h"
 
 class Renderer {

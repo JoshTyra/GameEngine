@@ -34,6 +34,8 @@
 #include "state/MenuState.h"
 #include "state/GameplayState.h"
 
+using namespace irrklang;
+
 // Global variables
 glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f); // Example position
 glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f); // Up is positive Y
@@ -42,21 +44,6 @@ glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f); // Looking towards negativ
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 float cameraSpeed = 6.0f;
-
-AudioManager audioManager;
-
-void initAudio(glm::vec3 ambiencePosition) {
-	std::string audioPath = FileSystemUtils::getAssetFilePath("audio/wind2.ogg");
-
-	// Load the sound without specifying a position
-	if (!audioManager.loadSound("ambient_wind", audioPath)) {
-		std::cerr << "Failed to load wind sound." << std::endl;
-		return;
-	}
-
-	// Specify the position when playing the sound
-	audioManager.playSound("ambient_wind", ambiencePosition, true, 1.0f, 1.0f, 500.0f);
-}
 
 int main() {
 
@@ -107,12 +94,6 @@ int main() {
 
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-	// Set the distance model for sound attenuation
-	alDistanceModel(AL_INVERSE_DISTANCE_CLAMPED);
-
-	// Proceed with loading sounds and other initializations
-	initAudio({ 0.0f, 0.0f, 0.0f });
-
 	// Enable VSync (1 = on, 0 = off)
 	glfwSwapInterval(1);
 
@@ -124,9 +105,13 @@ int main() {
 	// Enable multisampling
 	glEnable(GL_MULTISAMPLE);
 
-	// Initialize the CameraController
-	// Create the CameraController instance
-	std::shared_ptr<CameraController> cameraController = std::make_shared<CameraController>(
+	// Initialize AudioManager first
+	std::shared_ptr<AudioManager> audioManager = std::make_shared<AudioManager>();
+	GameStateManager::instance().setAudioManager(audioManager);
+
+	// Assuming you have added an `initializeCameraController` method in GameStateManager that does this:
+	// Note: You need to implement this method based on the instructions provided in previous responses.
+	GameStateManager::instance().initializeCameraController(
 		window,
 		cameraPos,    // Initial camera position
 		cameraFront,  // Initial camera front vector
@@ -134,13 +119,17 @@ int main() {
 		cameraSpeed   // Camera movement speed
 	);
 
+	// Retrieve the CameraController instance from GameStateManager if needed elsewhere
+	std::shared_ptr<CameraController> cameraController = GameStateManager::instance().getCameraController();
+
+	// Callback setup remains unchanged
 	glfwSetKeyCallback(window, CameraController::keyCallback);
 	GLFWcursorposfun cursorPosCallback = [](GLFWwindow* window, double xpos, double ypos) {
 		auto* controller = static_cast<CameraController*>(glfwGetWindowUserPointer(window));
 		if (controller) {
 			controller->mouseCallback(window, xpos, ypos);
 		}
-	};
+		};
 	glfwSetCursorPosCallback(window, cursorPosCallback);
 	glfwSetWindowUserPointer(window, cameraController.get());
 
@@ -168,9 +157,9 @@ int main() {
 	// Retrieve the singleton instance of GameStateManager
 	GameStateManager& stateManager = GameStateManager::instance();
 
-	// Set the window context, camera controller, and renderer in GameStateManager
+	// Set the window context, and renderer in GameStateManager
 	stateManager.setWindowContext(window);
-	stateManager.setCameraController(cameraController);
+	// The camera controller is now set through the initializeCameraController method
 	stateManager.setRenderer(renderer);
 
 	// Initialize the Skybox and set it in the GameStateManager
@@ -222,7 +211,6 @@ int main() {
 	ImGui_ImplGlfw_Shutdown();
 	ImGui::DestroyContext();
 
-	audioManager.cleanUp();
 	glfwDestroyWindow(window);
 	glfwTerminate();
 	return 0;
