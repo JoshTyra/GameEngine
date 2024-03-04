@@ -28,7 +28,7 @@ void GameplayState::enter() {
         irrklang::vec3df irrPosition(ambiencePosition.x, ambiencePosition.y, ambiencePosition.z);
 
         // Play the sound using the direct path and converted position
-        audioManager->playSound("ambient_wind", audioPath, irrPosition, true, 10.0f);
+        audioManager->playSound("ambient_wind", audioPath, irrPosition, true, 12.0f);
     }
 }
 

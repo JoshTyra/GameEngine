@@ -83,13 +83,18 @@ void LevelGeometry::Draw(const glm::mat4& model, const glm::mat4& view, const gl
 			glDisable(GL_DEPTH_TEST);
 		}
 
-		// Set tiling factors if available in the material
-		if (material->hasParameter("TilingFactor1") && material->hasParameter("TilingFactor2")) {
+		// Set tiling factor for the first detail texture if available
+		if (material->hasParameter("TilingFactor1")) {
 			float tilingFactor1 = material->getParameter("TilingFactor1");
-			float tilingFactor2 = material->getParameter("TilingFactor2");
 			shader->setFloat("TilingFactor1", tilingFactor1);
+		}
+
+		// Set tiling factor for the first detail texture if available
+		if (material->hasParameter("TilingFactor2")) {
+			float tilingFactor2 = material->getParameter("TilingFactor2");
 			shader->setFloat("TilingFactor2", tilingFactor2);
 		}
+
 	}
 
 	shader->use();
