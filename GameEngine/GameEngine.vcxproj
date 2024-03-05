@@ -152,6 +152,7 @@
     <ClCompile Include="imgui\imgui_tables.cpp" />
     <ClCompile Include="imgui\imgui_widgets.cpp" />
     <ClCompile Include="io\FileSystemUtils.cpp" />
+    <ClCompile Include="main.cpp" />
     <ClCompile Include="Materials.cpp" />
     <ClCompile Include="materials\MaterialParser.cpp" />
     <ClCompile Include="physics\PhysicsDebugDrawer.cpp" />
@@ -175,6 +176,7 @@
     <ClInclude Include="Debug.h" />
     <ClInclude Include="FileSystemUtils.h" />
     <ClInclude Include="FrameTimer.h" />
+    <ClInclude Include="GameEngine.h" />
     <ClInclude Include="GLEnumUtils.h" />
     <ClInclude Include="LevelGeometry.h" />
     <ClInclude Include="MaterialParser.h" />

@@ -177,6 +177,9 @@
     <ClCompile Include="post-processing\ScreenQuad.cpp">
       <Filter>Source Files\postprocessing</Filter>
     </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CameraController.h">
@@ -259,6 +262,9 @@
     </ClInclude>
     <ClInclude Include="post-processing\ScreenQuad.h">
       <Filter>Header Files\postprocessing</Filter>
+    </ClInclude>
+    <ClInclude Include="GameEngine.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

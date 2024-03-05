@@ -17,6 +17,18 @@ glm::mat4 CameraController::getViewMatrix() const {
     return glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
 }
 
+glm::vec3 CameraController::getCameraPosition() const {
+    return cameraPos;
+}
+
+glm::vec3 CameraController::getCameraFront() const {
+    return cameraFront;
+}
+
+glm::vec3 CameraController::getCameraUp() const {
+    return cameraUp;
+}
+
 void CameraController::keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
     if (key == GLFW_KEY_W)
         keyWPressed = (action != GLFW_RELEASE);
@@ -58,7 +70,14 @@ void CameraController::updateAudioListener() {
     }
 }
 
-void CameraController::mouseCallback(GLFWwindow* window, double xpos, double ypos) {
+void CameraController::mouseCallbackStatic(GLFWwindow* window, double xpos, double ypos) {
+    CameraController* controller = static_cast<CameraController*>(glfwGetWindowUserPointer(window));
+    if (controller) {
+        controller->handleMouseMovement(xpos, ypos);
+    }
+}
+
+void CameraController::handleMouseMovement(double xpos, double ypos) {
     if (firstMouse) {
         lastX = xpos;
         lastY = ypos;
@@ -76,13 +95,23 @@ void CameraController::mouseCallback(GLFWwindow* window, double xpos, double ypo
     yaw += xoffset;
     pitch += yoffset;
 
-    // Clamping the pitch value to prevent screen flip
-    pitch = std::max(std::min(pitch, 89.0f), -89.0f);
+    // Make sure that when pitch is out of bounds, screen doesn't get flipped
+    if (pitch > 89.0f)
+        pitch = 89.0f;
+    if (pitch < -89.0f)
+        pitch = -89.0f;
 
+    // Update Front, Right and Up Vectors using the updated Euler angles
     glm::vec3 front;
     front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
     front.y = sin(glm::radians(pitch));
     front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
     cameraFront = glm::normalize(front);
+
+    // Optionally, update the camera right and up vectors here if your camera class uses them
+    // This ensures the camera's movement is correctly oriented to its direction
+    // cameraRight = glm::normalize(glm::cross(cameraFront, worldUp)); // Assuming worldUp = glm::vec3(0.0f, 1.0f, 0.0f)
+    // cameraUp = glm::normalize(glm::cross(cameraRight, cameraFront));
 }
+
 

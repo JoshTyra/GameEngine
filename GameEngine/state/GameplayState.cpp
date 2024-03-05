@@ -78,6 +78,11 @@ void GameplayState::render() {
     ImGui::Text("Average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
     ImGui::End();
 
+    if (!cameraController) {
+        std::cerr << "CameraController not initialized.\n";
+        return;
+    }
+
     // Create a window to display Camera Position
     auto cameraPos = cameraController->getCameraPosition();
     ImGui::Begin("Camera Position");

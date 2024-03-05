@@ -2,11 +2,24 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <iostream>
 
+Renderer::Renderer(int width, int height)
+    : screenWidth(width), screenHeight(height), projectionMatrix(glm::mat4(1.0f)) {
+
+    // Initialize post-processing
+    postProcessing = std::make_shared<PostProcessing>();
+
+    // Set up UBO
+    setupUniformBufferObject();
+
+    // Set up FBO with provided dimensions
+    setupFrameBufferObject(width, height);
+}
+
 Renderer::~Renderer() {
     glDeleteBuffers(1, &uboMatrices); // Clean up the UBO
 }
 
-Renderer::Renderer() : projectionMatrix(glm::mat4(1.0f)) {
+void Renderer::setupUniformBufferObject() {
     glGenBuffers(1, &uboMatrices);
     glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
     glBufferData(GL_UNIFORM_BUFFER, 2 * sizeof(glm::mat4), NULL, GL_STATIC_DRAW);
@@ -22,12 +35,12 @@ void Renderer::setProjectionMatrix(const glm::mat4& projectionMatrix) {
     this->projectionMatrix = projectionMatrix;
 }
 
-// New method to encapsulate the entire frame rendering process
 void Renderer::renderFrame(const std::vector<std::unique_ptr<LevelGeometry>>& geometries) {
+    glBindFramebuffer(GL_FRAMEBUFFER, 0); // Bind the FBO
     prepareFrame();
-    renderSkybox(); // Adjusted to not require parameters
+    renderSkybox();
     renderGeometries(geometries);
-    finalizeFrame();
+    glBindFramebuffer(GL_FRAMEBUFFER, 0); // Bind back to the default framebuffer
 }
 
 void Renderer::prepareFrame() {
@@ -87,9 +100,28 @@ void Renderer::renderGeometries(const std::vector<std::unique_ptr<LevelGeometry>
 }
 
 void Renderer::finalizeFrame() {
-    // Apply post-processing here if any
+    postProcessing->applyActiveEffect(fboTexture);
 }
 
 void Renderer::setSkybox(std::shared_ptr<Skybox> skybox) {
     this->skybox = skybox;
 }
+
+void Renderer::setupFrameBufferObject(int width, int height) {
+    glGenFramebuffers(1, &fbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+
+    glGenTextures(1, &fboTexture);
+    glBindTexture(GL_TEXTURE_2D, fboTexture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, screenWidth, screenHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, fboTexture, 0);
+
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+        std::cerr << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
