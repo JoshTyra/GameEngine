@@ -95,6 +95,7 @@ void GameplayState::render() {
 
     if (cameraController && renderer) {
         renderer->renderFrame(planeGeometry);
+        renderer->finalizeFrame();
     }
     else {
         std::cerr << "Rendering setup incomplete: Camera controller or renderer not available." << std::endl;

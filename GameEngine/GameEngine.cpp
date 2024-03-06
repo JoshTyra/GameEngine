@@ -33,6 +33,7 @@ void GameEngine::initialize() {
     initializeImGui();
     setupCallbacks();
     initializeGameStates();
+    renderer->initializePostProcessing();
 }
 
 void GameEngine::run() {

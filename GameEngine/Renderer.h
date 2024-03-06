@@ -18,12 +18,13 @@ public:
 
     // New method to encapsulate the entire frame rendering process
     void renderFrame(const std::vector<std::unique_ptr<LevelGeometry>>& geometries);
+    void initializePostProcessing();
+    void finalizeFrame();
 
 private:
     void prepareFrame();
     void renderSkybox() const;
     void renderGeometries(const std::vector<std::unique_ptr<LevelGeometry>>& geometries);
-    void finalizeFrame();
     void setupUniformBufferObject();
     void setupFrameBufferObject(int width, int height);
 

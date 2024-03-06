@@ -36,7 +36,7 @@ void Renderer::setProjectionMatrix(const glm::mat4& projectionMatrix) {
 }
 
 void Renderer::renderFrame(const std::vector<std::unique_ptr<LevelGeometry>>& geometries) {
-    glBindFramebuffer(GL_FRAMEBUFFER, 0); // Bind the FBO
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo); // Bind the FBO
     prepareFrame();
     renderSkybox();
     renderGeometries(geometries);
@@ -100,7 +100,21 @@ void Renderer::renderGeometries(const std::vector<std::unique_ptr<LevelGeometry>
 }
 
 void Renderer::finalizeFrame() {
+    // Bind back to default framebuffer for final output
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    // Clear the default framebuffer
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    // Disable depth testing since we're now just drawing a full-screen quad
+    // and don't need the depth information.
+    glDisable(GL_DEPTH_TEST);
+
+    // Apply the post-processing effect using the texture we rendered the scene into
     postProcessing->applyActiveEffect(fboTexture);
+
+    // Re-enable depth testing for the next frame's regular rendering
+    glEnable(GL_DEPTH_TEST);
 }
 
 void Renderer::setSkybox(std::shared_ptr<Skybox> skybox) {
@@ -108,20 +122,48 @@ void Renderer::setSkybox(std::shared_ptr<Skybox> skybox) {
 }
 
 void Renderer::setupFrameBufferObject(int width, int height) {
+    // Generate and bind the Framebuffer
     glGenFramebuffers(1, &fbo);
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 
+    // Generate the texture to hold color buffer
     glGenTextures(1, &fboTexture);
     glBindTexture(GL_TEXTURE_2D, fboTexture);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, screenWidth, screenHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glBindTexture(GL_TEXTURE_2D, 0);
 
+    // Attach the texture to the framebuffer as its color attachment
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, fboTexture, 0);
 
+    // Create a renderbuffer object for depth and stencil attachment (we won't use stencil in this example)
+    GLuint rbo;
+    glGenRenderbuffers(1, &rbo);
+    glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+    // Use a depth component format
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, screenWidth, screenHeight);
+    glBindRenderbuffer(GL_RENDERBUFFER, 0);
+
+    // Attach the renderbuffer to the framebuffer
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
+
+    // Check if the framebuffer is complete
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
         std::cerr << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
+
+    // Bind back to the default framebuffer
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void Renderer::initializePostProcessing() {
+    // Paths to the vertex and fragment shader of the invert effect
+    std::string vertShaderPath = FileSystemUtils::getAssetFilePath("shaders/invert.vert");
+    std::string fragShaderPath = FileSystemUtils::getAssetFilePath("shaders/invert.frag");
+
+    // Adding the invert shader effect
+    postProcessing->addEffect("invert", vertShaderPath, fragShaderPath);
+
+    // Activating the invert shader effect
+    postProcessing->setActiveEffect("invert");
 }
 
