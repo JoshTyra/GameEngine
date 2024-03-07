@@ -160,6 +160,7 @@
     <ClCompile Include="post-processing\PostProcessing.cpp" />
     <ClCompile Include="post-processing\ScreenQuad.cpp" />
     <ClCompile Include="Render.cpp" />
+    <ClCompile Include="rendering\Frustum.cpp" />
     <ClCompile Include="rendering\Skybox.cpp" />
     <ClCompile Include="state\GameplayState.cpp" />
     <ClCompile Include="state\GameState.cpp" />
@@ -187,6 +188,7 @@
     <ClInclude Include="post-processing\PostProcessing.h" />
     <ClInclude Include="post-processing\ScreenQuad.h" />
     <ClInclude Include="Renderer.h" />
+    <ClInclude Include="rendering\Frustum.h" />
     <ClInclude Include="rendering\Skybox.h" />
     <ClInclude Include="shader.h" />
     <ClInclude Include="state\GameplayState.h" />

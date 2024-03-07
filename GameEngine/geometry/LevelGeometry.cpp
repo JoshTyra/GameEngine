@@ -11,6 +11,7 @@ LevelGeometry::LevelGeometry()
 LevelGeometry::LevelGeometry(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, const std::vector<Texture>& textures)
 	: vertices(vertices), indices(indices), textures(textures), VAO(0), VBO(0), EBO(0), shader(nullptr) {
 	setupMesh();
+	calculateAABB();
 	// Apply default transformations
 	setPosition(glm::vec3(0.0f)); // Set the initial position if needed
 	setScale(glm::vec3(0.025f)); // Scale the model uniformly
@@ -196,6 +197,42 @@ void LevelGeometry::addToPhysicsWorld(btDiscreteDynamicsWorld* dynamicsWorld) {
 
 	dynamicsWorld->addRigidBody(body);
 }
+
+void LevelGeometry::calculateAABB() {
+	if (vertices.empty()) return;
+
+	aabbMin = aabbMax = vertices[0].Position;
+
+	for (const auto& vertex : vertices) {
+		aabbMin = glm::min(aabbMin, vertex.Position);
+		aabbMax = glm::max(aabbMax, vertex.Position);
+	}
+
+	// Optionally, apply the current model matrix to the AABB corners
+	glm::mat4 modelMatrix = getModelMatrix();
+	glm::vec4 minCorner = modelMatrix * glm::vec4(aabbMin, 1.0f);
+	glm::vec4 maxCorner = modelMatrix * glm::vec4(aabbMax, 1.0f);
+
+	aabbMin = glm::vec3(minCorner);
+	aabbMax = glm::vec3(maxCorner);
+}
+
+bool LevelGeometry::isInFrustum(const Frustum& frustum) const {
+	for (int i = 0; i < 6; ++i) {
+		const auto& plane = frustum.planes[i];
+
+		glm::vec3 pVertex = aabbMin;
+		if (plane.normal.x >= 0) pVertex.x = aabbMax.x;
+		if (plane.normal.y >= 0) pVertex.y = aabbMax.y;
+		if (plane.normal.z >= 0) pVertex.z = aabbMax.z;
+
+		if (glm::dot(plane.normal, pVertex) + plane.distance < 0) {
+			return false; // AABB is outside the frustum
+		}
+	}
+	return true; // AABB is inside the frustum
+}
+
 
 
 

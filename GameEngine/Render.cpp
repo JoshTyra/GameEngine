@@ -2,6 +2,15 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <iostream>
 
+void printMatrix(const glm::mat4& mat) {
+    for (int i = 0; i < 4; ++i) {
+        for (int j = 0; j < 4; ++j) {
+            std::cout << mat[i][j] << " ";
+        }
+        std::cout << std::endl;
+    }
+}
+
 Renderer::Renderer(int width, int height)
     : screenWidth(width), screenHeight(height), projectionMatrix(glm::mat4(1.0f)) {
 
@@ -41,7 +50,9 @@ void Renderer::setProjectionMatrix(const glm::mat4& projectionMatrix) {
     this->projectionMatrix = projectionMatrix;
 }
 
-void Renderer::renderFrame(const std::vector<std::unique_ptr<LevelGeometry>>& geometries) {
+void Renderer::renderFrame(const std::vector<std::unique_ptr<LevelGeometry>>& geometries) {    
+    glm::mat4 viewProjectionMatrix = projectionMatrix * cameraController->getViewMatrix();
+    updateFrustum(viewProjectionMatrix);
     glBindFramebuffer(GL_FRAMEBUFFER, fbo); // Bind the FBO
     prepareFrame();
     renderSkybox();
@@ -80,6 +91,11 @@ void Renderer::renderGeometries(const std::vector<std::unique_ptr<LevelGeometry>
         if (!geometry) {
             std::cerr << "Encountered a null geometry." << std::endl;
             continue;
+        }
+
+        // Perform the frustum culling check here
+        if (!geometry->isInFrustum(frustum)) {
+            continue; // Skip rendering this geometry as it's outside the frustum
         }
 
         auto material = geometry->getMaterial();
@@ -189,6 +205,10 @@ void Renderer::initializePostProcessing() {
     // Prepare and set the list of active effects
     std::vector<std::string> activeEffects = { "invert", "brightness" };
     postProcessing->setActiveEffects(activeEffects);
+}
+
+void Renderer::updateFrustum(const glm::mat4& viewProjection) {
+    frustum.update(viewProjection);
 }
 
 

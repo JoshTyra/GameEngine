@@ -180,6 +180,9 @@
     <ClCompile Include="post-processing\PostProcessing.cpp">
       <Filter>Source Files\postprocessing</Filter>
     </ClCompile>
+    <ClCompile Include="rendering\Frustum.cpp">
+      <Filter>Source Files\rendering</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CameraController.h">
@@ -265,6 +268,9 @@
     </ClInclude>
     <ClInclude Include="post-processing\PostProcessing.h">
       <Filter>Header Files\postprocessing</Filter>
+    </ClInclude>
+    <ClInclude Include="rendering\Frustum.h">
+      <Filter>Header Files\rendering</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

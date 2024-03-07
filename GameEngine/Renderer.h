@@ -7,11 +7,14 @@
 #include "LevelGeometry.h"
 #include "rendering/Skybox.h"
 #include "post-processing/PostProcessing.h"
+#include "rendering/Frustum.h"
 
 class Renderer {
+    Frustum frustum;
 public:
     Renderer(int width, int height);
     ~Renderer();
+    void updateFrustum(const glm::mat4& viewProjection);
 
     void setCameraController(std::shared_ptr<CameraController> cameraController);
     void setProjectionMatrix(const glm::mat4& projectionMatrix);

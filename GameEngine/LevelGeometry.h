@@ -7,6 +7,7 @@
 #include "Texture.h"
 #include "shader.h"
 #include "Materials.h"
+#include "rendering/Frustum.h"
 
 // Vertex structure
 struct Vertex {
@@ -38,6 +39,8 @@ public:
     void addToPhysicsWorld(btDiscreteDynamicsWorld* dynamicsWorld); // Adds the geometry to the specified Bullet dynamics world
 
     glm::mat4 getModelMatrix() const;
+    glm::vec3 aabbMin;
+    glm::vec3 aabbMax;
 
     // Getter function for textures
     const std::vector<Texture>& getTextures() const {
@@ -79,6 +82,9 @@ public:
     std::shared_ptr<Material> getMaterial() const {
         return material;
     }
+
+    void calculateAABB();
+    bool isInFrustum(const Frustum& frustum) const;
 
 private:
     std::vector<Vertex> vertices;
