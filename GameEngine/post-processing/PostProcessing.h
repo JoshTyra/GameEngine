@@ -58,7 +58,7 @@ public:
     PostProcessing();
     ~PostProcessing();
     void applyEffects(GLuint inputTexture);
-    void addEffect(const std::string& name, const std::string& vertexShaderPath, const std::string& fragmentShaderPath);
+    void addEffect(const std::string& name, PostProcessingEffect&& effect);
     void setActiveEffects(const std::vector<std::string>& effectNames);
 
 private:

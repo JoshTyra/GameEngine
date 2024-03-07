@@ -9,13 +9,7 @@ PostProcessing::~PostProcessing() {
     // Clean up resources if necessary
 }
 
-void PostProcessing::addEffect(const std::string& name, const std::string& vertexShaderPath, const std::string& fragmentShaderPath) {
-    // Load and compile the shader
-    Shader shader(vertexShaderPath, fragmentShaderPath);
-    PostProcessingEffect effect(shader);
-    // Initialize default uniforms for the effect here (if any)
-
-    // Store the effect using its name as the key
+void PostProcessing::addEffect(const std::string& name, PostProcessingEffect&& effect) {
     effects.emplace(name, std::move(effect));
 }
 
@@ -49,3 +43,4 @@ void PostProcessing::applyEffects(GLuint inputTexture) {
 void PostProcessing::setActiveEffects(const std::vector<std::string>& effectNames) {
     activeEffects = effectNames;  // Directly store the names
 }
+
