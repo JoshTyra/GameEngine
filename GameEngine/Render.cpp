@@ -111,7 +111,7 @@ void Renderer::finalizeFrame() {
     glDisable(GL_DEPTH_TEST);
 
     // Apply the post-processing effect using the texture we rendered the scene into
-    postProcessing->applyActiveEffect(fboTexture);
+    postProcessing->applyEffects(fboTexture);
 
     // Re-enable depth testing for the next frame's regular rendering
     glEnable(GL_DEPTH_TEST);
@@ -163,7 +163,12 @@ void Renderer::initializePostProcessing() {
     // Adding the invert shader effect
     postProcessing->addEffect("invert", vertShaderPath, fragShaderPath);
 
-    // Activating the invert shader effect
-    postProcessing->setActiveEffect("invert");
+    // Prepare a list of effects to be activated
+    std::vector<std::string> activeEffects;
+    activeEffects.push_back("invert"); // Add any additional effects you want to initialize here
+
+    // Setting the list of active effects
+    postProcessing->setActiveEffects(activeEffects);
 }
+
 

@@ -5,7 +5,7 @@
 #include "CameraController.h"
 #include "LevelGeometry.h"
 #include "rendering/Skybox.h"
-#include "post-processing/PostProcessingShader.h"
+#include "post-processing/PostProcessing.h"
 
 class Renderer {
 public:

@@ -171,14 +171,14 @@
     <ClCompile Include="state\GameplayState.cpp">
       <Filter>Source Files\state</Filter>
     </ClCompile>
-    <ClCompile Include="post-processing\PostProcessingShader.cpp">
-      <Filter>Source Files\postprocessing</Filter>
-    </ClCompile>
     <ClCompile Include="post-processing\ScreenQuad.cpp">
       <Filter>Source Files\postprocessing</Filter>
     </ClCompile>
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="post-processing\PostProcessing.cpp">
+      <Filter>Source Files\postprocessing</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -257,14 +257,14 @@
     <ClInclude Include="state\GameplayState.h">
       <Filter>Header Files\state</Filter>
     </ClInclude>
-    <ClInclude Include="post-processing\PostProcessingShader.h">
-      <Filter>Header Files\postprocessing</Filter>
-    </ClInclude>
     <ClInclude Include="post-processing\ScreenQuad.h">
       <Filter>Header Files\postprocessing</Filter>
     </ClInclude>
     <ClInclude Include="GameEngine.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="post-processing\PostProcessing.h">
+      <Filter>Header Files\postprocessing</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
