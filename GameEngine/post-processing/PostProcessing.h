@@ -57,13 +57,16 @@ class PostProcessing {
 public:
     PostProcessing();
     ~PostProcessing();
+    void initializeFramebuffers(GLsizei width, GLsizei height);
     void applyEffects(GLuint inputTexture);
     void addEffect(const std::string& name, PostProcessingEffect&& effect);
     void setActiveEffects(const std::vector<std::string>& effectNames);
 
 private:
+    GLuint framebuffers[2];
+    GLuint textures[2];
+    GLsizei screenWidth, screenHeight;
     std::unordered_map<std::string, PostProcessingEffect> effects;
     std::vector<std::string> activeEffects;
     ScreenQuad screenQuad;
-    // Additional members as needed
 };

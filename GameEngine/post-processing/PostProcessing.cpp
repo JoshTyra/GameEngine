@@ -1,46 +1,98 @@
 #include "PostProcessing.h"
 
 PostProcessing::PostProcessing() {
-    // Constructor implementation
-    // Initialize any members here if necessary
+	// Constructor implementation
+	// Initialize any members here if necessary
 }
 
 PostProcessing::~PostProcessing() {
-    // Clean up resources if necessary
+	// Clean up resources if necessary
 }
 
 void PostProcessing::addEffect(const std::string& name, PostProcessingEffect&& effect) {
-    effects.emplace(name, std::move(effect));
+	effects.emplace(name, std::move(effect));
 }
 
 void PostProcessing::applyEffects(GLuint inputTexture) {
-    GLuint currentInputTexture = inputTexture;
+	GLuint currentInputTexture = inputTexture;
+	bool useFirstFramebuffer = false;
 
-    // Assuming the screenQuad has been initialized elsewhere (e.g., in the constructor)
-    for (const auto& effectName : activeEffects) {
-        auto it = effects.find(effectName);
-        if (it != effects.end()) {
-            PostProcessingEffect& effect = it->second; // Correct, assuming 'it' is valid
+	// Apply each effect in the activeEffects list
+	for (const auto& effectName : activeEffects) {
+		auto it = effects.find(effectName);
+		if (it != effects.end()) {
+			// Ping-pong: bind the next framebuffer
+			useFirstFramebuffer = !useFirstFramebuffer;
+			glBindFramebuffer(GL_FRAMEBUFFER, framebuffers[useFirstFramebuffer ? 0 : 1]);
 
-            effect.shader.use();
-            effect.shader.setInt("screenTexture", 0);
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, currentInputTexture);
+			glClearColor(0.0, 0.0, 0.0, 1.0);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-            // Apply each uniform set for the effect
-            for (const auto& uniform : effect.uniforms) {
-                uniform.applyToShader(effect.shader);
-            }
+			PostProcessingEffect& effect = it->second;
+			effect.shader.use();
 
-            screenQuad.render();
+			// Set up the texture for the current effect
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, currentInputTexture);
+			effect.shader.setInt("screenTexture", 0);
 
-            // Here, you'd handle ping-ponging between framebuffers if necessary
-            // and update currentInputTexture accordingly
-        }
-    }
+			for (const auto& uniform : effect.uniforms) {
+				uniform.applyToShader(effect.shader);
+			}
+
+			screenQuad.render();
+
+			// Update currentInputTexture to the one we just rendered to
+			currentInputTexture = textures[useFirstFramebuffer ? 0 : 1];
+		}
+		else {
+			std::cerr << "Effect '" << effectName << "' not found in the effects map." << std::endl;
+			return;
+		}
+	}
+
+	// Now render the final texture to the screen
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glClearColor(0.0, 0.0, 0.0, 1.0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	// The last effect applied will be the current shader in use.
+	// Use it to draw the final result to the screen.
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, currentInputTexture); // This is the result of the last effect
+
+	// If your last effect's shader expects the texture to be bound to a different uniform,
+	// you will need to set it here
+	// effect.shader.setInt("finalTexture", 0); // This line would be needed if the uniform is different
+
+	screenQuad.render();
 }
 
 void PostProcessing::setActiveEffects(const std::vector<std::string>& effectNames) {
-    activeEffects = effectNames;  // Directly store the names
+	activeEffects = effectNames;  // Directly store the names
+}
+
+void PostProcessing::initializeFramebuffers(GLsizei width, GLsizei height) {
+	screenWidth = width;
+	screenHeight = height;
+
+	glGenFramebuffers(2, framebuffers);
+	glGenTextures(2, textures);
+
+	for (int i = 0; i < 2; ++i) {
+		glBindTexture(GL_TEXTURE_2D, textures[i]);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, screenWidth, screenHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+		glBindFramebuffer(GL_FRAMEBUFFER, framebuffers[i]);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textures[i], 0);
+
+		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+			std::cerr << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
+		}
+	}
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0); // Unbind the framebuffer to avoid unintended side effects
 }
 
