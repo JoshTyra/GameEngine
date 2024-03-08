@@ -182,13 +182,25 @@ void Renderer::initializePostProcessing() {
 
     // Create the brightness effect and configure its specific uniforms
     PostProcessingEffect brightnessEffect(brightnessShader);
+    brightnessEffect.framebufferIndex = 0;
     brightnessEffect.addUniform(ShaderUniform("brightnessThreshold", 0.15f)); // Set the brightness threshold value
 
     // Add the configured brightness effect
     postProcessing->addEffect("brightness", std::move(brightnessEffect));
 
+    // Create the shader for the brightness effect
+    Shader downsampleShader(FileSystemUtils::getAssetFilePath("shaders/invert.vert"),
+        FileSystemUtils::getAssetFilePath("shaders/downsample.frag"));
+
+    // Create the brightness effect and configure its specific uniforms
+    PostProcessingEffect downsampleEffect(downsampleShader);
+    downsampleEffect.framebufferIndex = 1;
+
+    // Add the configured brightness effect
+    postProcessing->addEffect("downsample", std::move(downsampleEffect));
+
     // Prepare and set the list of active effects
-    std::vector<std::string> activeEffects = { "brightness" };
+    std::vector<std::string> activeEffects = { "brightness", "downsample"};
     postProcessing->setActiveEffects(activeEffects);
 }
 

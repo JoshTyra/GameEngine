@@ -37,8 +37,9 @@ struct ShaderUniform {
 };
 
 struct PostProcessingEffect {
-    Shader shader; // Assumes Shader class is accessible and contains methods like setInt, setFloat, etc.
+    Shader shader;
     std::vector<ShaderUniform> uniforms;
+    int framebufferIndex = -1; // Default to -1, indicating no specific framebuffer selected
 
     PostProcessingEffect(const Shader& shader) : shader(shader) {}
 
