@@ -2,15 +2,6 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <iostream>
 
-void printMatrix(const glm::mat4& mat) {
-    for (int i = 0; i < 4; ++i) {
-        for (int j = 0; j < 4; ++j) {
-            std::cout << mat[i][j] << " ";
-        }
-        std::cout << std::endl;
-    }
-}
-
 Renderer::Renderer(int width, int height)
     : screenWidth(width), screenHeight(height), projectionMatrix(glm::mat4(1.0f)) {
 
