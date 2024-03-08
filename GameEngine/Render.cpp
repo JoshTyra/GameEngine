@@ -10,9 +10,10 @@ Renderer::Renderer(int width, int height)
 
     // Define framebuffer resolutions: original and potentially downscaled versions
     std::vector<std::pair<GLsizei, GLsizei>> resolutions = {
-        {screenWidth, screenHeight},                       // Original resolution
-        {screenWidth / 2, screenHeight / 2},               // Half resolution for downsampling
-        {screenWidth / 4, screenHeight / 4}                // Quarter resolution for further downsampling
+        {screenWidth, screenHeight},
+        {screenWidth / 2, screenHeight / 2},
+        {screenWidth / 4, screenHeight / 4},
+        {screenWidth / 4, screenHeight / 4}
     };
 
     // Initialize ping-pong framebuffers for post-processing
@@ -176,33 +177,42 @@ void Renderer::setupFrameBufferObject(int width, int height) {
 }
 
 void Renderer::initializePostProcessing() {
-    // Create the shader for the brightness effect
-    Shader brightnessShader(FileSystemUtils::getAssetFilePath("shaders/invert.vert"), 
+    // Brightness effect setup
+    Shader brightnessShader(FileSystemUtils::getAssetFilePath("shaders/invert.vert"),
         FileSystemUtils::getAssetFilePath("shaders/bright_pass.frag"));
-
-    // Create the brightness effect and configure its specific uniforms
     PostProcessingEffect brightnessEffect(brightnessShader);
-    brightnessEffect.framebufferIndex = 0;
-    brightnessEffect.addUniform(ShaderUniform("brightnessThreshold", 0.15f)); // Set the brightness threshold value
-
-    // Add the configured brightness effect
+    brightnessEffect.framebufferIndex = 0; // Use full-resolution framebuffer
+    brightnessEffect.addUniform(ShaderUniform("brightnessThreshold", 0.15f));
     postProcessing->addEffect("brightness", std::move(brightnessEffect));
 
-    // Create the shader for the brightness effect
+    // Downsampling effect setup
     Shader downsampleShader(FileSystemUtils::getAssetFilePath("shaders/invert.vert"),
         FileSystemUtils::getAssetFilePath("shaders/downsample.frag"));
-
-    // Create the brightness effect and configure its specific uniforms
     PostProcessingEffect downsampleEffect(downsampleShader);
-    downsampleEffect.framebufferIndex = 1;
-
-    // Add the configured brightness effect
+    downsampleEffect.framebufferIndex = 1; // Use a smaller framebuffer
     postProcessing->addEffect("downsample", std::move(downsampleEffect));
 
-    // Prepare and set the list of active effects
-    std::vector<std::string> activeEffects = { "brightness", "downsample"};
+    // Horizontal blur effect setup
+    Shader horizontalBlurShader(FileSystemUtils::getAssetFilePath("shaders/invert.vert"),
+        FileSystemUtils::getAssetFilePath("shaders/horizontalBlur.frag"));
+    PostProcessingEffect horizontalBlurEffect(horizontalBlurShader);
+    horizontalBlurEffect.framebufferIndex = 2; // Use a framebuffer suited for horizontal blur
+    horizontalBlurEffect.addUniform(ShaderUniform("blurSize", 1.0f));
+    postProcessing->addEffect("horizontalBlur", std::move(horizontalBlurEffect));
+
+    // Vertical blur effect setup
+    Shader verticalBlurShader(FileSystemUtils::getAssetFilePath("shaders/invert.vert"),
+        FileSystemUtils::getAssetFilePath("shaders/verticalBlur.frag"));
+    PostProcessingEffect verticalBlurEffect(verticalBlurShader);
+    verticalBlurEffect.framebufferIndex = 3; // Use a framebuffer suited for vertical blur
+    verticalBlurEffect.addUniform(ShaderUniform("blurSize", 1.0f));
+    postProcessing->addEffect("verticalBlur", std::move(verticalBlurEffect));
+
+    // Set the sequence of post-processing effects
+    std::vector<std::string> activeEffects = { "brightness", "downsample", "horizontalBlur", "verticalBlur" };
     postProcessing->setActiveEffects(activeEffects);
 }
+
 
 void Renderer::updateFrustum(const glm::mat4& viewProjection) {
     frustum.update(viewProjection);
