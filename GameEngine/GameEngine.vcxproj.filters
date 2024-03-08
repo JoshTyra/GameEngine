@@ -183,6 +183,9 @@
     <ClCompile Include="rendering\Frustum.cpp">
       <Filter>Source Files\rendering</Filter>
     </ClCompile>
+    <ClCompile Include="rendering\BatchRenderer.cpp">
+      <Filter>Source Files\rendering</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CameraController.h">
@@ -270,6 +273,9 @@
       <Filter>Header Files\postprocessing</Filter>
     </ClInclude>
     <ClInclude Include="rendering\Frustum.h">
+      <Filter>Header Files\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="rendering\BatchRenderer.h">
       <Filter>Header Files\rendering</Filter>
     </ClInclude>
   </ItemGroup>
