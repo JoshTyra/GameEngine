@@ -169,22 +169,9 @@ void Renderer::setupFrameBufferObject(int width, int height) {
 }
 
 void Renderer::initializePostProcessing() {
-    std::string invertVertPath = FileSystemUtils::getAssetFilePath("shaders/invert.vert");
-    std::string invertFragPath = FileSystemUtils::getAssetFilePath("shaders/grayscale.frag");
-
     // Create the shader for the brightness effect
-    Shader invertShader(invertVertPath, invertFragPath);
-
-    // Create the brightness effect and configure its specific uniforms
-    PostProcessingEffect invertEffect(invertShader);
-
-    // Add the configured brightness effect
-    postProcessing->addEffect("invert", std::move(invertEffect));
-
-    std::string brightnessFragPath = FileSystemUtils::getAssetFilePath("shaders/sepia.frag");
-
-    // Create the shader for the brightness effect
-    Shader brightnessShader(invertVertPath, brightnessFragPath);
+    Shader brightnessShader(FileSystemUtils::getAssetFilePath("shaders/invert.vert"), 
+        FileSystemUtils::getAssetFilePath("shaders/bright_pass.frag"));
 
     // Create the brightness effect and configure its specific uniforms
     PostProcessingEffect brightnessEffect(brightnessShader);
@@ -194,7 +181,7 @@ void Renderer::initializePostProcessing() {
     postProcessing->addEffect("brightness", std::move(brightnessEffect));
 
     // Prepare and set the list of active effects
-    std::vector<std::string> activeEffects = { "invert", "brightness" };
+    std::vector<std::string> activeEffects = { "brightness" };
     postProcessing->setActiveEffects(activeEffects);
 }
 
