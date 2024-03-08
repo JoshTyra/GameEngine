@@ -72,27 +72,33 @@ void PostProcessing::setActiveEffects(const std::vector<std::string>& effectName
 	activeEffects = effectNames;  // Directly store the names
 }
 
-void PostProcessing::initializeFramebuffers(GLsizei width, GLsizei height) {
-	screenWidth = width;
-	screenHeight = height;
+void PostProcessing::initializeFramebuffers(std::vector<std::pair<GLsizei, GLsizei>> resolutions) {
+	for (const auto& res : resolutions) {
+		GLsizei width = res.first;
+		GLsizei height = res.second;
+		GLuint framebuffer;
+		GLuint texture;
 
-	glGenFramebuffers(2, framebuffers);
-	glGenTextures(2, textures);
+		glGenFramebuffers(1, &framebuffer);
+		glGenTextures(1, &texture);
 
-	for (int i = 0; i < 2; ++i) {
-		glBindTexture(GL_TEXTURE_2D, textures[i]);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, screenWidth, screenHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+		glBindTexture(GL_TEXTURE_2D, texture);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-		glBindFramebuffer(GL_FRAMEBUFFER, framebuffers[i]);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textures[i], 0);
+		glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture, 0);
 
 		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
 			std::cerr << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
 		}
+
+		framebuffers.push_back(framebuffer);
+		textures.push_back(texture);
 	}
 
-	glBindFramebuffer(GL_FRAMEBUFFER, 0); // Unbind the framebuffer to avoid unintended side effects
+	glBindFramebuffer(GL_FRAMEBUFFER, 0); // Unbind to avoid unintended side effects
 }
+
 

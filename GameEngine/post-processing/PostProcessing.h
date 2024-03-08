@@ -57,14 +57,14 @@ class PostProcessing {
 public:
     PostProcessing();
     ~PostProcessing();
-    void initializeFramebuffers(GLsizei width, GLsizei height);
+    void initializeFramebuffers(std::vector<std::pair<GLsizei, GLsizei>> resolutions);
     void applyEffects(GLuint inputTexture);
     void addEffect(const std::string& name, PostProcessingEffect&& effect);
     void setActiveEffects(const std::vector<std::string>& effectNames);
 
 private:
-    GLuint framebuffers[2];
-    GLuint textures[2];
+    std::vector<GLuint> framebuffers; // Updated to dynamic container
+    std::vector<GLuint> textures; // Updated to dynamic container
     GLsizei screenWidth, screenHeight;
     std::unordered_map<std::string, PostProcessingEffect> effects;
     std::vector<std::string> activeEffects;

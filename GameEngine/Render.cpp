@@ -8,8 +8,15 @@ Renderer::Renderer(int width, int height)
     // Initialize post-processing
     postProcessing = std::make_shared<PostProcessing>();
 
+    // Define framebuffer resolutions: original and potentially downscaled versions
+    std::vector<std::pair<GLsizei, GLsizei>> resolutions = {
+        {screenWidth, screenHeight},                       // Original resolution
+        {screenWidth / 2, screenHeight / 2},               // Half resolution for downsampling
+        {screenWidth / 4, screenHeight / 4}                // Quarter resolution for further downsampling
+    };
+
     // Initialize ping-pong framebuffers for post-processing
-    postProcessing->initializeFramebuffers(width, height);
+    postProcessing->initializeFramebuffers(resolutions);
 
     // Set up UBO
     setupUniformBufferObject();
@@ -175,7 +182,7 @@ void Renderer::initializePostProcessing() {
 
     // Create the brightness effect and configure its specific uniforms
     PostProcessingEffect brightnessEffect(brightnessShader);
-    brightnessEffect.addUniform(ShaderUniform("brightnessThreshold", 0.3f)); // Set the brightness threshold value
+    brightnessEffect.addUniform(ShaderUniform("brightnessThreshold", 0.15f)); // Set the brightness threshold value
 
     // Add the configured brightness effect
     postProcessing->addEffect("brightness", std::move(brightnessEffect));
