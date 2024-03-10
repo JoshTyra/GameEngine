@@ -2,15 +2,6 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <iostream>
 
-void printMatrix(const glm::mat4& mat) {
-    for (int i = 0; i < 4; ++i) {
-        for (int j = 0; j < 4; ++j) {
-            std::cout << mat[i][j] << " ";
-        }
-        std::cout << std::endl;
-    }
-}
-
 Renderer::Renderer(int width, int height)
     : screenWidth(width), screenHeight(height), projectionMatrix(glm::mat4(1.0f)) {
 
@@ -178,32 +169,18 @@ void Renderer::setupFrameBufferObject(int width, int height) {
 }
 
 void Renderer::initializePostProcessing() {
-    std::string invertVertPath = FileSystemUtils::getAssetFilePath("shaders/invert.vert");
-    std::string invertFragPath = FileSystemUtils::getAssetFilePath("shaders/grayscale.frag");
-
     // Create the shader for the brightness effect
-    Shader invertShader(invertVertPath, invertFragPath);
+    Shader defaultShader(FileSystemUtils::getAssetFilePath("shaders/invert.vert"), 
+        FileSystemUtils::getAssetFilePath("shaders/originalScene.frag"));
 
     // Create the brightness effect and configure its specific uniforms
-    PostProcessingEffect invertEffect(invertShader);
+    PostProcessingEffect defaultEffect(defaultShader);
 
     // Add the configured brightness effect
-    postProcessing->addEffect("invert", std::move(invertEffect));
-
-    std::string brightnessFragPath = FileSystemUtils::getAssetFilePath("shaders/sepia.frag");
-
-    // Create the shader for the brightness effect
-    Shader brightnessShader(invertVertPath, brightnessFragPath);
-
-    // Create the brightness effect and configure its specific uniforms
-    PostProcessingEffect brightnessEffect(brightnessShader);
-    brightnessEffect.addUniform(ShaderUniform("brightnessThreshold", 0.3f)); // Set the brightness threshold value
-
-    // Add the configured brightness effect
-    postProcessing->addEffect("brightness", std::move(brightnessEffect));
+    postProcessing->addEffect("defaultEffect", std::move(defaultEffect));
 
     // Prepare and set the list of active effects
-    std::vector<std::string> activeEffects = { "invert", "brightness" };
+    std::vector<std::string> activeEffects = { "defaultEffect"};
     postProcessing->setActiveEffects(activeEffects);
 }
 
