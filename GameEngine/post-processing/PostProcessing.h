@@ -37,10 +37,13 @@ struct ShaderUniform {
 };
 
 struct PostProcessingEffect {
-    Shader shader; // Assumes Shader class is accessible and contains methods like setInt, setFloat, etc.
+    PostProcessingEffect(Shader&& shader) : shader(std::move(shader)) {}
+    Shader shader;
     std::vector<ShaderUniform> uniforms;
 
-    PostProcessingEffect(const Shader& shader) : shader(shader) {}
+    PostProcessingEffect() = default;
+    PostProcessingEffect(PostProcessingEffect&&) = default;
+    PostProcessingEffect& operator=(PostProcessingEffect&&) = default;
 
     void addUniform(const ShaderUniform& uniform) {
         uniforms.push_back(uniform);
@@ -57,16 +60,17 @@ class PostProcessing {
 public:
     PostProcessing();
     ~PostProcessing();
-    void initializeFramebuffers(GLsizei width, GLsizei height);
-    void applyEffects(GLuint inputTexture);
     void addEffect(const std::string& name, PostProcessingEffect&& effect);
     void setActiveEffects(const std::vector<std::string>& effectNames);
+    void applyEffect(const std::string& effectName, GLuint inputTexture, GLuint inputTexture2);
+    void updateUniform(const std::string& effectName, const std::string& uniformName, const glm::vec2& value);
 
-private:
-    GLuint framebuffers[2];
-    GLuint textures[2];
-    GLsizei screenWidth, screenHeight;
+    const std::vector<std::string>& getActiveEffects() const {
+        return activeEffects;
+    }
+
     std::unordered_map<std::string, PostProcessingEffect> effects;
+private:
     std::vector<std::string> activeEffects;
     ScreenQuad screenQuad;
 };

@@ -4,21 +4,18 @@
 
 Renderer::Renderer(int width, int height)
     : screenWidth(width), screenHeight(height), projectionMatrix(glm::mat4(1.0f)) {
+    frameBufferManager = std::make_unique<FrameBufferManager>();
 
-    // Initialize post-processing
-    postProcessing = std::make_shared<PostProcessing>();
+    // Create the main scene framebuffer
+    frameBufferManager->createFrameBuffer(width, height);
+    frameBufferManager->createFrameBuffer(width, height);
+    frameBufferManager->createFrameBuffer(width /2, height /2);
+    frameBufferManager->createFrameBuffer(width /2, height /2);
+    frameBufferManager->createFrameBuffer(width /2, height /2);
+    frameBufferManager->createFrameBuffer(width, height);
 
-    // Initialize ping-pong framebuffers for post-processing
-    postProcessing->initializeFramebuffers(width, height);
-
-    // Set up UBO
-    setupUniformBufferObject();
-
-    // Set up FBO with provided dimensions
-    setupFrameBufferObject(width, height);
-
-    // Initialize post-processing effects
-    initializePostProcessing();
+    frameBufferManager->createPostProcessingEffects(); // Setup post-processing effects
+    setupUniformBufferObject(); // Continue with UBO setup
 }
 
 Renderer::~Renderer() {
@@ -41,13 +38,14 @@ void Renderer::setProjectionMatrix(const glm::mat4& projectionMatrix) {
     this->projectionMatrix = projectionMatrix;
 }
 
-void Renderer::renderFrame(const std::vector<std::unique_ptr<LevelGeometry>>& geometries) {    
+void Renderer::renderFrame(const std::vector<std::unique_ptr<LevelGeometry>>& geometries) {
     glm::mat4 viewProjectionMatrix = projectionMatrix * cameraController->getViewMatrix();
     updateFrustum(viewProjectionMatrix);
-    glBindFramebuffer(GL_FRAMEBUFFER, fbo); // Bind the FBO
+    frameBufferManager->bindFrameBuffer(0);
     prepareFrame();
     renderSkybox();
     renderGeometries(geometries);
+    frameBufferManager->unbindFrameBuffer();
     glBindFramebuffer(GL_FRAMEBUFFER, 0); // Bind back to the default framebuffer
 }
 
@@ -58,7 +56,7 @@ void Renderer::prepareFrame() {
     }
 
     // Clear the screen
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // Update the UBO for view and projection matrices
@@ -116,15 +114,13 @@ void Renderer::finalizeFrame() {
     // Bind back to default framebuffer for final output
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    // Clear the default framebuffer
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
     // Disable depth testing since we're now just drawing a full-screen quad
     // and don't need the depth information.
     glDisable(GL_DEPTH_TEST);
 
-    // Apply the post-processing effect using the texture we rendered the scene into
-    postProcessing->applyEffects(fboTexture);
+    // Apply post-processing effects through FrameBufferManager
+    GLuint sceneTexture = frameBufferManager->getSceneTexture();
+    frameBufferManager->applyPostProcessingEffects(sceneTexture);
 
     // Re-enable depth testing for the next frame's regular rendering
     glEnable(GL_DEPTH_TEST);
@@ -134,58 +130,6 @@ void Renderer::setSkybox(std::shared_ptr<Skybox> skybox) {
     this->skybox = skybox;
 }
 
-void Renderer::setupFrameBufferObject(int width, int height) {
-    // Generate and bind the Framebuffer
-    glGenFramebuffers(1, &fbo);
-    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-
-    // Generate the texture to hold color buffer
-    glGenTextures(1, &fboTexture);
-    glBindTexture(GL_TEXTURE_2D, fboTexture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, screenWidth, screenHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    // Attach the texture to the framebuffer as its color attachment
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, fboTexture, 0);
-
-    // Create a renderbuffer object for depth and stencil attachment (we won't use stencil in this example)
-    GLuint rbo;
-    glGenRenderbuffers(1, &rbo);
-    glBindRenderbuffer(GL_RENDERBUFFER, rbo);
-    // Use a depth component format
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, screenWidth, screenHeight);
-    glBindRenderbuffer(GL_RENDERBUFFER, 0);
-
-    // Attach the renderbuffer to the framebuffer
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
-
-    // Check if the framebuffer is complete
-    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-        std::cerr << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
-
-    // Bind back to the default framebuffer
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-}
-
-void Renderer::initializePostProcessing() {
-    // Create the shader for the brightness effect
-    Shader defaultShader(FileSystemUtils::getAssetFilePath("shaders/invert.vert"), 
-        FileSystemUtils::getAssetFilePath("shaders/originalScene.frag"));
-
-    // Create the brightness effect and configure its specific uniforms
-    PostProcessingEffect defaultEffect(defaultShader);
-
-    // Add the configured brightness effect
-    postProcessing->addEffect("defaultEffect", std::move(defaultEffect));
-
-    // Prepare and set the list of active effects
-    std::vector<std::string> activeEffects = { "defaultEffect"};
-    postProcessing->setActiveEffects(activeEffects);
-}
-
 void Renderer::updateFrustum(const glm::mat4& viewProjection) {
     frustum.update(viewProjection);
 }
-
-

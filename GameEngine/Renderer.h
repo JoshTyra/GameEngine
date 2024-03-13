@@ -8,6 +8,7 @@
 #include "rendering/Skybox.h"
 #include "post-processing/PostProcessing.h"
 #include "rendering/Frustum.h"
+#include "post-processing/FrameBufferManager.h"
 
 class Renderer {
     Frustum frustum;
@@ -22,7 +23,6 @@ public:
 
     // New method to encapsulate the entire frame rendering process
     void renderFrame(const std::vector<std::unique_ptr<LevelGeometry>>& geometries);
-    void initializePostProcessing();
     void finalizeFrame();
 
 private:
@@ -30,7 +30,6 @@ private:
     void renderSkybox() const;
     void renderGeometries(const std::vector<std::unique_ptr<LevelGeometry>>& geometries);
     void setupUniformBufferObject();
-    void setupFrameBufferObject(int width, int height);
 
     std::shared_ptr<CameraController> cameraController;
     glm::mat4 projectionMatrix;
@@ -40,5 +39,6 @@ private:
     GLuint fboTexture;
     std::shared_ptr<PostProcessing> postProcessing;
     int screenWidth, screenHeight;
+    std::unique_ptr<FrameBufferManager> frameBufferManager;
 };
 

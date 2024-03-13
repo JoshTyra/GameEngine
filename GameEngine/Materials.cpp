@@ -48,7 +48,7 @@ void Material::setTechniqueDetails(const Technique& techniqueDetails) {
         }
     }
     shaderProgram = std::make_unique<Shader>(vertexShaderPath, fragmentShaderPath);
-    if (!shaderProgram->isSuccessfullyCompiled()) {
+    if (!shaderProgram->isProgramLinkedSuccessfully()) {
         std::cerr << "Failed to compile/link shader program for material." << std::endl;
     }
 }

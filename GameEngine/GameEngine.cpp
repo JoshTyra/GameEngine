@@ -33,7 +33,6 @@ void GameEngine::initialize() {
     initializeImGui();
     setupCallbacks();
     initializeGameStates();
-    renderer->initializePostProcessing();
 }
 
 void GameEngine::run() {
@@ -106,9 +105,6 @@ void GameEngine::initializeImGui() {
     ImGui_ImplOpenGL3_Init("#version 420 core");
 }
 
-void GameEngine::setupCallbacks() {
-}
-
 void GameEngine::initializeCameraController() {
 
     cameraController = std::make_shared<CameraController>(
@@ -125,17 +121,22 @@ void GameEngine::initializeCameraController() {
     glfwSetCursorPosCallback(window, CameraController::mouseCallbackStatic);
 }
 
+void GameEngine::setupCallbacks()
+{
+    // Callbacks here
+}
 
 void GameEngine::initializeGameStates() {
     // Initialize and set the skybox, which might be used across different game states
     std::vector<std::string> skyboxFaces = {
-        "clouds1_east.bmp",
-        "clouds1_west.bmp",
-        "clouds1_up.bmp",
-        "clouds1_down.bmp",
-        "clouds1_north.bmp",
-        "clouds1_south.bmp"
+        "right.tga",    // Right face of the skybox, typically positive X
+        "left.tga",     // Left face of the skybox, typically negative X
+        "top.tga",      // Top face of the skybox, typically positive Y
+        "bottom.tga",   // Bottom face of the skybox, typically negative Y
+        "front.tga",    // Front face of the skybox, typically positive Z
+        "back.tga"      // Back face of the skybox, typically negative Z
     };
+
     auto skybox = std::make_unique<Skybox>(skyboxFaces);
     stateManager.setSkybox(std::move(skybox));
 
@@ -153,8 +154,6 @@ void GameEngine::mainLoop() {
 
         stateManager.update(deltaTime);
 
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         stateManager.render();
         glfwSwapBuffers(window);
     }

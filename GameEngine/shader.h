@@ -54,7 +54,7 @@ public:
         glUniform3fv(glGetUniformLocation(Program, name.c_str()), 1, &value[0]);
     }
 
-    bool isSuccessfullyCompiled() const {
+    bool isProgramLinkedSuccessfully() const {
         GLint success;
         glGetProgramiv(this->Program, GL_LINK_STATUS, &success);
         if (!success) {
