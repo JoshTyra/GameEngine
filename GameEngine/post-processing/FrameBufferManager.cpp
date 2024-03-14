@@ -1,6 +1,6 @@
 #include "FrameBufferManager.h"
 
-FrameBufferManager::FrameBufferManager() {
+FrameBufferManager::FrameBufferManager(GLFWwindow* window) : window(window) {
     createPostProcessingEffects();
 }
 
@@ -27,8 +27,11 @@ void FrameBufferManager::createFrameBuffer(int width, int height) {
     glGenTextures(1, &frameBuffer.textureId);
     glBindTexture(GL_TEXTURE_2D, frameBuffer.textureId);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, screenWidth, screenHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+    // Set texture parameters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); // Use mipmaps for minification
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); // Linear filter for magnification
+
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, frameBuffer.textureId, 0);
 
     // Generate and attach the renderbuffer for depth
@@ -56,12 +59,6 @@ void FrameBufferManager::unbindFrameBuffer() {
 
 void FrameBufferManager::createPostProcessingEffects() {
     // BrightPass shader
-    Shader originalPassShader(FileSystemUtils::getAssetFilePath("shaders/invert.vert"),
-        FileSystemUtils::getAssetFilePath("shaders/originalScene.frag"));
-    PostProcessingEffect originalPassEffect(std::move(originalPassShader));
-    postProcessing.addEffect("originalScenePass", std::move(originalPassEffect));
-
-    // BrightPass shader
     Shader brightPassShader(FileSystemUtils::getAssetFilePath("shaders/invert.vert"),
         FileSystemUtils::getAssetFilePath("shaders/bright_pass.frag"));
     PostProcessingEffect brightPassEffect(std::move(brightPassShader));
@@ -73,6 +70,7 @@ void FrameBufferManager::createPostProcessingEffects() {
         FileSystemUtils::getAssetFilePath("shaders/downsample.frag"));
     PostProcessingEffect downSampleEffect(std::move(downSampleShader));
     downSampleEffect.addUniform(ShaderUniform("resolutionFactor", 0.5f)); // Half-size downsample
+    //downSampleEffect.addUniform(ShaderUniform("lod", 1.0f)); // Half-size downsample
     postProcessing.addEffect("downSample", std::move(downSampleEffect));
 
     // HorizontalBlur shader
@@ -93,18 +91,27 @@ void FrameBufferManager::createPostProcessingEffects() {
     Shader upSampleShader(FileSystemUtils::getAssetFilePath("shaders/invert.vert"),
         FileSystemUtils::getAssetFilePath("shaders/upscale.frag"));
     PostProcessingEffect upSampleEffect(std::move(upSampleShader));
-    upSampleEffect.addUniform(ShaderUniform("textureSize", glm::vec2(1280.0f, 530.0f)));
-    upSampleEffect.addUniform(ShaderUniform("inverseTextureSize", glm::vec2(1.0f / 1280.0f, 1.0f / 530.0f)));
+    //upSampleEffect.addUniform(ShaderUniform("textureSize", glm::vec2(1280.0f, 530.0f)));
+    //upSampleEffect.addUniform(ShaderUniform("inverseTextureSize", glm::vec2(1.0f / 1280.0f, 1.0f / 530.0f)));
     postProcessing.addEffect("upSample", std::move(upSampleEffect));
+
+    // Color Grading shader
+    Shader colorGradingShader(FileSystemUtils::getAssetFilePath("shaders/invert.vert"),
+        FileSystemUtils::getAssetFilePath("shaders/colorGrading.frag"));
+    PostProcessingEffect colorGradingEffect(std::move(colorGradingShader));
+    colorGradingEffect.addUniform(ShaderUniform("saturation", 1.5f)); // Example: Increase saturation
+    colorGradingEffect.addUniform(ShaderUniform("contrast", 1.1f)); // Example: Slightly increase contrast
+    colorGradingEffect.addUniform(ShaderUniform("tint", glm::vec3(0.05f, 0.05f, 0.05f))); // Example: Apply a slight tint
+    postProcessing.addEffect("colorGrading", std::move(colorGradingEffect));
 
     // BloomFinal shader
     Shader bloomFinalShader(FileSystemUtils::getAssetFilePath("shaders/invert.vert"),
         FileSystemUtils::getAssetFilePath("shaders/bloom_final.frag"));
     PostProcessingEffect bloomFinalEffect(std::move(bloomFinalShader));
-    bloomFinalEffect.addUniform(ShaderUniform("bloomIntensity", 0.65f));
+    bloomFinalEffect.addUniform(ShaderUniform("bloomIntensity", 1.25f));
     postProcessing.addEffect("bloomFinal", std::move(bloomFinalEffect));
 
-    activeEffects = {"brightPass", "downSample", "kawaseBlur", "upSample", "bloomFinal" };
+    activeEffects = { "brightPass", "downSample", "horizontalBlur", "verticalBlur", "upSample", "colorGrading", "bloomFinal" };
     postProcessing.setActiveEffects(activeEffects);
 }
 
@@ -143,15 +150,24 @@ void FrameBufferManager::applyPostProcessingEffects(GLuint inputTexture) {
 
     // 4. Apply the upSample effect and render to full resolution
     glBindFramebuffer(GL_FRAMEBUFFER, frameBuffers[5].frameBufferId);
-    glViewport(0, 0, screenWidth, screenHeight); // Reset viewport to full resolution for upsample
+    glViewport(0, 0, screenWidth, screenHeight);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     postProcessing.applyEffect("upSample", currentInputTexture, 0);
 
-    // 5. Apply the bloomFinal effect, combining the original scene and the blurred scene
-    glBindFramebuffer(GL_FRAMEBUFFER, 0); // Render to the default framebuffer (screen)
-    glViewport(0, 0, screenWidth, screenHeight); // Ensure viewport is set for full resolution when rendering to screen
+    // Assuming frameBuffers[6] is allocated for color grading effect
+    // You might need to create/setup this framebuffer if not done already
+    GLuint colorGradingFBO = frameBuffers[6].frameBufferId;
+    glBindFramebuffer(GL_FRAMEBUFFER, colorGradingFBO);
+    glViewport(0, 0, screenWidth, screenHeight); // Match full resolution for color grading
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    postProcessing.applyEffect("bloomFinal", frameBuffers[0].textureId, frameBuffers[5].textureId);
+    // Apply color grading to the upsampled texture (now in frameBuffers[5])
+    postProcessing.applyEffect("colorGrading", frameBuffers[5].textureId, 0);
+
+    // 5. Apply the bloomFinal effect, combining the original scene and the processed bloom
+    glBindFramebuffer(GL_FRAMEBUFFER, 0); // Render to the default framebuffer (screen)
+    glViewport(0, 0, screenWidth, screenHeight); // Ensure viewport matches screen resolution for final output
+    // Use the color-graded bloom texture (now in frameBuffers[6]) for the final combination
+    postProcessing.applyEffect("bloomFinal", frameBuffers[0].textureId, frameBuffers[6].textureId);
 }
 
 void FrameBufferManager::setActiveEffects(const std::vector<std::string>& effectNames) {

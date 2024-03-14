@@ -51,12 +51,39 @@ void PostProcessing::applyEffect(const std::string& effectName, GLuint inputText
     glActiveTexture(GL_TEXTURE0);
 }
 
+void PostProcessing::updateUniform(const std::string& effectName, const std::string& uniformName, float value) {
+    auto it = effects.find(effectName);
+    if (it != effects.end()) {
+        PostProcessingEffect& effect = it->second;
+        effect.shader.use();
+        effect.shader.setFloat(uniformName, value);
+    }
+}
+
 void PostProcessing::updateUniform(const std::string& effectName, const std::string& uniformName, const glm::vec2& value) {
     auto it = effects.find(effectName);
     if (it != effects.end()) {
         PostProcessingEffect& effect = it->second;
         effect.shader.use();
         effect.shader.setVec2(uniformName, value);
+    }
+}
+
+void PostProcessing::updateUniform(const std::string& effectName, const std::string& uniformName, const glm::vec3& value) {
+    auto it = effects.find(effectName);
+    if (it != effects.end()) {
+        PostProcessingEffect& effect = it->second;
+        effect.shader.use();
+        effect.shader.setVec3(uniformName, value);
+    }
+}
+
+void PostProcessing::updateUniform(const std::string& effectName, const std::string& uniformName, const glm::vec4& value) {
+    auto it = effects.find(effectName);
+    if (it != effects.end()) {
+        PostProcessingEffect& effect = it->second;
+        effect.shader.use();
+        effect.shader.setVec4(uniformName, value);
     }
 }
 

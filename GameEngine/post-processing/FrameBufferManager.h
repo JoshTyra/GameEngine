@@ -1,4 +1,6 @@
 #pragma once
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
 #include <vector>
 #include <glm/glm.hpp>
 #include "ScreenQuad.h"
@@ -8,7 +10,7 @@
 
 class FrameBufferManager {
 public:
-    FrameBufferManager();
+    FrameBufferManager(GLFWwindow* window);
     ~FrameBufferManager();
 
     void createFrameBuffer(int width, int height);
@@ -32,4 +34,5 @@ private:
     std::vector<std::string> activeEffects;
     PostProcessing postProcessing;
     ScreenQuad screenQuad;
+    GLFWwindow* window;
 };

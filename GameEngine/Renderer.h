@@ -13,7 +13,7 @@
 class Renderer {
     Frustum frustum;
 public:
-    Renderer(int width, int height);
+    Renderer(int width, int height, GLFWwindow* window);
     ~Renderer();
     void updateFrustum(const glm::mat4& viewProjection);
 
@@ -40,5 +40,6 @@ private:
     std::shared_ptr<PostProcessing> postProcessing;
     int screenWidth, screenHeight;
     std::unique_ptr<FrameBufferManager> frameBufferManager;
+    GLFWwindow* window;
 };
 

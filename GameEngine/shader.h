@@ -54,6 +54,10 @@ public:
         glUniform3fv(glGetUniformLocation(Program, name.c_str()), 1, &value[0]);
     }
 
+    void setVec4(const std::string& name, const glm::vec4& value) const {
+        glUniform3fv(glGetUniformLocation(Program, name.c_str()), 1, &value[0]);
+    }
+
     bool isProgramLinkedSuccessfully() const {
         GLint success;
         glGetProgramiv(this->Program, GL_LINK_STATUS, &success);

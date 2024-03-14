@@ -2,9 +2,9 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <iostream>
 
-Renderer::Renderer(int width, int height)
-    : screenWidth(width), screenHeight(height), projectionMatrix(glm::mat4(1.0f)) {
-    frameBufferManager = std::make_unique<FrameBufferManager>();
+Renderer::Renderer(int width, int height, GLFWwindow* window)
+    : screenWidth(width), screenHeight(height), projectionMatrix(glm::mat4(1.0f)), window(window) {
+    frameBufferManager = std::make_unique<FrameBufferManager>(window);
 
     // Create the main scene framebuffer
     frameBufferManager->createFrameBuffer(width, height);
@@ -12,6 +12,7 @@ Renderer::Renderer(int width, int height)
     frameBufferManager->createFrameBuffer(width /2, height /2);
     frameBufferManager->createFrameBuffer(width /2, height /2);
     frameBufferManager->createFrameBuffer(width /2, height /2);
+    frameBufferManager->createFrameBuffer(width, height);
     frameBufferManager->createFrameBuffer(width, height);
 
     frameBufferManager->createPostProcessingEffects(); // Setup post-processing effects
