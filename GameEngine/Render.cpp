@@ -57,7 +57,7 @@ void Renderer::prepareFrame() {
     }
 
     // Clear the screen
-    glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // Update the UBO for view and projection matrices
