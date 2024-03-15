@@ -119,40 +119,39 @@ void GameEngine::initializeGLFW() {
 }
 
 void GameEngine::initializeOpenGL() {
-    glewExperimental = GL_TRUE;
+    glewExperimental = GL_TRUE; // Enable full GLEW functionality
     if (glewInit() != GLEW_OK) {
         throw std::runtime_error("Failed to initialize GLEW");
     }
 
+    // Clear any errors that might have occurred during GLEW initialization
+    while (glGetError() != GL_NO_ERROR) {}
+
+    // Check for OpenGL version support
+    GLint major, minor;
+    glGetIntegerv(GL_MAJOR_VERSION, &major);
+    glGetIntegerv(GL_MINOR_VERSION, &minor);
+    if (major < 4 || (major == 4 && minor < 3)) {
+        std::cerr << "OpenGL 4.3 or higher is required. Your version: " << major << "." << minor << std::endl;
+        throw std::runtime_error("Unsupported OpenGL version.");
+    }
+
+    // Setup debug message callback if supported and enabled
     GLint contextFlags;
     glGetIntegerv(GL_CONTEXT_FLAGS, &contextFlags);
     if (contextFlags & GL_CONTEXT_FLAG_DEBUG_BIT) {
         glEnable(GL_DEBUG_OUTPUT);
         glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
         glDebugMessageCallback(MessageCallback, nullptr);
+        std::cout << "OpenGL debug context activated." << std::endl;
     }
     else {
         std::cerr << "OpenGL debug context not activated." << std::endl;
     }
 
-    glGetIntegerv(GL_DEPTH_BITS, &depthBits); // You might want to store depthBits as a member variable
-    glEnable(GL_MULTISAMPLE); // Enable multisampling
+    glEnable(GL_MULTISAMPLE); // Enable multisampling, assuming it's always supported
 
-    // After initializing GLEW and creating your OpenGL context
-    if (GLEW_VERSION_4_3) { // Check that the OpenGL 4.3 functionality is available
-        glEnable(GL_DEBUG_OUTPUT);
-        glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS); // Makes debugging easier by allowing synchronous output
-        glDebugMessageCallback(MessageCallback, 0);
-    }
-    else {
-        std::cerr << "OpenGL 4.3 not supported" << std::endl;
-    }
-
-
-    // Check the depth buffer size, if needed for debugging
-    std::cout << "Depth buffer bit depth: " << depthBits << " bits\n";
-
-    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_DEPTH_TEST); // Enable depth testing
 }
 
 void GameEngine::initializeImGui() {
