@@ -144,6 +144,7 @@
     <ClCompile Include="GameEngine.cpp" />
     <ClCompile Include="geometry\LevelGeometry.cpp" />
     <ClCompile Include="geometry\ModelLoader.cpp" />
+    <ClCompile Include="geometry\SkinnedMesh.cpp" />
     <ClCompile Include="GLEnumUtils.cpp" />
     <ClCompile Include="imgui\imgui.cpp" />
     <ClCompile Include="imgui\imgui_draw.cpp" />
@@ -180,6 +181,8 @@
     <ClInclude Include="FileSystemUtils.h" />
     <ClInclude Include="FrameTimer.h" />
     <ClInclude Include="GameEngine.h" />
+    <ClInclude Include="geometry\AnimatedModel.h" />
+    <ClInclude Include="geometry\SkinnedMesh.h" />
     <ClInclude Include="GLEnumUtils.h" />
     <ClInclude Include="LevelGeometry.h" />
     <ClInclude Include="MaterialParser.h" />
