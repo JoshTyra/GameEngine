@@ -1,12 +1,12 @@
 #include "PostProcessing.h"
 
 PostProcessing::PostProcessing() {
-	// Constructor implementation
-	// Initialize any members here if necessary
+    // Constructor implementation
+    // Initialize any members here if necessary
 }
 
 PostProcessing::~PostProcessing() {
-	// Clean up resources if necessary
+    // Clean up resources if necessary
 }
 
 void PostProcessing::addEffect(const std::string& name, PostProcessingEffect&& effect) {
@@ -16,7 +16,7 @@ void PostProcessing::addEffect(const std::string& name, PostProcessingEffect&& e
 }
 
 void PostProcessing::setActiveEffects(const std::vector<std::string>& effectNames) {
-	activeEffects = effectNames;  // Directly store the names
+    activeEffects = effectNames;  // Directly store the names
 }
 
 void PostProcessing::applyEffect(const std::string& effectName, GLuint inputTexture1, GLuint inputTexture2) {
@@ -60,7 +60,7 @@ void PostProcessing::updateUniform(const std::string& effectName, const std::str
     }
 }
 
-void PostProcessing::updateUniform(const std::string& effectName, const std::string& uniformName, const glm::vec2& value) {
+void PostProcessing::updateUniform(const std::string& effectName, const std::string& uniformName, the glm::vec2& value) {
     auto it = effects.find(effectName);
     if (it != effects.end()) {
         PostProcessingEffect& effect = it->second;
@@ -69,7 +69,7 @@ void PostProcessing::updateUniform(const std::string& effectName, const std::str
     }
 }
 
-void PostProcessing::updateUniform(const std::string& effectName, const std::string& uniformName, const glm::vec3& value) {
+void PostProcessing::updateUniform(const std::string& effectName, const std::string& uniformName, the glm::vec3& value) {
     auto it = effects.find(effectName);
     if (it != effects.end()) {
         PostProcessingEffect& effect = it->second;
@@ -78,7 +78,7 @@ void PostProcessing::updateUniform(const std::string& effectName, const std::str
     }
 }
 
-void PostProcessing::updateUniform(const std::string& effectName, const std::string& uniformName, const glm::vec4& value) {
+void PostProcessing::updateUniform(const std::string& effectName, const std::string& uniformName, the glm::vec4& value) {
     auto it = effects.find(effectName);
     if (it != effects.end()) {
         PostProcessingEffect& effect = it->second;
@@ -86,5 +86,3 @@ void PostProcessing::updateUniform(const std::string& effectName, const std::str
         effect.shader.setVec4(uniformName, value);
     }
 }
-
-

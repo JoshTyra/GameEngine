@@ -37,11 +37,12 @@ struct ShaderUniform {
 };
 
 struct PostProcessingEffect {
-    PostProcessingEffect(Shader&& shader) : shader(std::move(shader)) {}
     Shader shader;
     std::vector<ShaderUniform> uniforms;
+    int framebufferIndex = -1; // Default to -1, indicating no specific framebuffer selected
 
     PostProcessingEffect() = default;
+    PostProcessingEffect(Shader&& shader) : shader(std::move(shader)) {}
     PostProcessingEffect(PostProcessingEffect&&) = default;
     PostProcessingEffect& operator=(PostProcessingEffect&&) = default;
 
@@ -72,8 +73,8 @@ public:
         return activeEffects;
     }
 
-    std::unordered_map<std::string, PostProcessingEffect> effects;
 private:
+    std::unordered_map<std::string, PostProcessingEffect> effects;
     std::vector<std::string> activeEffects;
     ScreenQuad screenQuad;
 };
