@@ -51,7 +51,7 @@ void PostProcessing::applyEffect(const std::string& effectName, GLuint inputText
     glActiveTexture(GL_TEXTURE0);
 }
 
-void PostProcessing::updateUniform(const std::string& effectName, const std::string& uniformName, float value) {
+void PostProcessing::updateUniform(const std::string& effectName, const std::string& uniformName, const float value) {
     auto it = effects.find(effectName);
     if (it != effects.end()) {
         PostProcessingEffect& effect = it->second;
@@ -60,7 +60,7 @@ void PostProcessing::updateUniform(const std::string& effectName, const std::str
     }
 }
 
-void PostProcessing::updateUniform(const std::string& effectName, const std::string& uniformName, the glm::vec2& value) {
+void PostProcessing::updateUniform(const std::string& effectName, const std::string& uniformName, const glm::vec2& value) {
     auto it = effects.find(effectName);
     if (it != effects.end()) {
         PostProcessingEffect& effect = it->second;
@@ -69,7 +69,7 @@ void PostProcessing::updateUniform(const std::string& effectName, const std::str
     }
 }
 
-void PostProcessing::updateUniform(const std::string& effectName, const std::string& uniformName, the glm::vec3& value) {
+void PostProcessing::updateUniform(const std::string& effectName, const std::string& uniformName, const glm::vec3& value) {
     auto it = effects.find(effectName);
     if (it != effects.end()) {
         PostProcessingEffect& effect = it->second;
@@ -78,7 +78,7 @@ void PostProcessing::updateUniform(const std::string& effectName, const std::str
     }
 }
 
-void PostProcessing::updateUniform(const std::string& effectName, const std::string& uniformName, the glm::vec4& value) {
+void PostProcessing::updateUniform(const std::string& effectName, const std::string& uniformName, const glm::vec4& value) {
     auto it = effects.find(effectName);
     if (it != effects.end()) {
         PostProcessingEffect& effect = it->second;

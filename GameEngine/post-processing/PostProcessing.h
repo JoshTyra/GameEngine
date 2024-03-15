@@ -64,7 +64,7 @@ public:
     void addEffect(const std::string& name, PostProcessingEffect&& effect);
     void setActiveEffects(const std::vector<std::string>& effectNames);
     void applyEffect(const std::string& effectName, GLuint inputTexture, GLuint inputTexture2);
-    void updateUniform(const std::string& effectName, const std::string& uniformName, float value);
+    void updateUniform(const std::string& effectName, const std::string& uniformName, const float value);
     void updateUniform(const std::string& effectName, const std::string& uniformName, const glm::vec2& value);
     void updateUniform(const std::string& effectName, const std::string& uniformName, const glm::vec3& value);
     void updateUniform(const std::string& effectName, const std::string& uniformName, const glm::vec4& value);
