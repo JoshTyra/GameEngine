@@ -41,7 +41,10 @@ struct PostProcessingEffect {
     std::vector<ShaderUniform> uniforms;
     int framebufferIndex = -1; // Default to -1, indicating no specific framebuffer selected
 
-    PostProcessingEffect(const Shader& shader) : shader(shader) {}
+    PostProcessingEffect() = default;
+    PostProcessingEffect(Shader&& shader) : shader(std::move(shader)) {}
+    PostProcessingEffect(PostProcessingEffect&&) = default;
+    PostProcessingEffect& operator=(PostProcessingEffect&&) = default;
 
     void addUniform(const ShaderUniform& uniform) {
         uniforms.push_back(uniform);
@@ -58,15 +61,19 @@ class PostProcessing {
 public:
     PostProcessing();
     ~PostProcessing();
-    void initializeFramebuffers(std::vector<std::pair<GLsizei, GLsizei>> resolutions);
-    void applyEffects(GLuint inputTexture);
     void addEffect(const std::string& name, PostProcessingEffect&& effect);
     void setActiveEffects(const std::vector<std::string>& effectNames);
+    void applyEffect(const std::string& effectName, GLuint inputTexture, GLuint inputTexture2);
+    void updateUniform(const std::string& effectName, const std::string& uniformName, float value);
+    void updateUniform(const std::string& effectName, const std::string& uniformName, const glm::vec2& value);
+    void updateUniform(const std::string& effectName, const std::string& uniformName, const glm::vec3& value);
+    void updateUniform(const std::string& effectName, const std::string& uniformName, const glm::vec4& value);
+
+    const std::vector<std::string>& getActiveEffects() const {
+        return activeEffects;
+    }
 
 private:
-    std::vector<GLuint> framebuffers; // Updated to dynamic container
-    std::vector<GLuint> textures; // Updated to dynamic container
-    GLsizei screenWidth, screenHeight;
     std::unordered_map<std::string, PostProcessingEffect> effects;
     std::vector<std::string> activeEffects;
     ScreenQuad screenQuad;

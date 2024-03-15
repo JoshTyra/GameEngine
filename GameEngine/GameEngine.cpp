@@ -4,10 +4,36 @@
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_opengl3.h"
 
+void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity,
+    GLsizei length, const GLchar* message, const void* userParam) {
+    // Ignore non-significant error/warning codes
+    if (id == 131169 || id == 131185 || id == 131218 || id == 131204) return;
+
+    std::cerr << "GL Callback: " << (type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : "")
+        << " type = " << type << ", severity = " << severity
+        << ", message = " << message << "\n";
+}
+
+void framebufferSizeCallback(GLFWwindow* window, int width, int height) {
+    // Retrieve the GameEngine instance from the window user pointer
+    auto* engine = static_cast<GameEngine*>(glfwGetWindowUserPointer(window));
+    if (!engine) return; // Safety check
+
+    // Update the viewport to match the new window dimensions
+    glViewport(0, 0, width, height);
+
+    // Recalculate the aspect ratio and update the projection matrix
+    float aspectRatio = static_cast<float>(width) / static_cast<float>(height);
+    auto projectionMatrix = glm::perspective(glm::radians(45.0f), aspectRatio, 0.1f, 100.0f);
+
+    // Update the renderer's projection matrix
+    engine->getRenderer()->setProjectionMatrix(projectionMatrix);
+}
+
 GameEngine::GameEngine()
     : stateManager(GameStateManager::instance()), frameTimer(20),
     cameraPos(0.0f, 0.0f, 3.0f), cameraUp(0.0f, 1.0f, 0.0f), cameraFront(0.0f, 0.0f, -1.0f),
-    cameraSpeed(6.0f), deltaTime(0.0f), lastFrame(0.0f) {
+    cameraSpeed(6.0f), deltaTime(0.0f), lastFrame(0.0f), window(nullptr) {
 }
 
 GameEngine::~GameEngine() {
@@ -21,19 +47,21 @@ void GameEngine::initialize() {
     stateManager.setAudioManager(audioManager);
 
     int width, height;
-    glfwGetFramebufferSize(window, &width, &height);
+    glfwGetFramebufferSize(window, &width, &height); // Get the actual framebuffer size
 
-    renderer = std::make_shared<Renderer>(width, height);
+    renderer = std::make_shared<Renderer>(width, height, window);
     stateManager.setRenderer(renderer);
 
-    auto projectionMatrix = glm::perspective(glm::radians(45.0f), width / (float)height, 0.1f, 100.0f);
+    // Calculate the aspect ratio dynamically based on the framebuffer size
+    float aspectRatio = static_cast<float>(width) / static_cast<float>(height);
+    auto projectionMatrix = glm::perspective(glm::radians(45.0f), aspectRatio, 0.1f, 100.0f);
     renderer->setProjectionMatrix(projectionMatrix);
+
     initializeCameraController();
     renderer->setCameraController(cameraController);
     initializeImGui();
     setupCallbacks();
     initializeGameStates();
-    renderer->initializePostProcessing();
 }
 
 void GameEngine::run() {
@@ -41,7 +69,12 @@ void GameEngine::run() {
 }
 
 void GameEngine::shutdown() {
-    // Cleanup ImGui, GLFW, etc.
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
+
+    glfwDestroyWindow(window);
+    glfwTerminate();
 }
 
 void GameEngine::initializeGLFW() {
@@ -49,6 +82,10 @@ void GameEngine::initializeGLFW() {
         throw std::runtime_error("Failed to initialize GLFW");
     }
 
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_DEPTH_BITS, 32); // Request a 32-bit depth buffer
     glfwWindowHint(GLFW_SAMPLES, 4); // Enable 4x multisampling
 
@@ -69,6 +106,10 @@ void GameEngine::initializeGLFW() {
         throw std::runtime_error("Failed to create GLFW window");
     }
 
+    // Set 'this' as the user pointer for the GLFW window
+    glfwSetWindowUserPointer(window, this);
+    // Set the framebuffer size callback
+    glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1); // Enable VSync to cap frame rate to monitor's refresh rate
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED); // Disable cursor by default
@@ -78,18 +119,39 @@ void GameEngine::initializeGLFW() {
 }
 
 void GameEngine::initializeOpenGL() {
-    glewExperimental = GL_TRUE;
+    glewExperimental = GL_TRUE; // Enable full GLEW functionality
     if (glewInit() != GLEW_OK) {
         throw std::runtime_error("Failed to initialize GLEW");
     }
 
-    glGetIntegerv(GL_DEPTH_BITS, &depthBits); // You might want to store depthBits as a member variable
-    glEnable(GL_MULTISAMPLE); // Enable multisampling
+    // Clear any errors that might have occurred during GLEW initialization
+    while (glGetError() != GL_NO_ERROR) {}
 
-    // Check the depth buffer size, if needed for debugging
-    std::cout << "Depth buffer bit depth: " << depthBits << " bits\n";
+    // Check for OpenGL version support
+    GLint major, minor;
+    glGetIntegerv(GL_MAJOR_VERSION, &major);
+    glGetIntegerv(GL_MINOR_VERSION, &minor);
+    if (major < 4 || (major == 4 && minor < 3)) {
+        std::cerr << "OpenGL 4.3 or higher is required. Your version: " << major << "." << minor << std::endl;
+        throw std::runtime_error("Unsupported OpenGL version.");
+    }
 
-    glEnable(GL_DEPTH_TEST);
+    // Setup debug message callback if supported and enabled
+    GLint contextFlags;
+    glGetIntegerv(GL_CONTEXT_FLAGS, &contextFlags);
+    if (contextFlags & GL_CONTEXT_FLAG_DEBUG_BIT) {
+        glEnable(GL_DEBUG_OUTPUT);
+        glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+        glDebugMessageCallback(MessageCallback, nullptr);
+        std::cout << "OpenGL debug context activated." << std::endl;
+    }
+    else {
+        std::cerr << "OpenGL debug context not activated." << std::endl;
+    }
+
+    glEnable(GL_MULTISAMPLE); // Enable multisampling, assuming it's always supported
+
+    glEnable(GL_DEPTH_TEST); // Enable depth testing
 }
 
 void GameEngine::initializeImGui() {
@@ -104,9 +166,6 @@ void GameEngine::initializeImGui() {
     // Setup Platform/Renderer backends
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 420 core");
-}
-
-void GameEngine::setupCallbacks() {
 }
 
 void GameEngine::initializeCameraController() {
@@ -125,17 +184,22 @@ void GameEngine::initializeCameraController() {
     glfwSetCursorPosCallback(window, CameraController::mouseCallbackStatic);
 }
 
+void GameEngine::setupCallbacks()
+{
+    // Callbacks here
+}
 
 void GameEngine::initializeGameStates() {
     // Initialize and set the skybox, which might be used across different game states
     std::vector<std::string> skyboxFaces = {
-        "clouds1_east.bmp",
-        "clouds1_west.bmp",
-        "clouds1_up.bmp",
-        "clouds1_down.bmp",
-        "clouds1_north.bmp",
-        "clouds1_south.bmp"
+        "right.tga",    // Right face of the skybox, typically positive X
+        "left.tga",     // Left face of the skybox, typically negative X
+        "top.tga",      // Top face of the skybox, typically positive Y
+        "bottom.tga",   // Bottom face of the skybox, typically negative Y
+        "front.tga",    // Front face of the skybox, typically positive Z
+        "back.tga"      // Back face of the skybox, typically negative Z
     };
+
     auto skybox = std::make_unique<Skybox>(skyboxFaces);
     stateManager.setSkybox(std::move(skybox));
 
@@ -153,8 +217,6 @@ void GameEngine::mainLoop() {
 
         stateManager.update(deltaTime);
 
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         stateManager.render();
         glfwSwapBuffers(window);
     }

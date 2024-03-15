@@ -45,6 +45,10 @@ public:
     void run();
     void shutdown();
 
+    std::shared_ptr<Renderer> getRenderer() const {
+        return renderer;
+    }
+
 private:
     GLFWwindow* window;
     std::shared_ptr<Renderer> renderer;

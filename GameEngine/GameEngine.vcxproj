@@ -157,6 +157,7 @@
     <ClCompile Include="materials\MaterialParser.cpp" />
     <ClCompile Include="physics\PhysicsDebugDrawer.cpp" />
     <ClCompile Include="physics\PhysicsManager.cpp" />
+    <ClCompile Include="post-processing\FrameBufferManager.cpp" />
     <ClCompile Include="post-processing\PostProcessing.cpp" />
     <ClCompile Include="post-processing\ScreenQuad.cpp" />
     <ClCompile Include="Render.cpp" />
@@ -186,6 +187,7 @@
     <ClInclude Include="ModelLoader.h" />
     <ClInclude Include="physics\PhysicsDebugDrawer.h" />
     <ClInclude Include="physics\PhysicsManager.h" />
+    <ClInclude Include="post-processing\FrameBufferManager.h" />
     <ClInclude Include="post-processing\PostProcessing.h" />
     <ClInclude Include="post-processing\ScreenQuad.h" />
     <ClInclude Include="Renderer.h" />

@@ -73,19 +73,22 @@ void GameplayState::render() {
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-    // Display FPS in an ImGui window
-    ImGui::Begin("Performance");
+    // Set the Performance window position and size
+    ImVec2 perfWindowPos = ImVec2(windowWidth - 10.0f, 10.0f); // 10 pixels padding from the right & top
+    ImVec2 windowPivot = ImVec2(1.0f, 0.0f); // Pivot at the top right
+    ImGui::SetNextWindowPos(perfWindowPos, ImGuiCond_Always, windowPivot);
+    ImGui::SetNextWindowSize(ImVec2(0.0f, 0.0f)); // Auto resize window size
+    ImGui::Begin("Performance", NULL, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove);
     ImGui::Text("Average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+    ImVec2 perfWindowSize = ImGui::GetWindowSize(); // Get the window size for the Performance window
     ImGui::End();
 
-    if (!cameraController) {
-        std::cerr << "CameraController not initialized.\n";
-        return;
-    }
-
-    // Create a window to display Camera Position
+    // Set the Camera Position window directly below the Performance window
+    ImVec2 camPosWindowPos = ImVec2(windowWidth - 10.0f, 10.0f + perfWindowSize.y); // Offset by the Performance window's height
+    ImGui::SetNextWindowPos(camPosWindowPos, ImGuiCond_Always, windowPivot);
+    ImGui::SetNextWindowSize(ImVec2(perfWindowSize.x, 0.0f)); // Match the width of the Performance window
+    ImGui::Begin("Camera Position", NULL, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove);
     auto cameraPos = cameraController->getCameraPosition();
-    ImGui::Begin("Camera Position");
     ImGui::Text("Position: %.2f, %.2f, %.2f", cameraPos.x, cameraPos.y, cameraPos.z);
     ImGui::End();
 
@@ -105,5 +108,6 @@ void GameplayState::render() {
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
+
 
 
