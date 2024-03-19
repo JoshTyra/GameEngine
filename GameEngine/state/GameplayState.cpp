@@ -113,10 +113,9 @@ void GameplayState::render() {
     // Create a collection for all renderable entities.
     std::vector<std::shared_ptr<IRenderable>> renderables;
 
-    // Assuming planeGeometry is also adapted to use IRenderable interface
-    // or if it's a collection, iterate and add each to renderables.
+    // Correctly iterate over planeGeometry and add each geometry to renderables
     for (const auto& geometry : planeGeometry) {
-        renderables.push_back(std::shared_ptr<IRenderable>(geometry.get(), [](IRenderable*) {}));
+        renderables.push_back(geometry);
     }
 
     // Add the animated model if it exists and is adapted to IRenderable.

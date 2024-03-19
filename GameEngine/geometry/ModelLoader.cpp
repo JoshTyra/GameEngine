@@ -13,7 +13,7 @@ std::string getFileExtension(const std::string& filename) {
     return path.extension().string();
 }
 
-std::vector<std::unique_ptr<LevelGeometry>> ModelLoader::loadModel(const std::string& path, const std::string& materialPath) {
+std::vector<std::shared_ptr<IRenderable>> ModelLoader::loadModel(const std::string& path, const std::string& materialPath) {
     Assimp::Importer importer;
     const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
 
@@ -22,7 +22,7 @@ std::vector<std::unique_ptr<LevelGeometry>> ModelLoader::loadModel(const std::st
         throw std::runtime_error("Failed to load model");
     }
 
-    std::vector<std::unique_ptr<LevelGeometry>> meshes;
+    std::vector<std::shared_ptr<IRenderable>> meshes;
     std::vector<std::shared_ptr<Material>> materials;
 
     // Check file extension
@@ -58,7 +58,7 @@ std::vector<std::unique_ptr<LevelGeometry>> ModelLoader::loadModel(const std::st
     return meshes;
 }
 
-std::unique_ptr<LevelGeometry> ModelLoader::processMesh(aiMesh* mesh, const aiScene* scene, std::shared_ptr<Material> material) {
+std::shared_ptr<LevelGeometry> ModelLoader::processMesh(aiMesh* mesh, const aiScene* scene, std::shared_ptr<Material> material) {
     // Log number of meshes and current mesh pointer
     DEBUG_COUT << "[Info] Processing mesh " << scene->mNumMeshes << ", pointer: " << mesh << std::endl;
 
@@ -146,7 +146,7 @@ std::unique_ptr<LevelGeometry> ModelLoader::processMesh(aiMesh* mesh, const aiSc
     }
 
     // Process mesh...
-    auto geometry = std::make_unique<LevelGeometry>(vertices, indices, textures);
+    auto geometry = std::make_shared<LevelGeometry>(vertices, indices, textures);
     geometry->setMaterial(material); // Directly use the shared_ptr
 
     return geometry;

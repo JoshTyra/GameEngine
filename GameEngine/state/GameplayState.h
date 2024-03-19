@@ -17,7 +17,7 @@ public:
     void render() override;
 
 private:
-    std::vector<std::unique_ptr<LevelGeometry>> planeGeometry; // Model storage
+    std::vector<std::shared_ptr<IRenderable>> planeGeometry; // Model storage
     std::shared_ptr<AnimatedModel> animatedModel;
 };
 
