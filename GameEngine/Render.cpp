@@ -39,13 +39,18 @@ void Renderer::setProjectionMatrix(const glm::mat4& projectionMatrix) {
     this->projectionMatrix = projectionMatrix;
 }
 
-void Renderer::renderFrame(const std::vector<std::unique_ptr<LevelGeometry>>& geometries) {
-    glm::mat4 viewProjectionMatrix = projectionMatrix * cameraController->getViewMatrix();
-    updateFrustum(viewProjectionMatrix);
+// Overload or new method for Renderer
+void Renderer::renderFrame(const std::vector<std::shared_ptr<IRenderable>>& renderables) {
+    updateFrustum(projectionMatrix * cameraController->getViewMatrix());
     frameBufferManager->bindFrameBuffer(0);
     prepareFrame();
     renderSkybox();
-    renderGeometries(geometries);
+
+    // Draw each IRenderable
+    for (const auto& renderable : renderables) {
+        renderable->draw(cameraController->getViewMatrix(), projectionMatrix);
+    }
+
     frameBufferManager->unbindFrameBuffer();
     glBindFramebuffer(GL_FRAMEBUFFER, 0); // Bind back to the default framebuffer
 }
@@ -107,7 +112,7 @@ void Renderer::renderGeometries(const std::vector<std::unique_ptr<LevelGeometry>
         shader->setMat4("model", modelMatrix);
 
         // Assuming the geometry knows how to draw itself, including setting its own vertex array, textures, etc.
-        geometry->Draw(modelMatrix, cameraController->getViewMatrix(), projectionMatrix);
+        geometry->draw(cameraController->getViewMatrix(), projectionMatrix);
     }
 }
 

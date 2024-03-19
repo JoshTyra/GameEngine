@@ -142,6 +142,8 @@
     <ClCompile Include="camera\CameraController.cpp" />
     <ClCompile Include="camera\FrameTimer.cpp" />
     <ClCompile Include="GameEngine.cpp" />
+    <ClCompile Include="geometry\AnimatedModel.cpp" />
+    <ClCompile Include="geometry\Animation.cpp" />
     <ClCompile Include="geometry\LevelGeometry.cpp" />
     <ClCompile Include="geometry\ModelLoader.cpp" />
     <ClCompile Include="geometry\SkinnedMesh.cpp" />
@@ -182,7 +184,14 @@
     <ClInclude Include="FrameTimer.h" />
     <ClInclude Include="GameEngine.h" />
     <ClInclude Include="geometry\AnimatedModel.h" />
+    <ClInclude Include="geometry\Animation.h" />
+    <ClInclude Include="geometry\AnimationChannel.h" />
+    <ClInclude Include="geometry\AnimationKeyframe.h" />
+    <ClInclude Include="geometry\Bone.h" />
+    <ClInclude Include="geometry\Skeleton.h" />
     <ClInclude Include="geometry\SkinnedMesh.h" />
+    <ClInclude Include="geometry\SkinnedVertex.h" />
+    <ClInclude Include="geometry\StaticVertex.h" />
     <ClInclude Include="GLEnumUtils.h" />
     <ClInclude Include="LevelGeometry.h" />
     <ClInclude Include="MaterialParser.h" />
@@ -196,6 +205,7 @@
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="rendering\BatchRenderer.h" />
     <ClInclude Include="rendering\Frustum.h" />
+    <ClInclude Include="rendering\IRenderable.h" />
     <ClInclude Include="rendering\Skybox.h" />
     <ClInclude Include="shader.h" />
     <ClInclude Include="state\GameplayState.h" />

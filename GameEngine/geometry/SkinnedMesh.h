@@ -7,31 +7,17 @@
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
-
-#define MAX_BONE_INFLUENCE 4
+#include "geometry/SkinnedVertex.h"
+#include "geometry/Skeleton.h"
+#include "geometry/Animation.h"
+#include "geometry/Bone.h"
+#include "shader.h"
 
 struct BoneInfo {
-    glm::mat4 BoneOffset;
-    glm::mat4 FinalTransformation; // You might need this for the actual bone transformations during animation
-};
+    glm::mat4 BoneOffset; // Transforms from model space to bone space
+    glm::mat4 FinalTransformation; // Final transformation of the bone after applying animation
 
-struct Vertex {
-    glm::vec3 Position;
-    glm::vec3 Normal;
-    glm::vec2 TexCoords;
-    glm::ivec4 BoneIDs = glm::ivec4(0);
-    glm::vec4 Weights = glm::vec4(0.0f);
-
-    void addBoneData(unsigned int boneID, float weight) {
-        for (int i = 0; i < MAX_BONE_INFLUENCE; ++i) {
-            if (Weights[i] == 0.0) {
-                BoneIDs[i] = boneID;
-                Weights[i] = weight;
-                return;
-            }
-        }
-        std::cerr << "Vertex has more than " << MAX_BONE_INFLUENCE << " bone influences. Extra bones ignored." << std::endl;
-    }
+    BoneInfo() : BoneOffset(glm::mat4(1.0f)), FinalTransformation(glm::mat4(1.0f)) {}
 };
 
 class SkinnedMesh {
@@ -41,7 +27,8 @@ public:
 
     bool loadMesh(const std::string& filename);
     void processMesh(aiMesh* mesh, const aiScene* scene);
-    void render();
+    void passBoneTransformationsToShader(const Shader& shader) const;
+    void render(const Shader& shader, const glm::mat4& modelMatrix, const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix) const;
     void initFromVectors(std::vector<glm::vec3>& positions, std::vector<glm::vec3>& normals,
         std::vector<glm::vec2>& texCoords, std::vector<unsigned int>& indices,
         std::vector<glm::vec4>& weights, std::vector<glm::ivec4>& boneIDs);
@@ -50,9 +37,10 @@ public:
 private:
     GLuint VAO, VBO, EBO;
     unsigned int numIndices = 0;
+    std::vector<BoneInfo> boneInfo; // Stores information for each bone
     std::map<std::string, unsigned int> boneMapping; // Maps a bone name to its index
     unsigned int numBones = 0; // Tracks the number of unique bones
-    std::vector<BoneInfo> boneInfo; // Stores the bone information
+    std::map<std::string, Bone> bones;
 
-    void setupMesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices);
+    void setupMesh(const std::vector<SkinnedVertex>& vertices, const std::vector<unsigned int>& indices);
 };

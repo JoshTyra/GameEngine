@@ -1,5 +1,8 @@
 #include "SkinnedMesh.h"
 
+SkinnedMesh::SkinnedMesh() {
+}
+
 SkinnedMesh::~SkinnedMesh() {
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
@@ -33,97 +36,122 @@ bool SkinnedMesh::loadMesh(const std::string& filename) {
     return true; // Indicate success
 }
 
-void SkinnedMesh::setupMesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices) {
+void SkinnedMesh::setupMesh(const std::vector<SkinnedVertex>& vertices, const std::vector<unsigned int>& indices) {
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
     glGenBuffers(1, &EBO);
 
     glBindVertexArray(VAO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
-    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &vertices[0], GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(SkinnedVertex), &vertices[0], GL_STATIC_DRAW);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), &indices[0], GL_STATIC_DRAW);
 
-    // Vertex Positions
+    // Vertex positions
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Position));
-    // Vertex Normals
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(SkinnedVertex), (void*)offsetof(SkinnedVertex, Position));
+
+    // Vertex normals
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Normal));
-    // Vertex Texture Coords
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(SkinnedVertex), (void*)offsetof(SkinnedVertex, Normal));
+
+    // Vertex texture coords
     glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, TexCoords));
-    // Vertex Bone IDs
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(SkinnedVertex), (void*)offsetof(SkinnedVertex, TexCoords));
+
+    // Vertex bone ids
     glEnableVertexAttribArray(3);
-    glVertexAttribIPointer(3, 4, GL_INT, sizeof(Vertex), (void*)offsetof(Vertex, BoneIDs));
-    // Vertex Weights
+    glVertexAttribIPointer(3, 4, GL_INT, sizeof(SkinnedVertex), (void*)offsetof(SkinnedVertex, BoneIDs));
+
+    // Vertex bone weights
     glEnableVertexAttribArray(4);
-    glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Weights));
+    glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(SkinnedVertex), (void*)offsetof(SkinnedVertex, Weights));
 
     glBindVertexArray(0);
 }
 
 void SkinnedMesh::processMesh(aiMesh* mesh, const aiScene* scene) {
-    std::vector<Vertex> vertices;
+    std::vector<SkinnedVertex> vertices;
     std::vector<unsigned int> indices;
 
     // Process vertices
     for (unsigned int i = 0; i < mesh->mNumVertices; i++) {
-        Vertex vertex;
+        SkinnedVertex vertex;
         // Positions
-        vertex.Position.x = mesh->mVertices[i].x;
-        vertex.Position.y = mesh->mVertices[i].y;
-        vertex.Position.z = mesh->mVertices[i].z;
+        vertex.Position = glm::vec3(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z);
         // Normals
-        vertex.Normal.x = mesh->mNormals[i].x;
-        vertex.Normal.y = mesh->mNormals[i].y;
-        vertex.Normal.z = mesh->mNormals[i].z;
+        vertex.Normal = glm::vec3(mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z);
         // Texture Coordinates
         if (mesh->mTextureCoords[0]) { // Does the mesh contain texture coordinates?
-            vertex.TexCoords.x = mesh->mTextureCoords[0][i].x;
-            vertex.TexCoords.y = mesh->mTextureCoords[0][i].y;
+            vertex.TexCoords = glm::vec2(mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y);
         }
         else {
             vertex.TexCoords = glm::vec2(0.0f, 0.0f);
         }
-        // Bone IDs and Weights (initialized to 0 in the Vertex struct)
         vertices.push_back(vertex);
     }
 
     // Process indices
     for (unsigned int i = 0; i < mesh->mNumFaces; i++) {
         aiFace face = mesh->mFaces[i];
-        for (unsigned int j = 0; j < face.mNumIndices; j++)
+        for (unsigned int j = 0; j < face.mNumIndices; j++) {
             indices.push_back(face.mIndices[j]);
+        }
     }
 
     // Process bones
     for (unsigned int i = 0; i < mesh->mNumBones; i++) {
-        unsigned int BoneIndex = 0;
-        std::string BoneName(mesh->mBones[i]->mName.data);
+        std::string boneName = mesh->mBones[i]->mName.C_Str();
+        unsigned int boneIndex = 0;
 
-        if (boneMapping.find(BoneName) == boneMapping.end()) {
-            BoneIndex = numBones;
-            numBones++;
+        if (boneMapping.find(boneName) == boneMapping.end()) {
+            // Allocate an index for a new bone, adding it to the mapping and bone info vector
+            boneIndex = static_cast<unsigned int>(boneInfo.size());
             BoneInfo bi;
             bi.BoneOffset = convertMatrixToGLMFormat(mesh->mBones[i]->mOffsetMatrix);
             boneInfo.push_back(bi);
-            boneMapping[BoneName] = BoneIndex;
+            boneMapping[boneName] = boneIndex;
         }
         else {
-            BoneIndex = boneMapping[BoneName];
+            boneIndex = boneMapping[boneName];
         }
 
         for (unsigned int j = 0; j < mesh->mBones[i]->mNumWeights; j++) {
-            unsigned int VertexID = mesh->mBones[i]->mWeights[j].mVertexId;
-            float Weight = mesh->mBones[i]->mWeights[j].mWeight;
-            vertices[VertexID].addBoneData(BoneIndex, Weight);
+            unsigned int vertexID = mesh->mBones[i]->mWeights[j].mVertexId;
+            float weight = mesh->mBones[i]->mWeights[j].mWeight;
+            vertices[vertexID].addBoneData(boneIndex, weight);
         }
     }
 
-    // Assuming you have a method setupMesh() to setup VAO, VBO, etc.
+    // Setup mesh (VAO, VBO, EBO)
     setupMesh(vertices, indices);
 }
+
+void SkinnedMesh::passBoneTransformationsToShader(const Shader& shader) const {
+    // Make sure your shader is using the correct uniform name ("boneTransforms" in this case)
+    for (size_t i = 0; i < boneInfo.size(); ++i) {
+        shader.setMat4("boneTransforms[" + std::to_string(i) + "]", boneInfo[i].FinalTransformation);
+    }
+}
+
+void SkinnedMesh::render(const Shader& shader, const glm::mat4& modelMatrix, const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix) const {
+    shader.use(); // Activate the shader program
+
+    // Pass the model, view, and projection matrices to the shader
+    shader.setMat4("model", modelMatrix);
+    shader.setMat4("view", viewMatrix);
+    shader.setMat4("projection", projectionMatrix);
+
+    // Upload bone transformations to the shader
+    passBoneTransformationsToShader(shader);
+
+    // Bind the VAO and draw the mesh
+    glBindVertexArray(VAO);
+    glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(numIndices), GL_UNSIGNED_INT, 0);
+    glBindVertexArray(0);
+}
+
+
 

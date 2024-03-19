@@ -8,37 +8,22 @@
 #include "shader.h"
 #include "Materials.h"
 #include "rendering/Frustum.h"
-
-// Vertex structure
-struct Vertex {
-    glm::vec3 Position{ 0.0f, 0.0f, 0.0f };
-    glm::vec3 Normal{ 0.0f, 0.0f, 0.0f };
-    glm::vec2 TexCoords{ 0.0f, 0.0f };
-    glm::vec2 LightMapTexCoords{ 0.0f, 0.0f };
-    // Initialize other members with appropriate default values
-};
+#include "rendering/IRenderable.h"
+#include "geometry/StaticVertex.h"
 
 // LevelGeometry class
-class LevelGeometry {
+class LevelGeometry : public IRenderable {
 public:
-    // Destructor
-    ~LevelGeometry() {
-        // Clean up OpenGL resources
-        glDeleteVertexArrays(1, &VAO);
-        glDeleteBuffers(1, &VBO);
-        glDeleteBuffers(1, &EBO);
-    }
     LevelGeometry();
-    LevelGeometry(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, const std::vector<Texture>& textures);
-    void Draw(const glm::mat4& model, const glm::mat4& view, const glm::mat4& projection);
+    LevelGeometry(const std::vector<StaticVertex>& vertices, const std::vector<unsigned int>& indices, const std::vector<Texture>& textures);
+    virtual ~LevelGeometry();
+    void draw(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix) const override;
     void addTexture(const Texture& texture);
-    void setPosition(const glm::vec3& pos) { position = pos; }
-    void setRotation(float angle, const glm::vec3& axis) { rotationAngle = angle; rotationAxis = axis; }
-    void setScale(const glm::vec3& scl) { scale = scl; }
+    void setPosition(const glm::vec3& pos);
+    void setRotation(float angle, const glm::vec3& axis);
+    void setScale(const glm::vec3& scl);
     btCollisionShape* createBulletCollisionShape() const; // Creates and returns the Bullet collision shape
     void addToPhysicsWorld(btDiscreteDynamicsWorld* dynamicsWorld); // Adds the geometry to the specified Bullet dynamics world
-
-    glm::mat4 getModelMatrix() const;
     glm::vec3 aabbMin;
     glm::vec3 aabbMax;
 
@@ -86,8 +71,12 @@ public:
     void calculateAABB();
     bool isInFrustum(const Frustum& frustum) const;
 
+    void setModelMatrix(const glm::mat4& model) { modelMatrix = model; }
+    glm::mat4 getModelMatrix() const;
+    void updateModelMatrix();
+
 private:
-    std::vector<Vertex> vertices;
+    std::vector<StaticVertex> vertices;
     std::vector<unsigned int> indices;
     std::vector<Texture> textures; // Store textures
     GLuint VAO, VBO, EBO;
@@ -97,6 +86,7 @@ private:
     glm::vec3 rotationAxis = glm::vec3(0.0f, 1.0f, 0.0f);
     float rotationAngle = 0.0f; // In degrees
     glm::vec3 scale = glm::vec3(1.0f);
+    glm::mat4 modelMatrix;
 
     // Optional: Store Bullet physics objects if needed
     // std::unique_ptr<btCollisionShape> collisionShape; // Use smart pointers for automatic memory management

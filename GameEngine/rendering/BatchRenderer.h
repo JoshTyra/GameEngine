@@ -11,7 +11,7 @@ public:
     void end();
     void flush();
 private:
-    std::vector<Vertex> vertices; // Use your custom Vertex structure
+    std::vector<StaticVertex> vertices; // Use your custom Vertex structure
     std::vector<unsigned int> indices;
 
     GLuint VAO, VBO, EBO;

@@ -16,6 +16,11 @@ void GameplayState::enter() {
     std::string materialPath = FileSystemUtils::getAssetFilePath("materials/tutorial.txt");
     planeGeometry = ModelLoader::loadModel(modelPath, materialPath);
 
+    animatedModel = std::make_unique<AnimatedModel>(FileSystemUtils::getAssetFilePath("shaders/skinning.vert"),
+        FileSystemUtils::getAssetFilePath("shaders/skinning.frag"));
+    animatedModel->loadModel(FileSystemUtils::getAssetFilePath("path/to/animated/model.fbx"));
+    animatedModel->setAnimation("AnimationName");
+
     auto audioManager = GameStateManager::instance().getAudioManager();
     if (audioManager) {
         // Directly use the fully qualified path to the sound file
@@ -58,6 +63,10 @@ void GameplayState::update(float deltaTime) {
         // Update listener position in the audio manager
         audioManager->updateListenerPosition(irrCameraPos, irrCameraFront, irrCameraUp);
     }
+
+    if (!animatedModel) {
+        animatedModel->update(deltaTime);
+    }
 }
 
 void GameplayState::render() {
@@ -96,13 +105,30 @@ void GameplayState::render() {
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    if (cameraController && renderer) {
-        renderer->renderFrame(planeGeometry);
-        renderer->finalizeFrame();
-    }
-    else {
+    if (!cameraController || !renderer) {
         std::cerr << "Rendering setup incomplete: Camera controller or renderer not available." << std::endl;
+        return;
     }
+
+    // Create a collection for all renderable entities.
+    std::vector<std::shared_ptr<IRenderable>> renderables;
+
+    // Assuming planeGeometry is also adapted to use IRenderable interface
+    // or if it's a collection, iterate and add each to renderables.
+    for (const auto& geometry : planeGeometry) {
+        renderables.push_back(std::shared_ptr<IRenderable>(geometry.get(), [](IRenderable*) {}));
+    }
+
+    // Add the animated model if it exists and is adapted to IRenderable.
+    if (!animatedModel) {
+        renderables.push_back(animatedModel);
+    }
+
+    // Now let the renderer handle all renderable entities.
+    renderer->renderFrame(renderables);
+
+    // Assuming finalizeFrame method takes care of post-frame operations.
+    renderer->finalizeFrame();
 
     // Render ImGui over your scene
     ImGui::Render();

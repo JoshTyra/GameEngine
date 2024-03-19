@@ -72,13 +72,13 @@ std::unique_ptr<LevelGeometry> ModelLoader::processMesh(aiMesh* mesh, const aiSc
     DEBUG_COUT << "[Info] Mesh vertex count: " << mesh->mNumVertices << std::endl;
 
     // Initialize data structures
-    std::vector<Vertex> vertices;
+    std::vector<StaticVertex> vertices;
     std::vector<unsigned int> indices;
     std::vector<Texture> textures;
 
     // Process vertices
     for (unsigned int i = 0; i < mesh->mNumVertices; i++) {
-        Vertex vertex;
+        StaticVertex vertex;
 
         // Extract and log position
         vertex.Position = glm::vec3(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z);

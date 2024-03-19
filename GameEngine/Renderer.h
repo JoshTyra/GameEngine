@@ -9,6 +9,7 @@
 #include "post-processing/PostProcessing.h"
 #include "rendering/Frustum.h"
 #include "post-processing/FrameBufferManager.h"
+#include "rendering/IRenderable.h"
 
 class Renderer {
     Frustum frustum;
@@ -20,9 +21,7 @@ public:
     void setCameraController(std::shared_ptr<CameraController> cameraController);
     void setProjectionMatrix(const glm::mat4& projectionMatrix);
     void setSkybox(std::shared_ptr<Skybox> skybox);
-
-    // New method to encapsulate the entire frame rendering process
-    void renderFrame(const std::vector<std::unique_ptr<LevelGeometry>>& geometries);
+    void renderFrame(const std::vector<std::shared_ptr<IRenderable>>& renderables);
     void finalizeFrame();
 
 private:
@@ -32,6 +31,7 @@ private:
     void setupUniformBufferObject();
 
     std::shared_ptr<CameraController> cameraController;
+    glm::mat4 viewMatrix;
     glm::mat4 projectionMatrix;
     GLuint uboMatrices;
     std::shared_ptr<Skybox> skybox;

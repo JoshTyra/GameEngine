@@ -7,6 +7,7 @@
 #include "LevelGeometry.h"
 #include "CameraController.h"
 #include "Renderer.h"
+#include "geometry/AnimatedModel.h"
 
 class GameplayState : public GameState {
 public:
@@ -17,6 +18,7 @@ public:
 
 private:
     std::vector<std::unique_ptr<LevelGeometry>> planeGeometry; // Model storage
+    std::shared_ptr<AnimatedModel> animatedModel;
 };
 
 #endif // GAMEPLAY_STATE_H
