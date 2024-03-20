@@ -28,6 +28,7 @@ private:
     void loadAnimations(const aiScene* scene); // Make sure to declare this method
 
     std::vector<SkinnedMesh> meshes;
+    std::vector<std::shared_ptr<SkinnedMesh>> skinnedMeshes;
     std::shared_ptr<Skeleton> skeleton; // Use smart pointers for shared resources
     std::map<std::string, std::shared_ptr<Animation>> animations; // Allows dynamic animation swapping
     std::shared_ptr<Animation> currentAnimation; // Optional: Direct reference to the current animation

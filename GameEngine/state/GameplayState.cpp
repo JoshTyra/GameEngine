@@ -18,8 +18,8 @@ void GameplayState::enter() {
 
     animatedModel = std::make_unique<AnimatedModel>(FileSystemUtils::getAssetFilePath("shaders/skinning.vert"),
         FileSystemUtils::getAssetFilePath("shaders/skinning.frag"));
-    animatedModel->loadModel(FileSystemUtils::getAssetFilePath("path/to/animated/model.fbx"));
-    animatedModel->setAnimation("AnimationName");
+    animatedModel->loadModel(FileSystemUtils::getAssetFilePath("models/combat_sword_idle.fbx"));
+    animatedModel->setAnimation("Take 001");
 
     auto audioManager = GameStateManager::instance().getAudioManager();
     if (audioManager) {
@@ -64,7 +64,7 @@ void GameplayState::update(float deltaTime) {
         audioManager->updateListenerPosition(irrCameraPos, irrCameraFront, irrCameraUp);
     }
 
-    if (!animatedModel) {
+    if (animatedModel) {
         animatedModel->update(deltaTime);
     }
 }
@@ -119,7 +119,7 @@ void GameplayState::render() {
     }
 
     // Add the animated model if it exists and is adapted to IRenderable.
-    if (!animatedModel) {
+    if (animatedModel) {
         renderables.push_back(animatedModel);
     }
 

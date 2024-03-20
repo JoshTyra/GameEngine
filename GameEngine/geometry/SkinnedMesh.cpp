@@ -1,5 +1,12 @@
 #include "SkinnedMesh.h"
 
+void CheckGLErrors(const std::string& label) {
+    GLenum err;
+    while ((err = glGetError()) != GL_NO_ERROR) {
+        std::cerr << "OpenGL Error at " << label << ": " << err << std::endl;
+    }
+}
+
 SkinnedMesh::SkinnedMesh() {
 }
 
@@ -28,6 +35,8 @@ bool SkinnedMesh::loadMesh(const std::string& filename) {
         return false; // Indicate failure
     }
 
+    std::cout << "Successfully loaded mesh file: " << filename << std::endl;
+
     // Process all meshes (or the first mesh, based on your needs) found
     // For simplicity, this example processes only the first mesh
     aiMesh* mesh = scene->mMeshes[0]; // Assuming there's at least one mesh
@@ -38,15 +47,21 @@ bool SkinnedMesh::loadMesh(const std::string& filename) {
 
 void SkinnedMesh::setupMesh(const std::vector<SkinnedVertex>& vertices, const std::vector<unsigned int>& indices) {
     glGenVertexArrays(1, &VAO);
+    CheckGLErrors("glGenVertexArrays");
     glGenBuffers(1, &VBO);
+    CheckGLErrors("glGenBuffers");
     glGenBuffers(1, &EBO);
+    CheckGLErrors("glGenBuffers");
 
     glBindVertexArray(VAO);
+    CheckGLErrors("glBindVertexArray");
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    CheckGLErrors("glBindBuffer");
     glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(SkinnedVertex), &vertices[0], GL_STATIC_DRAW);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    CheckGLErrors("glGenBuffer");
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), &indices[0], GL_STATIC_DRAW);
 
     // Vertex positions
@@ -70,11 +85,14 @@ void SkinnedMesh::setupMesh(const std::vector<SkinnedVertex>& vertices, const st
     glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(SkinnedVertex), (void*)offsetof(SkinnedVertex, Weights));
 
     glBindVertexArray(0);
+    CheckGLErrors("End of setupMesh");
 }
 
 void SkinnedMesh::processMesh(aiMesh* mesh, const aiScene* scene) {
     std::vector<SkinnedVertex> vertices;
     std::vector<unsigned int> indices;
+
+    std::cout << "Processing mesh with " << mesh->mNumVertices << " vertices and " << mesh->mNumFaces << " faces." << std::endl;
 
     // Process vertices
     for (unsigned int i = 0; i < mesh->mNumVertices; i++) {
@@ -101,6 +119,9 @@ void SkinnedMesh::processMesh(aiMesh* mesh, const aiScene* scene) {
         }
     }
 
+    numIndices = static_cast<unsigned int>(indices.size());
+    std::cout << "numIndices: " << numIndices << std::endl;
+
     // Process bones
     for (unsigned int i = 0; i < mesh->mNumBones; i++) {
         std::string boneName = mesh->mBones[i]->mName.C_Str();
@@ -125,6 +146,11 @@ void SkinnedMesh::processMesh(aiMesh* mesh, const aiScene* scene) {
         }
     }
 
+    std::cout << "Setting up mesh with VAO, VBO, EBO." << std::endl;
+
+    // After vertices, indices, and bones have been processed, log the totals
+    std::cout << "Vertices and indices processed. Total vertices: " << vertices.size() << ", Total indices: " << indices.size() << std::endl;
+
     // Setup mesh (VAO, VBO, EBO)
     setupMesh(vertices, indices);
 }
@@ -137,7 +163,12 @@ void SkinnedMesh::passBoneTransformationsToShader(const Shader& shader) const {
 }
 
 void SkinnedMesh::render(const Shader& shader, const glm::mat4& modelMatrix, const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix) const {
+    // Bind the VAO and draw the mesh
+    glBindVertexArray(VAO);
+    CheckGLErrors("glBindVertexArray");
+
     shader.use(); // Activate the shader program
+    CheckGLErrors("Shader use");
 
     // Pass the model, view, and projection matrices to the shader
     shader.setMat4("model", modelMatrix);
@@ -147,11 +178,25 @@ void SkinnedMesh::render(const Shader& shader, const glm::mat4& modelMatrix, con
     // Upload bone transformations to the shader
     passBoneTransformationsToShader(shader);
 
-    // Bind the VAO and draw the mesh
-    glBindVertexArray(VAO);
+    // Debug check: Get the currently bound VAO before drawing
+    GLint currentlyBoundVAO;
+    glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &currentlyBoundVAO);
+    std::cout << "Currently bound VAO: " << currentlyBoundVAO << std::endl;
+    if (currentlyBoundVAO != VAO) {
+        std::cerr << "Unexpected VAO bound! Expected: " << VAO << ", got: " << currentlyBoundVAO << std::endl;
+        // Optionally bind the correct VAO if it's not already bound
+        // glBindVertexArray(VAO);
+        // CheckGLErrors("glBindVertexArray");
+    }
+
+    std::cout << "Drawing elements. Count: " << static_cast<GLsizei>(numIndices) << std::endl;
     glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(numIndices), GL_UNSIGNED_INT, 0);
+    CheckGLErrors("glDrawElements");
+
     glBindVertexArray(0);
+    CheckGLErrors("glBindVertexArray unbind");
 }
+
 
 
 

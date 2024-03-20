@@ -26,11 +26,12 @@ bool AnimatedModel::loadModel(const std::string& path) {
     }
 
     // Process each mesh
-    meshes.reserve(scene->mNumMeshes);
+    skinnedMeshes.reserve(scene->mNumMeshes);
+
     for (unsigned int i = 0; i < scene->mNumMeshes; i++) {
-        SkinnedMesh mesh;
-        mesh.processMesh(scene->mMeshes[i], scene);
-        meshes.push_back(mesh);
+        std::shared_ptr<SkinnedMesh> mesh = std::make_shared<SkinnedMesh>();
+        mesh->processMesh(scene->mMeshes[i], scene);
+        skinnedMeshes.push_back(mesh);
     }
 
     // Load animations
@@ -40,7 +41,10 @@ bool AnimatedModel::loadModel(const std::string& path) {
 }
 
 void AnimatedModel::loadAnimations(const aiScene* scene) {
+    std::cout << "Loading animations:" << std::endl;
     for (unsigned int i = 0; i < scene->mNumAnimations; i++) {
+        std::string animName = scene->mAnimations[i]->mName.C_Str();
+        std::cout << " - " << animName << std::endl;
         aiAnimation* aiAnim = scene->mAnimations[i];
         Animation animation(aiAnim->mName.C_Str(), static_cast<float>(aiAnim->mDuration), static_cast<float>(aiAnim->mTicksPerSecond));
 
@@ -72,8 +76,7 @@ void AnimatedModel::loadAnimations(const aiScene* scene) {
             animation.addChannel(animChannel);
         }
 
-        // Store or process the loaded animation
-        // For example: animations[animation.name] = animation;
+        animations[animName] = std::make_shared<Animation>(animation); // Use animName from aiAnimation
     }
 }
 
@@ -83,17 +86,17 @@ void AnimatedModel::draw(const glm::mat4& viewMatrix, const glm::mat4& projectio
     shader.setMat4("projection", projectionMatrix);
 
     // Assuming each SkinnedMesh can use the same view and projection but has its own model matrix
-    for (auto& mesh : meshes) {
+    for (const auto& mesh : skinnedMeshes) {
         glm::mat4 modelMatrix = glm::mat4(1.0f); // Replace with actual model matrix for each mesh
-        mesh.passBoneTransformationsToShader(shader);
-        mesh.render(shader, modelMatrix, viewMatrix, projectionMatrix); // Adjust the render call accordingly
+        mesh->passBoneTransformationsToShader(shader);
+        mesh->render(shader, modelMatrix, viewMatrix, projectionMatrix);
     }
 }
 
 void AnimatedModel::setAnimation(const std::string& animationName) {
-    auto it = animations.find(animationName);
-    if (it != animations.end()) {
-        currentAnimation = it->second;
+    auto animIt = animations.find(animationName);
+    if (animIt != animations.end()) {
+        currentAnimation = animIt->second;
     }
     else {
         std::cerr << "Animation " << animationName << " not found." << std::endl;
