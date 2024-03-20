@@ -198,6 +198,15 @@
     <ClCompile Include="geometry\Animation.cpp">
       <Filter>Source Files\geometry</Filter>
     </ClCompile>
+    <ClCompile Include="geometry\Skeleton.cpp">
+      <Filter>Source Files\geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="geometry\Bone.cpp">
+      <Filter>Source Files\geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="utilities\OpenGLUtils.cpp">
+      <Filter>Source Files\utilities</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CameraController.h">
@@ -322,6 +331,12 @@
     </ClInclude>
     <ClInclude Include="geometry\StaticVertex.h">
       <Filter>Header Files\geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="utilities\MathUtils.h">
+      <Filter>Header Files\utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="utilities\OpenGLUtils.h">
+      <Filter>Header Files\utilities</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

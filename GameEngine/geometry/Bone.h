@@ -17,7 +17,11 @@ public:
     void calculateFinalTransformation(const glm::mat4& parentTransform);
     glm::mat4 getLocalTransform(); // Placeholder for future implementation
 
-    // Getters and other utility methods can be added here
+    glm::mat4 getFinalTransformation() const;
+    std::shared_ptr<Bone> getParent() const;
+    void setParent(std::shared_ptr<Bone> parent);
+    glm::mat4 getOffsetMatrix() const;
+    std::string getName() const;
 
 private:
     std::string name;

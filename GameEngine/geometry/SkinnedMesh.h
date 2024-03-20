@@ -12,6 +12,8 @@
 #include "geometry/Animation.h"
 #include "geometry/Bone.h"
 #include "shader.h"
+#include "utilities/MathUtils.h"
+#include "utilities/OpenGLUtils.h"
 
 struct BoneInfo {
     glm::mat4 BoneOffset; // Transforms from model space to bone space
@@ -32,7 +34,7 @@ public:
     void initFromVectors(std::vector<glm::vec3>& positions, std::vector<glm::vec3>& normals,
         std::vector<glm::vec2>& texCoords, std::vector<unsigned int>& indices,
         std::vector<glm::vec4>& weights, std::vector<glm::ivec4>& boneIDs);
-    glm::mat4 convertMatrixToGLMFormat(const aiMatrix4x4& from);
+    void updateBoneTransforms(const Shader& shader, const std::vector<glm::mat4>& boneMatrices);
 
 private:
     GLuint VAO, VBO, EBO;

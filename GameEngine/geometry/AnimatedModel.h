@@ -12,6 +12,7 @@
 #include <assimp/types.h> // Make sure to include the Assimp header that defines aiVector3D
 #include <glm/gtc/quaternion.hpp>
 #include <assimp/quaternion.h>
+#include "utilities/MathUtils.h"
 
 class AnimatedModel : public IRenderable {
 public:
@@ -23,6 +24,10 @@ public:
     void update(float deltaTime);
     void draw(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix) const override;
     void setAnimation(const std::string& animationName);
+    void processBonesAndHierarchy(const aiScene* scene, std::shared_ptr<Skeleton> skeleton);
+    void establishHierarchy(const aiNode* node, std::shared_ptr<Bone> parentBone, std::shared_ptr<Skeleton> skeleton, 
+        std::unordered_map<std::string, std::shared_ptr<Bone>>& tempBoneMap);
+
 
 private:
     void loadAnimations(const aiScene* scene); // Make sure to declare this method
@@ -32,4 +37,5 @@ private:
     std::shared_ptr<Skeleton> skeleton; // Use smart pointers for shared resources
     std::map<std::string, std::shared_ptr<Animation>> animations; // Allows dynamic animation swapping
     std::shared_ptr<Animation> currentAnimation; // Optional: Direct reference to the current animation
+    float currentAnimationTime = 0.0f; // Track the current time within the animation
 };

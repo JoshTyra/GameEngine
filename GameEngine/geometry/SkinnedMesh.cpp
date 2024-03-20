@@ -1,12 +1,5 @@
 #include "SkinnedMesh.h"
 
-void CheckGLErrors(const std::string& label) {
-    GLenum err;
-    while ((err = glGetError()) != GL_NO_ERROR) {
-        std::cerr << "OpenGL Error at " << label << ": " << err << std::endl;
-    }
-}
-
 SkinnedMesh::SkinnedMesh() {
 }
 
@@ -14,16 +7,6 @@ SkinnedMesh::~SkinnedMesh() {
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
     glDeleteBuffers(1, &EBO);
-}
-
-glm::mat4 SkinnedMesh::convertMatrixToGLMFormat(const aiMatrix4x4& from) {
-    glm::mat4 to;
-    // Copy the data from 'from' to 'to', taking care to transpose or rearrange as necessary
-    to[0][0] = from.a1; to[1][0] = from.b1; to[2][0] = from.c1; to[3][0] = from.d1;
-    to[0][1] = from.a2; to[1][1] = from.b2; to[2][1] = from.c2; to[3][1] = from.d2;
-    to[0][2] = from.a3; to[1][2] = from.b3; to[2][2] = from.c3; to[3][2] = from.d3;
-    to[0][3] = from.a4; to[1][3] = from.b4; to[2][3] = from.c4; to[3][3] = from.d4;
-    return to;
 }
 
 bool SkinnedMesh::loadMesh(const std::string& filename) {
@@ -131,7 +114,7 @@ void SkinnedMesh::processMesh(aiMesh* mesh, const aiScene* scene) {
             // Allocate an index for a new bone, adding it to the mapping and bone info vector
             boneIndex = static_cast<unsigned int>(boneInfo.size());
             BoneInfo bi;
-            bi.BoneOffset = convertMatrixToGLMFormat(mesh->mBones[i]->mOffsetMatrix);
+            bi.BoneOffset = MathUtils::convertMatrixToGLMFormat(mesh->mBones[i]->mOffsetMatrix);
             boneInfo.push_back(bi);
             boneMapping[boneName] = boneIndex;
         }
@@ -180,6 +163,15 @@ void SkinnedMesh::render(const Shader& shader, const glm::mat4& modelMatrix, con
     // Optionally, unbind the VAO to avoid unintended side effects in other parts of the program
     glBindVertexArray(0);
 }
+
+void SkinnedMesh::updateBoneTransforms(const Shader& shader, const std::vector<glm::mat4>& boneMatrices) {
+    shader.use();
+
+    for (size_t i = 0; i < boneMatrices.size(); ++i) {
+        shader.setMat4("boneTransforms[" + std::to_string(i) + "]", boneMatrices[i]);
+    }
+}
+
 
 
 

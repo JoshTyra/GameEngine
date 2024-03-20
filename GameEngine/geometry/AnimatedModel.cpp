@@ -34,6 +34,12 @@ bool AnimatedModel::loadModel(const std::string& path) {
         skinnedMeshes.push_back(mesh);
     }
 
+    // Create skeleton instance
+    skeleton = std::make_shared<Skeleton>();
+
+    // Process bones and hierarchy
+    processBonesAndHierarchy(scene, skeleton);
+
     // Load animations
     loadAnimations(scene);
 
@@ -82,14 +88,23 @@ void AnimatedModel::loadAnimations(const aiScene* scene) {
 
 void AnimatedModel::draw(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix) const {
     shader.use();
+    CheckGLErrors("After shader use");
     shader.setMat4("view", viewMatrix);
+    CheckGLErrors("After shader use");
     shader.setMat4("projection", projectionMatrix);
+    CheckGLErrors("After setting projection matrix");
+
+    if (skinnedMeshes.empty()) {
+        std::cerr << "No skinned meshes to draw." << std::endl;
+    }
 
     // Assuming each SkinnedMesh can use the same view and projection but has its own model matrix
     for (const auto& mesh : skinnedMeshes) {
         glm::mat4 modelMatrix = glm::mat4(1.0f); // Replace with actual model matrix for each mesh
         mesh->passBoneTransformationsToShader(shader);
+        CheckGLErrors("After passing bone transformations");
         mesh->render(shader, modelMatrix, viewMatrix, projectionMatrix);
+        CheckGLErrors("After rendering mesh");
     }
 }
 
@@ -97,6 +112,7 @@ void AnimatedModel::setAnimation(const std::string& animationName) {
     auto animIt = animations.find(animationName);
     if (animIt != animations.end()) {
         currentAnimation = animIt->second;
+        currentAnimationTime = 0.0f; // Reset the animation time
     }
     else {
         std::cerr << "Animation " << animationName << " not found." << std::endl;
@@ -106,9 +122,95 @@ void AnimatedModel::setAnimation(const std::string& animationName) {
 void AnimatedModel::update(float deltaTime) {
     if (!currentAnimation) return;
 
-    // Update current animation time
-    // Adjust this logic based on how you've structured Animation and how time is tracked
-    // For example, consider looping or clamping animation playback
+    float ticksPerFrame = currentAnimation->ticksPerSecond * deltaTime;
+    currentAnimationTime += ticksPerFrame;
 
-    // Update bone transformations in the skeleton based on the currentAnimation and currentTime
+    // Loop the animation
+    if (currentAnimationTime > currentAnimation->duration) {
+        currentAnimationTime = fmod(currentAnimationTime, currentAnimation->duration);
+    }
+
+    // A map to store the final transformations for each bone based on the current animation frame
+    std::map<std::string, glm::mat4> boneTransforms;
+
+    // For each bone in the animation, calculate its final transformation
+    for (const auto& channelPair : currentAnimation->channels) {
+        const std::string& boneName = channelPair.first;
+        const AnimationChannel& channel = channelPair.second;
+
+        glm::mat4 boneTransform = glm::mat4(1.0f); // Start with identity matrix
+
+        // Interpolate position, rotation, and scale based on the current animation time
+        glm::vec3 interpolatedPosition = currentAnimation->interpolatePosition(currentAnimationTime, channel);
+        glm::quat interpolatedRotation = currentAnimation->interpolateRotation(currentAnimationTime, channel);
+        glm::vec3 interpolatedScale = currentAnimation->interpolateScale(currentAnimationTime, channel);
+
+        // Construct the transformation matrix from the interpolated position, rotation, and scale
+        glm::mat4 translationMatrix = glm::translate(glm::mat4(1.0f), interpolatedPosition);
+        glm::mat4 rotationMatrix = glm::mat4_cast(interpolatedRotation);
+        glm::mat4 scaleMatrix = glm::scale(glm::mat4(1.0f), interpolatedScale);
+
+        boneTransform = translationMatrix * rotationMatrix * scaleMatrix;
+
+        // Store the final transformation for this bone
+        boneTransforms[boneName] = boneTransform;
+    }
+
+    // Update the skeleton's bone matrices based on the calculated transformations
+    skeleton->updateBoneMatricesFromAnimation(boneTransforms);
+
+    // Update the SkinnedMeshes if necessary. This step requires that SkinnedMeshes have a way to receive updated bone transformations.
+    // This might involve, for example, updating a uniform buffer with the new bone matrices.
+    for (auto& mesh : skinnedMeshes) {
+        mesh->updateBoneTransforms(shader, skeleton->getBoneMatrices());
+    }
 }
+
+void AnimatedModel::processBonesAndHierarchy(const aiScene* scene, std::shared_ptr<Skeleton> skeleton) {
+    // Temporary mapping to find bones quickly when setting up the hierarchy
+    std::unordered_map<std::string, std::shared_ptr<Bone>> tempBoneMap;
+
+    for (unsigned int i = 0; i < scene->mNumMeshes; i++) {
+        aiMesh* mesh = scene->mMeshes[i];
+        for (unsigned int j = 0; j < mesh->mNumBones; j++) {
+            aiBone* aiBone = mesh->mBones[j];
+            std::string boneName = aiBone->mName.C_Str();
+
+            // Avoid creating duplicate Bone instances
+            if (tempBoneMap.find(boneName) == tempBoneMap.end()) {
+                // Providing a default ID value of -1
+                std::shared_ptr<Bone> bone = std::make_shared<Bone>(boneName, -1, MathUtils::convertMatrixToGLMFormat(aiBone->mOffsetMatrix));
+                skeleton->addBone(bone);
+                tempBoneMap[boneName] = bone;
+            }
+        }
+    }
+
+    // Now, establish the hierarchy by traversing the scene's node tree
+    establishHierarchy(scene->mRootNode, nullptr, skeleton, tempBoneMap);
+}
+
+void AnimatedModel::establishHierarchy(const aiNode* node, std::shared_ptr<Bone> parentBone, std::shared_ptr<Skeleton> skeleton, std::unordered_map<std::string, std::shared_ptr<Bone>>& tempBoneMap) {
+    std::string nodeName = node->mName.C_Str();
+    std::shared_ptr<Bone> currentBone = nullptr;
+
+    // Check if this node corresponds to a bone
+    if (tempBoneMap.find(nodeName) != tempBoneMap.end()) {
+        currentBone = tempBoneMap[nodeName];
+        if (parentBone != nullptr) {
+            currentBone->setParent(parentBone);
+            parentBone->addChild(currentBone);
+        }
+    }
+    else {
+        currentBone = parentBone; // If not a bone, continue hierarchy traversal with the current parent bone
+    }
+
+    // Recursively establish hierarchy for child nodes
+    for (unsigned int i = 0; i < node->mNumChildren; i++) {
+        establishHierarchy(node->mChildren[i], currentBone, skeleton, tempBoneMap);
+    }
+}
+
+
+

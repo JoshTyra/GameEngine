@@ -3,7 +3,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 
-#define MAX_BONE_INFLUENCE 4
+#define MAX_BONE_INFLUENCE 2
 
 struct SkinnedVertex {
     glm::vec3 Position;

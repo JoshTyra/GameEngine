@@ -16,9 +16,17 @@ void Bone::setFinalTransformation(const glm::mat4& transform) {
 }
 
 void Bone::calculateFinalTransformation(const glm::mat4& parentTransform) {
-    glm::mat4 globalTransformation = parentTransform * getLocalTransform();
-    finalTransformation = globalInverseTransform * globalTransformation * offsetMatrix;
+    // Assume getLocalTransform() now provides the animated local transformation for this bone.
+    glm::mat4 localTransformation = getLocalTransform();
 
+    // The global transformation of this bone is its local transformation pre-multiplied by its parent's global transformation.
+    glm::mat4 globalTransformation = parentTransform * localTransformation;
+
+    // The final transformation combines the bone's global transformation with its offset matrix.
+    // This final transformation matrix is what gets applied to the vertices.
+    finalTransformation = globalTransformation * offsetMatrix;
+
+    // Recursively calculate the transformation for children.
     for (auto& child : children) {
         child->calculateFinalTransformation(globalTransformation);
     }
@@ -27,4 +35,24 @@ void Bone::calculateFinalTransformation(const glm::mat4& parentTransform) {
 glm::mat4 Bone::getLocalTransform() {
     // This method will be replaced by the actual implementation that gets the current bone's transformation
     return glm::mat4(1.0f); // Identity matrix for now
+}
+
+glm::mat4 Bone::getFinalTransformation() const {
+    return finalTransformation;
+}
+
+std::shared_ptr<Bone> Bone::getParent() const {
+    return parent;
+}
+
+glm::mat4 Bone::getOffsetMatrix() const {
+    return offsetMatrix;
+}
+
+std::string Bone::getName() const {
+    return name;
+}
+
+void Bone::setParent(std::shared_ptr<Bone> newParent) {
+    parent = newParent;
 }

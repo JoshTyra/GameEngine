@@ -144,8 +144,10 @@
     <ClCompile Include="GameEngine.cpp" />
     <ClCompile Include="geometry\AnimatedModel.cpp" />
     <ClCompile Include="geometry\Animation.cpp" />
+    <ClCompile Include="geometry\Bone.cpp" />
     <ClCompile Include="geometry\LevelGeometry.cpp" />
     <ClCompile Include="geometry\ModelLoader.cpp" />
+    <ClCompile Include="geometry\Skeleton.cpp" />
     <ClCompile Include="geometry\SkinnedMesh.cpp" />
     <ClCompile Include="GLEnumUtils.cpp" />
     <ClCompile Include="imgui\imgui.cpp" />
@@ -173,6 +175,7 @@
     <ClCompile Include="state\MenuState.cpp" />
     <ClCompile Include="TechniqueParser.cpp" />
     <ClCompile Include="textures\TextureLoader.cpp" />
+    <ClCompile Include="utilities\OpenGLUtils.cpp" />
     <ClCompile Include="utilities\stb_image.cpp" />
     <ClCompile Include="utilities\stb_vorbis.cpp" />
   </ItemGroup>
@@ -218,6 +221,8 @@
     <ClInclude Include="TechniqueParser.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="TextureLoader.h" />
+    <ClInclude Include="utilities\MathUtils.h" />
+    <ClInclude Include="utilities\OpenGLUtils.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
