@@ -163,38 +163,22 @@ void SkinnedMesh::passBoneTransformationsToShader(const Shader& shader) const {
 }
 
 void SkinnedMesh::render(const Shader& shader, const glm::mat4& modelMatrix, const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix) const {
-    // Bind the VAO and draw the mesh
-    glBindVertexArray(VAO);
-    CheckGLErrors("glBindVertexArray");
-
-    shader.use(); // Activate the shader program
-    CheckGLErrors("Shader use");
-
-    // Pass the model, view, and projection matrices to the shader
+    shader.use();
     shader.setMat4("model", modelMatrix);
     shader.setMat4("view", viewMatrix);
     shader.setMat4("projection", projectionMatrix);
 
-    // Upload bone transformations to the shader
     passBoneTransformationsToShader(shader);
 
-    // Debug check: Get the currently bound VAO before drawing
-    GLint currentlyBoundVAO;
-    glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &currentlyBoundVAO);
-    std::cout << "Currently bound VAO: " << currentlyBoundVAO << std::endl;
-    if (currentlyBoundVAO != VAO) {
-        std::cerr << "Unexpected VAO bound! Expected: " << VAO << ", got: " << currentlyBoundVAO << std::endl;
-        // Optionally bind the correct VAO if it's not already bound
-        // glBindVertexArray(VAO);
-        // CheckGLErrors("glBindVertexArray");
-    }
+    // Bind the VAO right before drawing to ensure it's bound
+    glBindVertexArray(VAO);
+    CheckGLErrors("glBindVertexArray");
 
-    std::cout << "Drawing elements. Count: " << static_cast<GLsizei>(numIndices) << std::endl;
     glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(numIndices), GL_UNSIGNED_INT, 0);
     CheckGLErrors("glDrawElements");
 
+    // Optionally, unbind the VAO to avoid unintended side effects in other parts of the program
     glBindVertexArray(0);
-    CheckGLErrors("glBindVertexArray unbind");
 }
 
 
