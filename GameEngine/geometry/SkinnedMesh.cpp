@@ -9,25 +9,6 @@ SkinnedMesh::~SkinnedMesh() {
     glDeleteBuffers(1, &EBO);
 }
 
-bool SkinnedMesh::loadMesh(const std::string& filename) {
-    Assimp::Importer importer;
-    const aiScene* scene = importer.ReadFile(filename, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenNormals | aiProcess_LimitBoneWeights);
-
-    if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
-        std::cerr << "ERROR::ASSIMP::" << importer.GetErrorString() << std::endl;
-        return false; // Indicate failure
-    }
-
-    std::cout << "Successfully loaded mesh file: " << filename << std::endl;
-
-    // Process all meshes (or the first mesh, based on your needs) found
-    // For simplicity, this example processes only the first mesh
-    aiMesh* mesh = scene->mMeshes[0]; // Assuming there's at least one mesh
-    processMesh(mesh, scene);
-
-    return true; // Indicate success
-}
-
 void SkinnedMesh::setupMesh(const std::vector<SkinnedVertex>& vertices, const std::vector<unsigned int>& indices) {
     glGenVertexArrays(1, &VAO);
     CheckGLErrors("glGenVertexArrays");
@@ -138,38 +119,15 @@ void SkinnedMesh::processMesh(aiMesh* mesh, const aiScene* scene) {
     setupMesh(vertices, indices);
 }
 
-void SkinnedMesh::passBoneTransformationsToShader(const Shader& shader) const {
-    // Make sure your shader is using the correct uniform name ("boneTransforms" in this case)
-    for (size_t i = 0; i < boneInfo.size(); ++i) {
-        shader.setMat4("boneTransforms[" + std::to_string(i) + "]", boneInfo[i].FinalTransformation);
-    }
-}
-
 void SkinnedMesh::render(const Shader& shader, const glm::mat4& modelMatrix, const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix) const {
-    shader.use();
+    shader.use(); // This activates the shader program which has the UBO bound to it
     shader.setMat4("model", modelMatrix);
     shader.setMat4("view", viewMatrix);
     shader.setMat4("projection", projectionMatrix);
 
-    passBoneTransformationsToShader(shader);
-
-    // Bind the VAO right before drawing to ensure it's bound
     glBindVertexArray(VAO);
-    CheckGLErrors("glBindVertexArray");
-
     glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(numIndices), GL_UNSIGNED_INT, 0);
-    CheckGLErrors("glDrawElements");
-
-    // Optionally, unbind the VAO to avoid unintended side effects in other parts of the program
     glBindVertexArray(0);
-}
-
-void SkinnedMesh::updateBoneTransforms(const Shader& shader, const std::vector<glm::mat4>& boneMatrices) {
-    shader.use();
-
-    for (size_t i = 0; i < boneMatrices.size(); ++i) {
-        shader.setMat4("boneTransforms[" + std::to_string(i) + "]", boneMatrices[i]);
-    }
 }
 
 

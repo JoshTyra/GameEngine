@@ -44,11 +44,18 @@ void Renderer::renderFrame(const std::vector<std::shared_ptr<IRenderable>>& rend
     updateFrustum(projectionMatrix * cameraController->getViewMatrix());
     frameBufferManager->bindFrameBuffer(0);
     prepareFrame();
-    renderSkybox();
+    //renderSkybox();
 
-    // Draw each IRenderable
+    // Creating a RenderingContext object here to encapsulate all the necessary state for rendering a frame.
+    // This approach simplifies the method signatures of draw calls across different renderable entities and
+    // makes the rendering pipeline more extensible. Instead of passing view and projection matrices separately
+    // to each draw method, we now pass a single context object. This allows for easy addition of new state
+    // parameters in the future without altering the interfaces of our renderable entities.
+    RenderingContext context(cameraController->getViewMatrix(), projectionMatrix);
+
+    // Draw each IRenderable using the context
     for (const auto& renderable : renderables) {
-        renderable->draw(cameraController->getViewMatrix(), projectionMatrix);
+        renderable->draw(context);
     }
 
     frameBufferManager->unbindFrameBuffer();
@@ -81,6 +88,13 @@ void Renderer::renderSkybox() const {
 }
 
 void Renderer::renderGeometries(const std::vector<std::unique_ptr<LevelGeometry>>& geometries) {
+    // Creating a RenderingContext object here to encapsulate all the necessary state for rendering a frame.
+    // This approach simplifies the method signatures of draw calls across different renderable entities and
+    // makes the rendering pipeline more extensible. Instead of passing view and projection matrices separately
+    // to each draw method, we now pass a single context object. This allows for easy addition of new state
+    // parameters in the future without altering the interfaces of our renderable entities.
+    RenderingContext context(cameraController->getViewMatrix(), projectionMatrix);
+
     // Iterate through each geometry and render
     for (const auto& geometry : geometries) {
         if (!geometry) {
@@ -111,8 +125,8 @@ void Renderer::renderGeometries(const std::vector<std::unique_ptr<LevelGeometry>
         glm::mat4 modelMatrix = geometry->getModelMatrix();
         shader->setMat4("model", modelMatrix);
 
-        // Assuming the geometry knows how to draw itself, including setting its own vertex array, textures, etc.
-        geometry->draw(cameraController->getViewMatrix(), projectionMatrix);
+        // Now the geometry's draw method should accept a RenderingContext
+        geometry->draw(context);
     }
 }
 

@@ -1,3 +1,4 @@
+#pragma once
 #include <map>
 #include <vector>
 #include <string>
@@ -27,14 +28,11 @@ public:
     SkinnedMesh();
     ~SkinnedMesh();
 
-    bool loadMesh(const std::string& filename);
     void processMesh(aiMesh* mesh, const aiScene* scene);
-    void passBoneTransformationsToShader(const Shader& shader) const;
     void render(const Shader& shader, const glm::mat4& modelMatrix, const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix) const;
     void initFromVectors(std::vector<glm::vec3>& positions, std::vector<glm::vec3>& normals,
         std::vector<glm::vec2>& texCoords, std::vector<unsigned int>& indices,
         std::vector<glm::vec4>& weights, std::vector<glm::ivec4>& boneIDs);
-    void updateBoneTransforms(const Shader& shader, const std::vector<glm::mat4>& boneMatrices);
 
 private:
     GLuint VAO, VBO, EBO;
@@ -42,7 +40,6 @@ private:
     std::vector<BoneInfo> boneInfo; // Stores information for each bone
     std::map<std::string, unsigned int> boneMapping; // Maps a bone name to its index
     unsigned int numBones = 0; // Tracks the number of unique bones
-    std::map<std::string, Bone> bones;
 
     void setupMesh(const std::vector<SkinnedVertex>& vertices, const std::vector<unsigned int>& indices);
 };

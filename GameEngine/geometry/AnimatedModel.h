@@ -7,35 +7,42 @@
 #include <vector>
 #include <memory>
 #include <map>
-#include <assimp/scene.h> // Ensure you have this include for aiScene
+#include <assimp/scene.h>
 #include <glm/glm.hpp>
-#include <assimp/types.h> // Make sure to include the Assimp header that defines aiVector3D
+#include <assimp/types.h>
 #include <glm/gtc/quaternion.hpp>
 #include <assimp/quaternion.h>
 #include "utilities/MathUtils.h"
 
+#define MAX_BONES 100
+
 class AnimatedModel : public IRenderable {
 public:
     Shader shader;
+    glm::vec3 position;
+    glm::quat rotation;
+    glm::vec3 scale;
+
     AnimatedModel(const std::string& vertexPath, const std::string& fragmentPath);
     ~AnimatedModel();
 
     bool loadModel(const std::string& path);
     void update(float deltaTime);
-    void draw(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix) const override;
+    void draw(const RenderingContext& context) const override;
     void setAnimation(const std::string& animationName);
+    void createBoneMatricesBuffer();
+    void updateBoneMatrices(const std::vector<glm::mat4>& boneMatrices);
     void processBonesAndHierarchy(const aiScene* scene, std::shared_ptr<Skeleton> skeleton);
-    void establishHierarchy(const aiNode* node, std::shared_ptr<Bone> parentBone, std::shared_ptr<Skeleton> skeleton, 
-        std::unordered_map<std::string, std::shared_ptr<Bone>>& tempBoneMap);
-
+    void establishHierarchy(const aiNode* node, std::shared_ptr<Bone> parentBone, std::shared_ptr<Skeleton> skeleton, std::unordered_map<std::string, std::shared_ptr<Bone>>& tempBoneMap);
+    glm::mat4 getModelMatrix() const;
 
 private:
-    void loadAnimations(const aiScene* scene); // Make sure to declare this method
-
-    std::vector<SkinnedMesh> meshes;
+    void loadAnimations(const aiScene* scene);
     std::vector<std::shared_ptr<SkinnedMesh>> skinnedMeshes;
-    std::shared_ptr<Skeleton> skeleton; // Use smart pointers for shared resources
-    std::map<std::string, std::shared_ptr<Animation>> animations; // Allows dynamic animation swapping
-    std::shared_ptr<Animation> currentAnimation; // Optional: Direct reference to the current animation
-    float currentAnimationTime = 0.0f; // Track the current time within the animation
+    std::shared_ptr<Skeleton> skeleton;
+    std::map<std::string, std::shared_ptr<Animation>> animations;
+    std::shared_ptr<Animation> currentAnimation;
+    float currentAnimationTime = 0.0f;
+    GLuint uboBoneMatrices;
+    const GLuint BONE_MATRICES_BINDING_POINT = 4;
 };

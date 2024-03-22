@@ -17,7 +17,7 @@ public:
     LevelGeometry();
     LevelGeometry(const std::vector<StaticVertex>& vertices, const std::vector<unsigned int>& indices, const std::vector<Texture>& textures);
     virtual ~LevelGeometry();
-    void draw(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix) const override;
+    void draw(const RenderingContext& context) const override;
     void addTexture(const Texture& texture);
     void setPosition(const glm::vec3& pos);
     void setRotation(float angle, const glm::vec3& axis);

@@ -1,7 +1,8 @@
 #include "AnimatedModel.h"
 
-AnimatedModel::AnimatedModel(const std::string& vertexPath, const std::string& fragmentPath) : shader(vertexPath, fragmentPath) {
-    this->shader = Shader(vertexPath, fragmentPath);
+AnimatedModel::AnimatedModel(const std::string& vertexPath, const std::string& fragmentPath)
+    : shader(vertexPath, fragmentPath), position(0.0f), rotation(glm::quat(1.0, 0.0, 0.0, 0.0)), scale(1.0f) {
+    createBoneMatricesBuffer();
 }
 
 AnimatedModel::~AnimatedModel() {}
@@ -38,10 +39,10 @@ bool AnimatedModel::loadModel(const std::string& path) {
     skeleton = std::make_shared<Skeleton>();
 
     // Process bones and hierarchy
-    processBonesAndHierarchy(scene, skeleton);
+    //processBonesAndHierarchy(scene, skeleton);
 
     // Load animations
-    loadAnimations(scene);
+    //loadAnimations(scene);
 
     return true;
 }
@@ -86,84 +87,27 @@ void AnimatedModel::loadAnimations(const aiScene* scene) {
     }
 }
 
-void AnimatedModel::draw(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix) const {
-    shader.use();
-    CheckGLErrors("After shader use");
-    shader.setMat4("view", viewMatrix);
-    CheckGLErrors("After shader use");
-    shader.setMat4("projection", projectionMatrix);
-    CheckGLErrors("After setting projection matrix");
-
-    if (skinnedMeshes.empty()) {
-        std::cerr << "No skinned meshes to draw." << std::endl;
-    }
-
-    // Assuming each SkinnedMesh can use the same view and projection but has its own model matrix
-    for (const auto& mesh : skinnedMeshes) {
-        glm::mat4 modelMatrix = glm::mat4(1.0f); // Replace with actual model matrix for each mesh
-        mesh->passBoneTransformationsToShader(shader);
-        CheckGLErrors("After passing bone transformations");
-        mesh->render(shader, modelMatrix, viewMatrix, projectionMatrix);
-        CheckGLErrors("After rendering mesh");
-    }
-}
-
-void AnimatedModel::setAnimation(const std::string& animationName) {
-    auto animIt = animations.find(animationName);
-    if (animIt != animations.end()) {
-        currentAnimation = animIt->second;
-        currentAnimationTime = 0.0f; // Reset the animation time
-    }
-    else {
-        std::cerr << "Animation " << animationName << " not found." << std::endl;
-    }
-}
-
 void AnimatedModel::update(float deltaTime) {
-    if (!currentAnimation) return;
+    //if (!currentAnimation) return;
 
-    float ticksPerFrame = currentAnimation->ticksPerSecond * deltaTime;
-    currentAnimationTime += ticksPerFrame;
+    //// Update the current animation time
+    //float ticksPerFrame = currentAnimation->ticksPerSecond * deltaTime;
+    //currentAnimationTime += ticksPerFrame;
+    //if (currentAnimationTime > currentAnimation->duration) {
+    //    currentAnimationTime = fmod(currentAnimationTime, currentAnimation->duration);
+    //}
 
-    // Loop the animation
-    if (currentAnimationTime > currentAnimation->duration) {
-        currentAnimationTime = fmod(currentAnimationTime, currentAnimation->duration);
-    }
+    //// Calculate the final transformations for each bone
+    //std::map<std::string, glm::mat4> boneTransforms;
+    //for (const auto& bone : skeleton->getBones()) {
+    //    glm::mat4 boneTransform = currentAnimation->getBoneTransform(currentAnimationTime, bone->getName());
+    //    boneTransforms[bone->getName()] = boneTransform;
+    //}
 
-    // A map to store the final transformations for each bone based on the current animation frame
-    std::map<std::string, glm::mat4> boneTransforms;
+    //// Update the skeleton with these transformations
+    //skeleton->updateBoneMatricesFromAnimation(boneTransforms);
 
-    // For each bone in the animation, calculate its final transformation
-    for (const auto& channelPair : currentAnimation->channels) {
-        const std::string& boneName = channelPair.first;
-        const AnimationChannel& channel = channelPair.second;
-
-        glm::mat4 boneTransform = glm::mat4(1.0f); // Start with identity matrix
-
-        // Interpolate position, rotation, and scale based on the current animation time
-        glm::vec3 interpolatedPosition = currentAnimation->interpolatePosition(currentAnimationTime, channel);
-        glm::quat interpolatedRotation = currentAnimation->interpolateRotation(currentAnimationTime, channel);
-        glm::vec3 interpolatedScale = currentAnimation->interpolateScale(currentAnimationTime, channel);
-
-        // Construct the transformation matrix from the interpolated position, rotation, and scale
-        glm::mat4 translationMatrix = glm::translate(glm::mat4(1.0f), interpolatedPosition);
-        glm::mat4 rotationMatrix = glm::mat4_cast(interpolatedRotation);
-        glm::mat4 scaleMatrix = glm::scale(glm::mat4(1.0f), interpolatedScale);
-
-        boneTransform = translationMatrix * rotationMatrix * scaleMatrix;
-
-        // Store the final transformation for this bone
-        boneTransforms[boneName] = boneTransform;
-    }
-
-    // Update the skeleton's bone matrices based on the calculated transformations
-    skeleton->updateBoneMatricesFromAnimation(boneTransforms);
-
-    // Update the SkinnedMeshes if necessary. This step requires that SkinnedMeshes have a way to receive updated bone transformations.
-    // This might involve, for example, updating a uniform buffer with the new bone matrices.
-    for (auto& mesh : skinnedMeshes) {
-        mesh->updateBoneTransforms(shader, skeleton->getBoneMatrices());
-    }
+    // At this point, the skeleton's boneMatrices vector is updated and ready for use in rendering
 }
 
 void AnimatedModel::processBonesAndHierarchy(const aiScene* scene, std::shared_ptr<Skeleton> skeleton) {
@@ -209,6 +153,73 @@ void AnimatedModel::establishHierarchy(const aiNode* node, std::shared_ptr<Bone>
     // Recursively establish hierarchy for child nodes
     for (unsigned int i = 0; i < node->mNumChildren; i++) {
         establishHierarchy(node->mChildren[i], currentBone, skeleton, tempBoneMap);
+    }
+}
+
+void AnimatedModel::createBoneMatricesBuffer() {
+    glGenBuffers(1, &uboBoneMatrices);
+    CheckGLErrors("glGenBuffers");
+
+    glBindBuffer(GL_UNIFORM_BUFFER, uboBoneMatrices);
+    CheckGLErrors("glBindBuffer GL_UNIFORM_BUFFER");
+
+    glBufferData(GL_UNIFORM_BUFFER, sizeof(glm::mat4) * MAX_BONES, nullptr, GL_DYNAMIC_DRAW);
+    CheckGLErrors("glBufferData");
+
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+    CheckGLErrors("glBindBuffer 0");
+
+    // Ensure the shader program is being used before getting and setting the uniform block index.
+    shader.use();
+    CheckGLErrors("shader.use");
+
+    GLuint blockIndex = glGetUniformBlockIndex(shader.Program, "BoneMatrices");
+    if (blockIndex == GL_INVALID_INDEX) {
+        std::cerr << "Uniform Block 'BoneMatrices' not found!" << std::endl;
+    }
+    else {
+        glUniformBlockBinding(shader.Program, blockIndex, BONE_MATRICES_BINDING_POINT);
+        CheckGLErrors("glUniformBlockBinding");
+
+        glBindBufferBase(GL_UNIFORM_BUFFER, BONE_MATRICES_BINDING_POINT, uboBoneMatrices);
+        CheckGLErrors("glBindBufferBase");
+    }
+}
+
+void AnimatedModel::updateBoneMatrices(const std::vector<glm::mat4>& boneMatrices) {
+    shader.use();
+    glBindBuffer(GL_UNIFORM_BUFFER, uboBoneMatrices);
+    glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4) * boneMatrices.size(), boneMatrices.data());
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+}
+
+glm::mat4 AnimatedModel::getModelMatrix() const {
+    glm::mat4 translationMatrix = glm::translate(glm::mat4(1.0f), position);
+    glm::mat4 rotationMatrix = glm::mat4_cast(rotation);
+    glm::mat4 scaleMatrix = glm::scale(glm::mat4(1.0f), scale);
+    return translationMatrix * rotationMatrix * scaleMatrix;
+}
+
+void AnimatedModel::draw(const RenderingContext& context) const {
+    shader.use();
+    shader.setMat4("view", context.viewMatrix);
+    shader.setMat4("projection", context.projectionMatrix);
+    glm::mat4 modelMatrix = getModelMatrix();
+    shader.setMat4("model", modelMatrix);
+
+    // Check if bone matrices binding point is specified and bind the bone matrices UBO to it before drawing
+    if (context.boneMatricesBindingPoint != 0) {
+        glBindBufferBase(GL_UNIFORM_BUFFER, context.boneMatricesBindingPoint, uboBoneMatrices);
+    }
+
+    for (const auto& mesh : skinnedMeshes) {
+        mesh->render(shader, modelMatrix, context.viewMatrix, context.projectionMatrix);
+    }
+
+    // Optionally, if you unbind the bone matrices UBO after drawing,
+    // make sure to check if it was bound in the first place
+    if (context.boneMatricesBindingPoint != 0) {
+        glBindBufferBase(GL_UNIFORM_BUFFER, context.boneMatricesBindingPoint, 0);
     }
 }
 

@@ -63,3 +63,7 @@ std::vector<std::shared_ptr<Bone>> Skeleton::getRootBones() const {
     }
     return rootBones;
 }
+
+const std::vector<std::shared_ptr<Bone>>& Skeleton::getBones() const {
+    return bones;
+}

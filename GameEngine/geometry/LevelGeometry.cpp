@@ -60,7 +60,7 @@ void LevelGeometry::setupMesh() {
 	glBindVertexArray(0);
 }
 
-void LevelGeometry::draw(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix) const {
+void LevelGeometry::draw(const RenderingContext& context) const {
 	if (!shader) {
 		std::cerr << "Shader not set for geometry, cannot draw." << std::endl;
 		return;
@@ -121,8 +121,8 @@ void LevelGeometry::draw(const glm::mat4& viewMatrix, const glm::mat4& projectio
 
 	// Pass the matrices to the shader.
 	shader->setMat4("model", model);
-	shader->setMat4("view", viewMatrix);
-	shader->setMat4("projection", projectionMatrix);
+	shader->setMat4("view", context.viewMatrix);
+	shader->setMat4("projection", context.projectionMatrix);
 
 	// Check for errors after setting uniforms
 	while ((error = glGetError()) != GL_NO_ERROR) {
@@ -297,6 +297,7 @@ void LevelGeometry::setScale(const glm::vec3& scl) {
 	scale = scl;
 	updateModelMatrix();
 }
+
 
 
 
