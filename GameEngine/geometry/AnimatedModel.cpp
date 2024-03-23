@@ -1,7 +1,7 @@
 #include "AnimatedModel.h"
 
 AnimatedModel::AnimatedModel(const std::string& vertexPath, const std::string& fragmentPath)
-    : shader(vertexPath, fragmentPath), position(0.0f), scale(1.0f) {
+    : shader(vertexPath, fragmentPath), position(0.0f), scale(0.25f) {
     createBoneMatricesBuffer();
     // Apply a rotation of -90 degrees around the X-axis
     rotation = glm::quat(glm::vec3(glm::radians(-90.0f), 0.0f, 0.0f));
@@ -165,7 +165,9 @@ void AnimatedModel::createBoneMatricesBuffer() {
     glBindBuffer(GL_UNIFORM_BUFFER, uboBoneMatrices);
     CheckGLErrors("glBindBuffer GL_UNIFORM_BUFFER");
 
-    glBufferData(GL_UNIFORM_BUFFER, sizeof(glm::mat4) * MAX_BONES, nullptr, GL_DYNAMIC_DRAW);
+    // Create an array of identity matrices for bone transformations
+    std::vector<glm::mat4> initialBoneMatrices(MAX_BONES, glm::mat4(1.0f));
+    glBufferData(GL_UNIFORM_BUFFER, sizeof(glm::mat4) * MAX_BONES, initialBoneMatrices.data(), GL_DYNAMIC_DRAW);
     CheckGLErrors("glBufferData");
 
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
