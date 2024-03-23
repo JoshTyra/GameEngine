@@ -223,5 +223,16 @@ void AnimatedModel::draw(const RenderingContext& context) const {
     }
 }
 
+void AnimatedModel::setAnimation(const std::string& animationName) {
+    auto animIt = animations.find(animationName);
+    if (animIt != animations.end()) {
+        currentAnimation = animIt->second;
+        currentAnimationTime = 0.0f; // Reset the animation time
+    }
+    else {
+        std::cerr << "Animation " << animationName << " not found." << std::endl;
+    }
+}
+
 
 

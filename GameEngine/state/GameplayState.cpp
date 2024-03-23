@@ -18,8 +18,8 @@ void GameplayState::enter() {
 
     animatedModel = std::make_unique<AnimatedModel>(FileSystemUtils::getAssetFilePath("shaders/skinning.vert"),
         FileSystemUtils::getAssetFilePath("shaders/skinning.frag"));
-    //animatedModel->loadModel(FileSystemUtils::getAssetFilePath("models/combat_sword_idle.fbx"));
-    //animatedModel->setAnimation("Take 001");
+    animatedModel->loadModel(FileSystemUtils::getAssetFilePath("models/combat_sword_idle.fbx"));
+    animatedModel->setAnimation("Take 001");
 
     auto audioManager = GameStateManager::instance().getAudioManager();
     if (audioManager) {
