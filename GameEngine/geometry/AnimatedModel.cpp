@@ -1,8 +1,10 @@
 #include "AnimatedModel.h"
 
 AnimatedModel::AnimatedModel(const std::string& vertexPath, const std::string& fragmentPath)
-    : shader(vertexPath, fragmentPath), position(0.0f), rotation(glm::quat(1.0, 0.0, 0.0, 0.0)), scale(1.0f) {
+    : shader(vertexPath, fragmentPath), position(0.0f), scale(1.0f) {
     createBoneMatricesBuffer();
+    // Apply a rotation of -90 degrees around the X-axis
+    rotation = glm::quat(glm::vec3(glm::radians(-90.0f), 0.0f, 0.0f));
 }
 
 AnimatedModel::~AnimatedModel() {}
@@ -194,10 +196,14 @@ void AnimatedModel::updateBoneMatrices(const std::vector<glm::mat4>& boneMatrice
 }
 
 glm::mat4 AnimatedModel::getModelMatrix() const {
-    glm::mat4 translationMatrix = glm::translate(glm::mat4(1.0f), position);
-    glm::mat4 rotationMatrix = glm::mat4_cast(rotation);
-    glm::mat4 scaleMatrix = glm::scale(glm::mat4(1.0f), scale);
-    return translationMatrix * rotationMatrix * scaleMatrix;
+    glm::mat4 model = glm::mat4(1.0f);
+    // Apply scaling
+    model = glm::scale(model, scale);
+    // Apply rotation
+    model *= glm::mat4_cast(rotation);
+    // Apply translation
+    model = glm::translate(model, position);
+    return model;
 }
 
 void AnimatedModel::draw(const RenderingContext& context) const {

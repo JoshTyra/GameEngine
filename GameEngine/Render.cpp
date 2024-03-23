@@ -44,7 +44,7 @@ void Renderer::renderFrame(const std::vector<std::shared_ptr<IRenderable>>& rend
     updateFrustum(projectionMatrix * cameraController->getViewMatrix());
     frameBufferManager->bindFrameBuffer(0);
     prepareFrame();
-    //renderSkybox();
+    renderSkybox();
 
     // Creating a RenderingContext object here to encapsulate all the necessary state for rendering a frame.
     // This approach simplifies the method signatures of draw calls across different renderable entities and
