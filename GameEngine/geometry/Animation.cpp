@@ -33,11 +33,13 @@ glm::mat4 Animation::getBoneTransform(float animationTime, const std::string& bo
 }
 
 glm::vec3 Animation::interpolatePosition(float animationTime, const AnimationChannel& channel) const {
-    if (channel.keyframes.size() == 1) {
-        return channel.keyframes[0].position;
+    // Ensure there's at least two keyframes to interpolate between
+    if (channel.keyframes.size() < 2) {
+        // If there's only one keyframe, or none, return the position from the first keyframe or a default value
+        return channel.keyframes.empty() ? glm::vec3() : channel.keyframes[0].position;
     }
 
-    // Find the keyframe right before the current animation time
+    // Find the keyframe right before the current animation time, or the last keyframe if the time exceeds the animation
     size_t keyframeIndex = 0;
     for (size_t i = 0; i < channel.keyframes.size() - 1; i++) {
         if (animationTime < channel.keyframes[i + 1].timeStamp) {
@@ -46,17 +48,27 @@ glm::vec3 Animation::interpolatePosition(float animationTime, const AnimationCha
         }
     }
 
+    // If the animation time is beyond the last keyframe's time, clamp to the last two keyframes
+    if (keyframeIndex == channel.keyframes.size() - 1) {
+        keyframeIndex = channel.keyframes.size() - 2;
+    }
+
     const Keyframe& startFrame = channel.keyframes[keyframeIndex];
     const Keyframe& endFrame = channel.keyframes[keyframeIndex + 1];
-    float deltaTime = endFrame.timeStamp - startFrame.timeStamp;
-    float factor = (animationTime - startFrame.timeStamp) / deltaTime;
 
+    // Safeguard against division by zero if the timestamps are the same
+    float deltaTime = endFrame.timeStamp - startFrame.timeStamp;
+    if (deltaTime == 0) {
+        return startFrame.position;
+    }
+
+    float factor = (animationTime - startFrame.timeStamp) / deltaTime;
     return glm::mix(startFrame.position, endFrame.position, factor);
 }
 
 glm::quat Animation::interpolateRotation(float animationTime, const AnimationChannel& channel) const {
-    if (channel.keyframes.size() == 1) {
-        return channel.keyframes[0].rotation;
+    if (channel.keyframes.size() < 2) {
+        return channel.keyframes.empty() ? glm::quat() : channel.keyframes[0].rotation;
     }
 
     size_t keyframeIndex = 0;
@@ -67,17 +79,22 @@ glm::quat Animation::interpolateRotation(float animationTime, const AnimationCha
         }
     }
 
+    if (keyframeIndex == channel.keyframes.size() - 1) {
+        keyframeIndex = channel.keyframes.size() - 2;
+    }
+
     const Keyframe& startFrame = channel.keyframes[keyframeIndex];
     const Keyframe& endFrame = channel.keyframes[keyframeIndex + 1];
     float deltaTime = endFrame.timeStamp - startFrame.timeStamp;
-    float factor = (animationTime - startFrame.timeStamp) / deltaTime;
+    if (deltaTime == 0) return startFrame.rotation;
 
+    float factor = (animationTime - startFrame.timeStamp) / deltaTime;
     return glm::slerp(startFrame.rotation, endFrame.rotation, factor);
 }
 
 glm::vec3 Animation::interpolateScale(float animationTime, const AnimationChannel& channel) const {
-    if (channel.keyframes.size() == 1) {
-        return channel.keyframes[0].scale;
+    if (channel.keyframes.size() < 2) {
+        return channel.keyframes.empty() ? glm::vec3(1.0f) : channel.keyframes[0].scale; // Assuming default scale is 1,1,1
     }
 
     size_t keyframeIndex = 0;
@@ -88,10 +105,15 @@ glm::vec3 Animation::interpolateScale(float animationTime, const AnimationChanne
         }
     }
 
+    if (keyframeIndex == channel.keyframes.size() - 1) {
+        keyframeIndex = channel.keyframes.size() - 2;
+    }
+
     const Keyframe& startFrame = channel.keyframes[keyframeIndex];
     const Keyframe& endFrame = channel.keyframes[keyframeIndex + 1];
     float deltaTime = endFrame.timeStamp - startFrame.timeStamp;
-    float factor = (animationTime - startFrame.timeStamp) / deltaTime;
+    if (deltaTime == 0) return startFrame.scale;
 
+    float factor = (animationTime - startFrame.timeStamp) / deltaTime;
     return glm::mix(startFrame.scale, endFrame.scale, factor);
 }

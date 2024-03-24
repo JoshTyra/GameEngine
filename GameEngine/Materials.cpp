@@ -47,18 +47,20 @@ void Material::setTechniqueDetails(const Technique& techniqueDetails) {
             fragmentShaderPath = fullPath;
         }
     }
-    shaderProgram = std::make_unique<Shader>(vertexShaderPath, fragmentShaderPath);
+
+    // Use std::make_shared for allocation
+    shaderProgram = std::make_shared<Shader>(vertexShaderPath, fragmentShaderPath);
     if (!shaderProgram->isProgramLinkedSuccessfully()) {
         std::cerr << "Failed to compile/link shader program for material." << std::endl;
     }
 }
 
-Shader* Material::getShaderProgram() const {
-    return shaderProgram.get();
+std::shared_ptr<Shader> Material::getShaderProgram() const {
+    return shaderProgram; // Simply return the shared_ptr
 }
 
-void Material::setShaderProgram(std::unique_ptr<Shader> shader) {
-    shaderProgram = std::move(shader);
+void Material::setShaderProgram(std::shared_ptr<Shader> shader) {
+    shaderProgram = shader; // Direct assignment thanks to shared_ptr
 }
 
 const Technique& Material::getTechniqueDetails() const {

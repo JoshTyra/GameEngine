@@ -22,11 +22,9 @@ LevelGeometry::LevelGeometry(const std::vector<StaticVertex>& vertices,
 }
 
 LevelGeometry::~LevelGeometry() {
-	// Clean up resources, if any
 	glDeleteVertexArrays(1, &VAO);
 	glDeleteBuffers(1, &VBO);
 	glDeleteBuffers(1, &EBO);
-	// Additional cleanup as needed
 }
 
 void LevelGeometry::setupMesh() {
@@ -61,8 +59,8 @@ void LevelGeometry::setupMesh() {
 }
 
 void LevelGeometry::draw(const RenderingContext& context) const {
-	if (!shader) {
-		std::cerr << "Shader not set for geometry, cannot draw." << std::endl;
+	if (!shader || !shader->Program) {
+		std::cerr << "Shader not set or invalid for geometry, cannot draw." << std::endl;
 		return;
 	}
 
@@ -129,8 +127,11 @@ void LevelGeometry::draw(const RenderingContext& context) const {
 		std::cerr << "OpenGL Error after setting matrix uniforms: " << error << std::endl;
 	}
 
+	GLint maxTextureUnits;
+	glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &maxTextureUnits);
+
 	// Use the Material::textureUniformMap to get the correct uniform names
-	for (size_t i = 0; i < textures.size(); ++i) {
+	for (size_t i = 0; i < textures.size() && i < static_cast<size_t>(maxTextureUnits); ++i) {
 		glActiveTexture(GL_TEXTURE0 + i);
 		glBindTexture(GL_TEXTURE_2D, textures[i].id);
 
@@ -168,10 +169,9 @@ void LevelGeometry::addTexture(const Texture& texture) {
 }
 
 void LevelGeometry::setMaterial(std::shared_ptr<Material> mat) {
-	material = mat;
-
-	// Directly assign the shader pointer from the material's shader program
-	shader = material->getShaderProgram();
+	material = std::move(mat); // Assume ownership or shared reference of the passed material
+	// Directly assign the shader std::shared_ptr from the material's shader program
+	shader = material->getShaderProgram(); // This should return std::shared_ptr<Shader>
 }
 
 btCollisionShape* LevelGeometry::createBulletCollisionShape() const {
@@ -297,6 +297,16 @@ void LevelGeometry::setScale(const glm::vec3& scl) {
 	scale = scl;
 	updateModelMatrix();
 }
+
+void LevelGeometry::setShader(std::shared_ptr<Shader> newShader) {
+	shader = std::move(newShader); // Use std::move if you're transferring ownership
+}
+
+std::shared_ptr<Shader> LevelGeometry::getShader() const {
+	return shader; // Directly return the std::shared_ptr<Shader>
+}
+
+
 
 
 

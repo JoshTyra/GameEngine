@@ -150,6 +150,7 @@
     <ClCompile Include="geometry\Skeleton.cpp" />
     <ClCompile Include="geometry\SkinnedMesh.cpp" />
     <ClCompile Include="GLEnumUtils.cpp" />
+    <ClCompile Include="graphics\shader.cpp" />
     <ClCompile Include="imgui\imgui.cpp" />
     <ClCompile Include="imgui\imgui_draw.cpp" />
     <ClCompile Include="imgui\imgui_impl_glfw.cpp" />

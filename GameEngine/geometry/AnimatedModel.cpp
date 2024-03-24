@@ -1,8 +1,7 @@
 #include "AnimatedModel.h"
 
 AnimatedModel::AnimatedModel(const std::string& vertexPath, const std::string& fragmentPath)
-    : shader(vertexPath, fragmentPath), position(0.0f), scale(0.25f) {
-    createBoneMatricesBuffer();
+    : shader(vertexPath, fragmentPath), position(0.0f), scale(1.0f) {
     // Apply a rotation of -90 degrees around the X-axis
     rotation = glm::quat(glm::vec3(glm::radians(-90.0f), 0.0f, 0.0f));
 }
@@ -41,10 +40,14 @@ bool AnimatedModel::loadModel(const std::string& path) {
     skeleton = std::make_shared<Skeleton>();
 
     // Process bones and hierarchy
-    //processBonesAndHierarchy(scene, skeleton);
+    processBonesAndHierarchy(scene, skeleton);
 
     // Load animations
     //loadAnimations(scene);
+
+    //createBoneMatricesBuffer();
+
+    updateShaderWithBoneMatrices();
 
     return true;
 }
@@ -52,34 +55,73 @@ bool AnimatedModel::loadModel(const std::string& path) {
 void AnimatedModel::loadAnimations(const aiScene* scene) {
     std::cout << "Loading animations:" << std::endl;
     for (unsigned int i = 0; i < scene->mNumAnimations; i++) {
-        std::string animName = scene->mAnimations[i]->mName.C_Str();
-        std::cout << " - " << animName << std::endl;
         aiAnimation* aiAnim = scene->mAnimations[i];
+        std::string animName = aiAnim->mName.C_Str();
+        std::cout << " - " << animName
+            << " | Channels: " << aiAnim->mNumChannels
+            << " | Duration: " << aiAnim->mDuration
+            << " | TicksPerSecond: " << aiAnim->mTicksPerSecond << std::endl;
+
         Animation animation(aiAnim->mName.C_Str(), static_cast<float>(aiAnim->mDuration), static_cast<float>(aiAnim->mTicksPerSecond));
 
         for (unsigned int j = 0; j < aiAnim->mNumChannels; j++) {
             aiNodeAnim* channel = aiAnim->mChannels[j];
+            std::cout << "Channel: " << channel->mNodeName.C_Str()
+                << " | PositionKeys: " << channel->mNumPositionKeys
+                << " | RotationKeys: " << channel->mNumRotationKeys
+                << " | ScalingKeys: " << channel->mNumScalingKeys << std::endl;
+
             AnimationChannel animChannel(channel->mNodeName.C_Str());
 
-            // Process position keyframes
-            for (unsigned int k = 0; k < channel->mNumPositionKeys; k++) {
-                aiVectorKey key = channel->mPositionKeys[k];
-                Keyframe keyframe(static_cast<float>(key.mTime), AssimpToGLMVec3(key.mValue), glm::quat(), glm::vec3(1.0f));
-                animChannel.keyframes.push_back(keyframe);
+            if (channel->mNumPositionKeys > 1) {
+                // Safe to access the first and last key if there are more than one keyframes
+                const aiVectorKey& firstPosKey = channel->mPositionKeys[0];
+                const aiVectorKey& lastPosKey = channel->mPositionKeys[channel->mNumPositionKeys - 1];
+                std::cout << "First Position Key Time: " << firstPosKey.mTime << " Value: "
+                    << firstPosKey.mValue.x << ", " << firstPosKey.mValue.y << ", " << firstPosKey.mValue.z << std::endl;
+                std::cout << "Last Position Key Time: " << lastPosKey.mTime << " Value: "
+                    << lastPosKey.mValue.x << ", " << lastPosKey.mValue.y << ", " << lastPosKey.mValue.z << std::endl;
+            }
+            else if (channel->mNumPositionKeys == 1) {
+                // If there's exactly one keyframe, it's both the first and the last
+                const aiVectorKey& key = channel->mPositionKeys[0];
+                std::cout << "Only Position Key Time: " << key.mTime << " Value: "
+                    << key.mValue.x << ", " << key.mValue.y << ", " << key.mValue.z << std::endl;
             }
 
-            // Process rotation keyframes
-            for (unsigned int k = 0; k < channel->mNumRotationKeys; k++) {
-                aiQuatKey key = channel->mRotationKeys[k];
-                Keyframe keyframe(static_cast<float>(key.mTime), glm::vec3(), AssimpToGLMQuat(key.mValue), glm::vec3(1.0f));
-                animChannel.keyframes.push_back(keyframe);
+            if (channel->mNumRotationKeys > 1) {
+                // Safe to access the first and last key if there are more than one keyframes
+                const aiQuatKey& firstRotKey = channel->mRotationKeys[0];
+                const aiQuatKey& lastRotKey = channel->mRotationKeys[channel->mNumRotationKeys - 1];
+                std::cout << "First Rotation Key Time: " << firstRotKey.mTime << " Value: "
+                    << firstRotKey.mValue.x << ", " << firstRotKey.mValue.y << ", "
+                    << firstRotKey.mValue.z << ", " << firstRotKey.mValue.w << std::endl;
+                std::cout << "Last Rotation Key Time: " << lastRotKey.mTime << " Value: "
+                    << lastRotKey.mValue.x << ", " << lastRotKey.mValue.y << ", "
+                    << lastRotKey.mValue.z << ", " << lastRotKey.mValue.w << std::endl;
+            }
+            else if (channel->mNumRotationKeys == 1) {
+                // If there's exactly one keyframe, it's both the first and the last
+                const aiQuatKey& key = channel->mRotationKeys[0];
+                std::cout << "Only Rotation Key Time: " << key.mTime << " Value: "
+                    << key.mValue.x << ", " << key.mValue.y << ", "
+                    << key.mValue.z << ", " << key.mValue.w << std::endl;
             }
 
-            // Process scaling keyframes
-            for (unsigned int k = 0; k < channel->mNumScalingKeys; k++) {
-                aiVectorKey key = channel->mScalingKeys[k];
-                Keyframe keyframe(static_cast<float>(key.mTime), glm::vec3(), glm::quat(), AssimpToGLMVec3(key.mValue));
-                animChannel.keyframes.push_back(keyframe);
+            if (channel->mNumScalingKeys > 1) {
+                // Safe to access the first and last key if there are more than one keyframe
+                const aiVectorKey& firstScaleKey = channel->mScalingKeys[0];
+                const aiVectorKey& lastScaleKey = channel->mScalingKeys[channel->mNumScalingKeys - 1];
+                std::cout << "First Scaling Key Time: " << firstScaleKey.mTime << " Value: "
+                    << firstScaleKey.mValue.x << ", " << firstScaleKey.mValue.y << ", " << firstScaleKey.mValue.z << std::endl;
+                std::cout << "Last Scaling Key Time: " << lastScaleKey.mTime << " Value: "
+                    << lastScaleKey.mValue.x << ", " << lastScaleKey.mValue.y << ", " << lastScaleKey.mValue.z << std::endl;
+            }
+            else if (channel->mNumScalingKeys == 1) {
+                // If there's exactly one keyframe, it's both the first and the last
+                const aiVectorKey& key = channel->mScalingKeys[0];
+                std::cout << "Only Scaling Key Time: " << key.mTime << " Value: "
+                    << key.mValue.x << ", " << key.mValue.y << ", " << key.mValue.z << std::endl;
             }
 
             animation.addChannel(animChannel);
@@ -108,8 +150,6 @@ void AnimatedModel::update(float deltaTime) {
 
     //// Update the skeleton with these transformations
     //skeleton->updateBoneMatricesFromAnimation(boneTransforms);
-
-    // At this point, the skeleton's boneMatrices vector is updated and ready for use in rendering
 }
 
 void AnimatedModel::processBonesAndHierarchy(const aiScene* scene, std::shared_ptr<Skeleton> skeleton) {
@@ -159,36 +199,67 @@ void AnimatedModel::establishHierarchy(const aiNode* node, std::shared_ptr<Bone>
 }
 
 void AnimatedModel::createBoneMatricesBuffer() {
+    // Assuming MAX_BONES is defined somewhere
+    std::vector<glm::mat4> identityMatrices(MAX_BONES, glm::mat4(1.0f)); // Identity matrices
+
     glGenBuffers(1, &uboBoneMatrices);
-    CheckGLErrors("glGenBuffers");
-
     glBindBuffer(GL_UNIFORM_BUFFER, uboBoneMatrices);
-    CheckGLErrors("glBindBuffer GL_UNIFORM_BUFFER");
-
-    // Create an array of identity matrices for bone transformations
-    std::vector<glm::mat4> initialBoneMatrices(MAX_BONES, glm::mat4(1.0f));
-    glBufferData(GL_UNIFORM_BUFFER, sizeof(glm::mat4) * MAX_BONES, initialBoneMatrices.data(), GL_DYNAMIC_DRAW);
-    CheckGLErrors("glBufferData");
-
+    glBufferData(GL_UNIFORM_BUFFER, sizeof(glm::mat4) * MAX_BONES, identityMatrices.data(), GL_STATIC_DRAW);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
-    CheckGLErrors("glBindBuffer 0");
 
     // Ensure the shader program is being used before getting and setting the uniform block index.
     shader.use();
     CheckGLErrors("shader.use");
 
-    GLuint blockIndex = glGetUniformBlockIndex(shader.Program, "BoneMatrices");
-    if (blockIndex == GL_INVALID_INDEX) {
-        std::cerr << "Uniform Block 'BoneMatrices' not found!" << std::endl;
-    }
-    else {
-        glUniformBlockBinding(shader.Program, blockIndex, BONE_MATRICES_BINDING_POINT);
-        CheckGLErrors("glUniformBlockBinding");
+    shader.use(); // Ensure shader program is active
 
-        glBindBufferBase(GL_UNIFORM_BUFFER, BONE_MATRICES_BINDING_POINT, uboBoneMatrices);
-        CheckGLErrors("glBindBufferBase");
+    const std::vector<glm::mat4>& boneMatrices = skeleton->getBoneMatrices();
+    // Log the first bone matrix, or loop through more if needed
+    if (!boneMatrices.empty()) {
+        const glm::mat4& firstBoneMatrix = boneMatrices[0];
+        std::cout << "First bone matrix: \n";
+        for (int i = 0; i < 4; ++i) {
+            std::cout << "["
+                << firstBoneMatrix[i][0] << ", "
+                << firstBoneMatrix[i][1] << ", "
+                << firstBoneMatrix[i][2] << ", "
+                << firstBoneMatrix[i][3] << "]\n";
+        }
+    }
+
+    for (size_t i = 0; i < boneMatrices.size(); ++i) {
+        glUniformMatrix4fv(glGetUniformLocation(shader.Program, ("bones[" + std::to_string(i) + "]").c_str()),
+            1, GL_FALSE, glm::value_ptr(boneMatrices[i]));
     }
 }
+
+void AnimatedModel::updateShaderWithBoneMatrices() {
+    shader.use(); // Ensure the shader program is active
+
+    // Assuming `skeleton` is valid and contains the current bone matrices
+    const std::vector<glm::mat4>& boneMatrices = skeleton->getBoneMatrices();
+
+    // For debugging, you can log the first bone matrix as you have done
+    if (!boneMatrices.empty()) {
+        const glm::mat4& firstBoneMatrix = boneMatrices[0];
+        std::cout << "First bone matrix: \n";
+        for (int i = 0; i < 4; ++i) {
+            std::cout << "["
+                << firstBoneMatrix[i][0] << ", "
+                << firstBoneMatrix[i][1] << ", "
+                << firstBoneMatrix[i][2] << ", "
+                << firstBoneMatrix[i][3] << "]\n";
+        }
+    }
+
+    // Update shader with each bone matrix
+    for (size_t i = 0; i < boneMatrices.size(); ++i) {
+        std::string uniformName = "bones[" + std::to_string(i) + "]";
+        GLint loc = glGetUniformLocation(shader.Program, uniformName.c_str());
+        glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(boneMatrices[i]));
+    }
+}
+
 
 void AnimatedModel::updateBoneMatrices(const std::vector<glm::mat4>& boneMatrices) {
     shader.use();
@@ -215,20 +286,19 @@ void AnimatedModel::draw(const RenderingContext& context) const {
     glm::mat4 modelMatrix = getModelMatrix();
     shader.setMat4("model", modelMatrix);
 
-    // Check if bone matrices binding point is specified and bind the bone matrices UBO to it before drawing
-    if (context.boneMatricesBindingPoint != 0) {
-        glBindBufferBase(GL_UNIFORM_BUFFER, context.boneMatricesBindingPoint, uboBoneMatrices);
-    }
+    // Temporarily bypass bone matrix logic for this test
+    // if (context.boneMatricesBindingPoint != 0) {
+    //     glBindBufferBase(GL_UNIFORM_BUFFER, context.boneMatricesBindingPoint, uboBoneMatrices);
+    // }
 
     for (const auto& mesh : skinnedMeshes) {
         mesh->render(shader, modelMatrix, context.viewMatrix, context.projectionMatrix);
     }
 
-    // Optionally, if you unbind the bone matrices UBO after drawing,
-    // make sure to check if it was bound in the first place
-    if (context.boneMatricesBindingPoint != 0) {
-        glBindBufferBase(GL_UNIFORM_BUFFER, context.boneMatricesBindingPoint, 0);
-    }
+    // Temporarily bypass bone matrix logic for this test
+    // if (context.boneMatricesBindingPoint != 0) {
+    //     glBindBufferBase(GL_UNIFORM_BUFFER, context.boneMatricesBindingPoint, 0);
+    // }
 }
 
 void AnimatedModel::setAnimation(const std::string& animationName) {

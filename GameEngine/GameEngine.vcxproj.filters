@@ -85,6 +85,9 @@
     <Filter Include="Source Files\postprocessing">
       <UniqueIdentifier>{9f3c4fe1-18ac-4723-833d-2e0e1217f2b6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\graphics">
+      <UniqueIdentifier>{06b8bb87-f4aa-4d33-8f0a-7d97728eee87}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GameEngine.cpp">
@@ -206,6 +209,9 @@
     </ClCompile>
     <ClCompile Include="utilities\OpenGLUtils.cpp">
       <Filter>Source Files\utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="graphics\shader.cpp">
+      <Filter>Source Files\graphics</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

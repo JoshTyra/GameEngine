@@ -41,6 +41,9 @@ void FrameBufferManager::createFrameBuffer(int width, int height) {
     glBindRenderbuffer(GL_RENDERBUFFER, 0);
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, frameBuffer.renderBufferId);
 
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+        std::cerr << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
+
     // Unbind the framebuffer
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 

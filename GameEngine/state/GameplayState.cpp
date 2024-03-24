@@ -16,9 +16,9 @@ void GameplayState::enter() {
     std::string materialPath = FileSystemUtils::getAssetFilePath("materials/tutorial.txt");
     planeGeometry = ModelLoader::loadModel(modelPath, materialPath);
 
-    animatedModel = std::make_unique<AnimatedModel>(FileSystemUtils::getAssetFilePath("shaders/skinning.vert"),
-        FileSystemUtils::getAssetFilePath("shaders/skinning.frag"));
-    animatedModel->loadModel(FileSystemUtils::getAssetFilePath("models/combat_sword_idle.fbx"));
+    //animatedModel = std::make_unique<AnimatedModel>(FileSystemUtils::getAssetFilePath("shaders/skinning.vert"),
+    //    FileSystemUtils::getAssetFilePath("shaders/skinning.frag"));
+    //animatedModel->loadModel(FileSystemUtils::getAssetFilePath("models/testDummy.fbx"));
     //animatedModel->setAnimation("Take 001");
 
     auto audioManager = GameStateManager::instance().getAudioManager();

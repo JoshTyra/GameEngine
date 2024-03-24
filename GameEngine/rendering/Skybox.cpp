@@ -48,8 +48,13 @@ GLfloat Skybox::skyboxVertices[] = {
 };
 
 Skybox::Skybox(const std::vector<std::string>& faces)
-    : skyboxShader(FileSystemUtils::getAssetFilePath("shaders/skybox.vert"),
-        FileSystemUtils::getAssetFilePath("shaders/skybox.frag")) {
+    : skyboxShader(std::make_unique<Shader>(
+        FileSystemUtils::getAssetFilePath("shaders/skybox.vert"),
+        FileSystemUtils::getAssetFilePath("shaders/skybox.frag"))) {
+    if (!skyboxShader->isProgramLinkedSuccessfully()) {
+        std::cerr << "Failed to link skybox shader program." << std::endl;
+        // You may want to handle this error more gracefully
+    }
     setupSkybox();
     textureID = loadCubemap(faces);
 }
@@ -88,7 +93,6 @@ GLuint Skybox::loadCubemap(const std::vector<std::string>& faces) {
         }
         else {
             std::cerr << "Cubemap texture failed to load at path: " << fullPath << "\nReason: " << stbi_failure_reason() << std::endl;
-            stbi_image_free(data); // This is redundant as data is already null, but kept for consistency
         }
     }
 
@@ -104,18 +108,18 @@ GLuint Skybox::loadCubemap(const std::vector<std::string>& faces) {
 }
 
 void Skybox::draw(const glm::mat4& view, const glm::mat4& projection) const {
-    glDepthFunc(GL_LEQUAL); // Change depth function so depth test passes when values are equal to depth buffer's content
-    skyboxShader.use();
-    skyboxShader.setMat4("view", glm::mat4(glm::mat3(view))); // Remove translation from the view matrix
-    skyboxShader.setMat4("projection", projection);
+    glDepthFunc(GL_LEQUAL);
+    skyboxShader->use(); // Use -> instead of .
+    skyboxShader->setMat4("view", glm::mat4(glm::mat3(view)));
+    skyboxShader->setMat4("projection", projection);
 
-    glBindVertexArray(VAO);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
-    glDrawArrays(GL_TRIANGLES, 0, 36); // Draw the skybox
+    glBindVertexArray(VAO);
+    glDrawArrays(GL_TRIANGLES, 0, 36);
     glBindVertexArray(0);
 
-    glDepthFunc(GL_LESS); // Set depth function back to default
+    glDepthFunc(GL_LESS);
 }
 
 void Skybox::updateCubemap(const std::vector<std::string>& newFaces) {

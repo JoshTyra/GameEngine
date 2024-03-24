@@ -53,14 +53,9 @@ public:
     }
 
     // Method to set the shader program
-    void setShader(Shader* shader) {
-        this->shader = shader;
-    }
+    void setShader(std::shared_ptr<Shader> newShader);
 
-    // Method to get the shader program
-    Shader* getShader() const {
-        return shader;
-    }
+    std::shared_ptr<Shader> getShader() const;
 
     void setMaterial(std::shared_ptr<Material> mat);
 
@@ -80,7 +75,7 @@ private:
     std::vector<unsigned int> indices;
     std::vector<Texture> textures; // Store textures
     GLuint VAO, VBO, EBO;
-    Shader* shader;
+    std::shared_ptr<Shader> shader;
     std::shared_ptr<Material> material;
     glm::vec3 position = glm::vec3(0.0f);
     glm::vec3 rotationAxis = glm::vec3(0.0f, 1.0f, 0.0f);

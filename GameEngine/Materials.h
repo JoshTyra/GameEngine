@@ -26,11 +26,11 @@ public:
 
     void setTechniqueDetails(const Technique& techniqueDetails);
 
-    Shader* getShaderProgram() const;
+    std::shared_ptr<Shader> getShaderProgram() const;
 
     const Technique& getTechniqueDetails() const;
 
-    void setShaderProgram(std::unique_ptr<Shader> shader);
+    void setShaderProgram(std::shared_ptr<Shader> shader);
 
     void addParameter(const std::string& name, float value);
 
@@ -45,5 +45,5 @@ private:
     std::map<std::string, std::string> textures; // unit -> texture name
     std::map<std::string, float> parameters;
     Technique techniqueDetails; // Store detailed technique information
-    std::unique_ptr<Shader> shaderProgram;
+    std::shared_ptr<Shader> shaderProgram;
 };

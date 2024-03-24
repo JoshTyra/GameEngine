@@ -31,6 +31,7 @@ public:
     void draw(const RenderingContext& context) const override;
     void setAnimation(const std::string& animationName);
     void createBoneMatricesBuffer();
+    void updateShaderWithBoneMatrices();
     void updateBoneMatrices(const std::vector<glm::mat4>& boneMatrices);
     void processBonesAndHierarchy(const aiScene* scene, std::shared_ptr<Skeleton> skeleton);
     void establishHierarchy(const aiNode* node, std::shared_ptr<Bone> parentBone, std::shared_ptr<Skeleton> skeleton, std::unordered_map<std::string, std::shared_ptr<Bone>>& tempBoneMap);
@@ -44,5 +45,4 @@ private:
     std::shared_ptr<Animation> currentAnimation;
     float currentAnimationTime = 0.0f;
     GLuint uboBoneMatrices;
-    const GLuint BONE_MATRICES_BINDING_POINT = 4;
 };

@@ -120,14 +120,29 @@ void SkinnedMesh::processMesh(aiMesh* mesh, const aiScene* scene) {
 }
 
 void SkinnedMesh::render(const Shader& shader, const glm::mat4& modelMatrix, const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix) const {
-    shader.use(); // This activates the shader program which has the UBO bound to it
+    shader.use();
     shader.setMat4("model", modelMatrix);
     shader.setMat4("view", viewMatrix);
     shader.setMat4("projection", projectionMatrix);
 
+    passBoneTransformationsToShader(shader);
+
+    // Bind the VAO right before drawing to ensure it's bound
     glBindVertexArray(VAO);
+    CheckGLErrors("glBindVertexArray");
+
     glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(numIndices), GL_UNSIGNED_INT, 0);
+    CheckGLErrors("glDrawElements");
+
+    // Optionally, unbind the VAO to avoid unintended side effects in other parts of the program
     glBindVertexArray(0);
+}
+
+void SkinnedMesh::passBoneTransformationsToShader(const Shader& shader) const {
+    // Make sure your shader is using the correct uniform name ("boneTransforms" in this case)
+    for (size_t i = 0; i < boneInfo.size(); ++i) {
+        shader.setMat4("boneTransforms[" + std::to_string(i) + "]", boneInfo[i].FinalTransformation);
+    }
 }
 
 
