@@ -153,3 +153,7 @@ void Renderer::setSkybox(std::shared_ptr<Skybox> skybox) {
 void Renderer::updateFrustum(const glm::mat4& viewProjection) {
     frustum.update(viewProjection);
 }
+
+const glm::mat4& Renderer::getProjectionMatrix() const {
+    return projectionMatrix;
+}

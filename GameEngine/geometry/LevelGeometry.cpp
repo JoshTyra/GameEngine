@@ -58,7 +58,7 @@ void LevelGeometry::setupMesh() {
 	glBindVertexArray(0);
 }
 
-void LevelGeometry::draw(const RenderingContext& context) const {
+void LevelGeometry::draw(const RenderingContext& context) {
 	if (!shader || !shader->Program) {
 		std::cerr << "Shader not set or invalid for geometry, cannot draw." << std::endl;
 		return;
@@ -305,14 +305,3 @@ void LevelGeometry::setShader(std::shared_ptr<Shader> newShader) {
 std::shared_ptr<Shader> LevelGeometry::getShader() const {
 	return shader; // Directly return the std::shared_ptr<Shader>
 }
-
-
-
-
-
-
-
-
-
-
-

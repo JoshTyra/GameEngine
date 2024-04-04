@@ -189,22 +189,7 @@
     <ClCompile Include="post-processing\FrameBufferManager.cpp">
       <Filter>Source Files\postprocessing</Filter>
     </ClCompile>
-    <ClCompile Include="geometry\AnimatedModel.cpp">
-      <Filter>Source Files\geometry</Filter>
-    </ClCompile>
-    <ClCompile Include="geometry\SkinnedMesh.cpp">
-      <Filter>Source Files\geometry</Filter>
-    </ClCompile>
     <ClCompile Include="rendering\BatchRenderer.cpp">
-      <Filter>Source Files\geometry</Filter>
-    </ClCompile>
-    <ClCompile Include="geometry\Animation.cpp">
-      <Filter>Source Files\geometry</Filter>
-    </ClCompile>
-    <ClCompile Include="geometry\Skeleton.cpp">
-      <Filter>Source Files\geometry</Filter>
-    </ClCompile>
-    <ClCompile Include="geometry\Bone.cpp">
       <Filter>Source Files\geometry</Filter>
     </ClCompile>
     <ClCompile Include="utilities\OpenGLUtils.cpp">
@@ -305,35 +290,11 @@
     <ClInclude Include="post-processing\FrameBufferManager.h">
       <Filter>Header Files\postprocessing</Filter>
     </ClInclude>
-    <ClInclude Include="geometry\AnimatedModel.h">
-      <Filter>Header Files\geometry</Filter>
-    </ClInclude>
-    <ClInclude Include="geometry\Animation.h">
-      <Filter>Header Files\geometry</Filter>
-    </ClInclude>
-    <ClInclude Include="geometry\AnimationChannel.h">
-      <Filter>Header Files\geometry</Filter>
-    </ClInclude>
-    <ClInclude Include="geometry\AnimationKeyframe.h">
-      <Filter>Header Files\geometry</Filter>
-    </ClInclude>
-    <ClInclude Include="geometry\Bone.h">
-      <Filter>Header Files\geometry</Filter>
-    </ClInclude>
-    <ClInclude Include="geometry\Skeleton.h">
-      <Filter>Header Files\geometry</Filter>
-    </ClInclude>
-    <ClInclude Include="geometry\SkinnedMesh.h">
-      <Filter>Header Files\geometry</Filter>
-    </ClInclude>
     <ClInclude Include="rendering\BatchRenderer.h">
       <Filter>Header Files\geometry</Filter>
     </ClInclude>
     <ClInclude Include="rendering\IRenderable.h">
       <Filter>Header Files\rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="geometry\SkinnedVertex.h">
-      <Filter>Header Files\geometry</Filter>
     </ClInclude>
     <ClInclude Include="geometry\StaticVertex.h">
       <Filter>Header Files\geometry</Filter>

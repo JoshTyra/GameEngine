@@ -1,12 +1,5 @@
 #include "GameplayState.h"
-#include "GameStateManager.h"
-#include "FileSystemUtils.h"
-#include "ModelLoader.h"
-#include "imgui.h"
-#include "backends/imgui_impl_glfw.h"
-#include "backends/imgui_impl_opengl3.h"
-#include <glm/gtc/matrix_transform.hpp>
-#include <iostream>
+
 
 void GameplayState::enter() {
     GLFWwindow* window = GameStateManager::instance().getWindowContext();
@@ -15,11 +8,6 @@ void GameplayState::enter() {
     std::string modelPath = FileSystemUtils::getAssetFilePath("models/tutorial.fbx");
     std::string materialPath = FileSystemUtils::getAssetFilePath("materials/tutorial.txt");
     planeGeometry = ModelLoader::loadModel(modelPath, materialPath);
-
-    //animatedModel = std::make_unique<AnimatedModel>(FileSystemUtils::getAssetFilePath("shaders/skinning.vert"),
-    //    FileSystemUtils::getAssetFilePath("shaders/skinning.frag"));
-    //animatedModel->loadModel(FileSystemUtils::getAssetFilePath("models/testDummy.fbx"));
-    //animatedModel->setAnimation("Take 001");
 
     auto audioManager = GameStateManager::instance().getAudioManager();
     if (audioManager) {
@@ -62,10 +50,6 @@ void GameplayState::update(float deltaTime) {
 
         // Update listener position in the audio manager
         audioManager->updateListenerPosition(irrCameraPos, irrCameraFront, irrCameraUp);
-    }
-
-    if (animatedModel) {
-        animatedModel->update(deltaTime);
     }
 }
 
@@ -116,11 +100,6 @@ void GameplayState::render() {
     // Correctly iterate over planeGeometry and add each geometry to renderables
     for (const auto& geometry : planeGeometry) {
         renderables.push_back(geometry);
-    }
-
-    // Add the animated model if it exists and is adapted to IRenderable.
-    if (animatedModel) {
-        renderables.push_back(animatedModel);
     }
 
     // Now let the renderer handle all renderable entities.

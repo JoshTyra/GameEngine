@@ -23,6 +23,7 @@ public:
     void setSkybox(std::shared_ptr<Skybox> skybox);
     void renderFrame(const std::vector<std::shared_ptr<IRenderable>>& renderables);
     void finalizeFrame();
+    const glm::mat4& getProjectionMatrix() const;
 
 private:
     void prepareFrame();

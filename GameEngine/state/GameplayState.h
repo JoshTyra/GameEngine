@@ -7,7 +7,14 @@
 #include "LevelGeometry.h"
 #include "CameraController.h"
 #include "Renderer.h"
-#include "geometry/AnimatedModel.h"
+#include "GameStateManager.h"
+#include "FileSystemUtils.h"
+#include "ModelLoader.h"
+#include "imgui.h"
+#include "backends/imgui_impl_glfw.h"
+#include "backends/imgui_impl_opengl3.h"
+#include <glm/gtc/matrix_transform.hpp>
+#include <iostream>
 
 class GameplayState : public GameState {
 public:
@@ -17,8 +24,7 @@ public:
     void render() override;
 
 private:
-    std::vector<std::shared_ptr<IRenderable>> planeGeometry; // Model storage
-    std::shared_ptr<AnimatedModel> animatedModel;
+    std::vector<std::shared_ptr<IRenderable>> planeGeometry; // Static Model storage
 };
 
 #endif // GAMEPLAY_STATE_H
