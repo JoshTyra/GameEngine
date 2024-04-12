@@ -121,7 +121,6 @@ void Renderer::renderGeometries(const std::vector<std::unique_ptr<StaticGeometry
 
         shader->use(); // Bind the shader program
 
-        // Set shader uniforms (view and projection matrices are set globally using UBO)
         glm::mat4 modelMatrix = geometry->getModelMatrix();
         shader->setMat4("model", modelMatrix);
 
