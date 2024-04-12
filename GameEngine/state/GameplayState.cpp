@@ -7,7 +7,7 @@ void GameplayState::enter() {
 
     std::string modelPath = FileSystemUtils::getAssetFilePath("models/tutorial.fbx");
     std::string materialPath = FileSystemUtils::getAssetFilePath("materials/tutorial.txt");
-    planeGeometry = ModelLoader::loadModel(modelPath, materialPath);
+    staticGeometry = ModelLoader::loadModel(modelPath, materialPath);
 
     auto audioManager = GameStateManager::instance().getAudioManager();
     if (audioManager) {
@@ -97,8 +97,8 @@ void GameplayState::render() {
     // Create a collection for all renderable entities.
     std::vector<std::shared_ptr<IRenderable>> renderables;
 
-    // Correctly iterate over planeGeometry and add each geometry to renderables
-    for (const auto& geometry : planeGeometry) {
+    // Correctly iterate over staticGeometry and add each geometry to renderables
+    for (const auto& geometry : staticGeometry) {
         renderables.push_back(geometry);
     }
 
