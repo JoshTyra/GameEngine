@@ -129,9 +129,6 @@
     <ClCompile Include="textures\TextureLoader.cpp">
       <Filter>Source Files\textures</Filter>
     </ClCompile>
-    <ClCompile Include="geometry\LevelGeometry.cpp">
-      <Filter>Source Files\geometry</Filter>
-    </ClCompile>
     <ClCompile Include="geometry\ModelLoader.cpp">
       <Filter>Source Files\geometry</Filter>
     </ClCompile>
@@ -189,14 +186,17 @@
     <ClCompile Include="post-processing\FrameBufferManager.cpp">
       <Filter>Source Files\postprocessing</Filter>
     </ClCompile>
-    <ClCompile Include="rendering\BatchRenderer.cpp">
-      <Filter>Source Files\geometry</Filter>
-    </ClCompile>
     <ClCompile Include="utilities\OpenGLUtils.cpp">
       <Filter>Source Files\utilities</Filter>
     </ClCompile>
     <ClCompile Include="graphics\shader.cpp">
       <Filter>Source Files\graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="geometry\AnimatedGeometry.cpp">
+      <Filter>Source Files\geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="geometry\StaticGeometry.cpp">
+      <Filter>Source Files\geometry</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -223,9 +223,6 @@
     </ClInclude>
     <ClInclude Include="Materials.h">
       <Filter>Header Files\materials</Filter>
-    </ClInclude>
-    <ClInclude Include="LevelGeometry.h">
-      <Filter>Header Files\geometry</Filter>
     </ClInclude>
     <ClInclude Include="ModelLoader.h">
       <Filter>Header Files\geometry</Filter>
@@ -290,9 +287,6 @@
     <ClInclude Include="post-processing\FrameBufferManager.h">
       <Filter>Header Files\postprocessing</Filter>
     </ClInclude>
-    <ClInclude Include="rendering\BatchRenderer.h">
-      <Filter>Header Files\geometry</Filter>
-    </ClInclude>
     <ClInclude Include="rendering\IRenderable.h">
       <Filter>Header Files\rendering</Filter>
     </ClInclude>
@@ -304,6 +298,15 @@
     </ClInclude>
     <ClInclude Include="utilities\OpenGLUtils.h">
       <Filter>Header Files\utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="geometry\AnimatedGeometry.h">
+      <Filter>Header Files\geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="geometry\AnimatedVertex.h">
+      <Filter>Header Files\geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="StaticGeometry.h">
+      <Filter>Header Files\geometry</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

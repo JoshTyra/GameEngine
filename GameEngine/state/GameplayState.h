@@ -4,7 +4,7 @@
 #include <vector>
 #include <memory>
 #include "GameState.h"
-#include "LevelGeometry.h"
+#include "StaticGeometry.h"
 #include "CameraController.h"
 #include "Renderer.h"
 #include "GameStateManager.h"

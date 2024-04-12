@@ -4,7 +4,7 @@
 #include <memory>
 #include <utility>
 #include "CameraController.h"
-#include "LevelGeometry.h"
+#include "StaticGeometry.h"
 #include "rendering/Skybox.h"
 #include "post-processing/PostProcessing.h"
 #include "rendering/Frustum.h"
@@ -28,7 +28,7 @@ public:
 private:
     void prepareFrame();
     void renderSkybox() const;
-    void renderGeometries(const std::vector<std::unique_ptr<LevelGeometry>>& geometries);
+    void renderGeometries(const std::vector<std::unique_ptr<StaticGeometry>>& geometries);
     void setupUniformBufferObject();
 
     std::shared_ptr<CameraController> cameraController;

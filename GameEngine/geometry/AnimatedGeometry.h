@@ -9,14 +9,20 @@
 #include "Materials.h"
 #include "rendering/Frustum.h"
 #include "rendering/IRenderable.h"
-#include "geometry/StaticVertex.h"
+#include "geometry/AnimatedVertex.h"
+#include "Debug.h"
 
-// LevelGeometry class
-class LevelGeometry : public IRenderable {
+// StaticGeometry class
+class AnimatedGeometry : public IRenderable {
 public:
-    LevelGeometry();
-    LevelGeometry(const std::vector<StaticVertex>& vertices, const std::vector<unsigned int>& indices, const std::vector<Texture>& textures);
-    virtual ~LevelGeometry();
+    AnimatedGeometry();
+
+    AnimatedGeometry(const std::vector<AnimatedVertex>& vertices,
+        const std::vector<unsigned int>& indices,
+        const std::vector<Texture>& textures,
+        const std::vector<glm::mat4>& boneTransforms);
+
+    virtual ~AnimatedGeometry();
     void draw(const RenderingContext& context) override;
     void addTexture(const Texture& texture);
     void setPosition(const glm::vec3& pos);
@@ -32,7 +38,7 @@ public:
         return this->textures;
     }
 
-    // Assuming textures is a std::vector<Texture> member of LevelGeometry
+    // Assuming textures is a std::vector<Texture> member of StaticGeometry
     unsigned int getDiffuseTextureID() const {
         for (const Texture& texture : textures) {
             if (texture.type == "diffuse") {
@@ -42,7 +48,7 @@ public:
         return 0; // Return an invalid ID if not found
     }
 
-    // Assuming textures is a std::vector<Texture> member of LevelGeometry
+    // Assuming textures is a std::vector<Texture> member of StaticGeometry
     unsigned int getLightmapTextureID() const {
         for (const Texture& texture : textures) {
             if (texture.type == "emissive") {
@@ -71,7 +77,7 @@ public:
     void updateModelMatrix();
 
 private:
-    std::vector<StaticVertex> vertices;
+    std::vector<AnimatedVertex> vertices;
     std::vector<unsigned int> indices;
     std::vector<Texture> textures; // Store textures
     GLuint VAO, VBO, EBO;
@@ -82,10 +88,6 @@ private:
     float rotationAngle = 0.0f; // In degrees
     glm::vec3 scale = glm::vec3(1.0f);
     glm::mat4 modelMatrix;
-
-    // Optional: Store Bullet physics objects if needed
-    // std::unique_ptr<btCollisionShape> collisionShape; // Use smart pointers for automatic memory management
-    // std::unique_ptr<btRigidBody> rigidBody;
 
     void setupMesh();
 };

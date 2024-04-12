@@ -1,64 +1,59 @@
-#include "LevelGeometry.h"
-#include "shader.h"
-#include "Materials.h"
-#include "Debug.h"
+#include "AnimatedGeometry.h"
 
-LevelGeometry::LevelGeometry()
+AnimatedGeometry::AnimatedGeometry()
 	: VAO(0), VBO(0), EBO(0), shader(nullptr), modelMatrix(glm::mat4(1.0f)),
 	position(glm::vec3(0.0f)), rotationAxis(glm::vec3(0.0f, 0.0f, 0.0f)),
 	rotationAngle(0.0f), scale(glm::vec3(0.025f)) {
 }
 
 // Overloaded constructor for initializing with mesh data
-LevelGeometry::LevelGeometry(const std::vector<StaticVertex>& vertices,
+AnimatedGeometry::AnimatedGeometry(const std::vector<AnimatedVertex>& vertices,
 	const std::vector<unsigned int>& indices,
-	const std::vector<Texture>& textures)
+	const std::vector<Texture>& textures,
+	const std::vector<glm::mat4>& boneTransforms)
 	: vertices(vertices), indices(indices), textures(textures),
 	VAO(0), VBO(0), EBO(0), shader(nullptr),
 	position(glm::vec3(0.0f)), rotationAxis(glm::vec3(1.0f, 0.0f, 0.0f)),
-	rotationAngle(-90.0f), scale(glm::vec3(0.025f)), modelMatrix(glm::mat4(1.0f)) {
-	setupMesh(); // Assuming setupMesh initializes the VAO, VBO, EBO with the member vectors
-	calculateAABB(); // If you're automatically calculating the AABB upon construction
+	rotationAngle(-90.0f), scale(glm::vec3(0.025f)), modelMatrix(glm::mat4(1.0f))
+{
+	setupMesh();
+	calculateAABB();
 }
 
-LevelGeometry::~LevelGeometry() {
+AnimatedGeometry::~AnimatedGeometry() {
 	glDeleteVertexArrays(1, &VAO);
 	glDeleteBuffers(1, &VBO);
 	glDeleteBuffers(1, &EBO);
 }
 
-void LevelGeometry::setupMesh() {
+void AnimatedGeometry::setupMesh() {
 	glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &VBO);
 	glGenBuffers(1, &EBO);
 
 	glBindVertexArray(VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(StaticVertex), &vertices[0], GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(AnimatedVertex), &vertices[0], GL_STATIC_DRAW);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), &indices[0], GL_STATIC_DRAW);
 
 	// Vertex positions
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(StaticVertex), (void*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(AnimatedVertex), (void*)0);
 
 	// Vertex normals (if needed in shader)
 	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(StaticVertex), (void*)offsetof(StaticVertex, Normal));
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(AnimatedVertex), (void*)offsetof(AnimatedVertex, Normal));
 
 	// Vertex texture coords (first UV channel)
 	glEnableVertexAttribArray(2);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(StaticVertex), (void*)offsetof(StaticVertex, TexCoords));
-
-	// Assuming LightMapTexCoords is properly set in your Vertex struct
-	glEnableVertexAttribArray(3); // Assuming location 3 for lightmap UVs
-	glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, sizeof(StaticVertex), (void*)offsetof(StaticVertex, LightMapTexCoords));
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(AnimatedVertex), (void*)offsetof(AnimatedVertex, TexCoords));
 
 	glBindVertexArray(0);
 }
 
-void LevelGeometry::draw(const RenderingContext& context) {
+void AnimatedGeometry::draw(const RenderingContext& context) {
 	if (!shader || !shader->Program) {
 		std::cerr << "Shader not set or invalid for geometry, cannot draw." << std::endl;
 		return;
@@ -164,17 +159,17 @@ void LevelGeometry::draw(const RenderingContext& context) {
 	}
 }
 
-void LevelGeometry::addTexture(const Texture& texture) {
+void AnimatedGeometry::addTexture(const Texture& texture) {
 	textures.push_back(texture);
 }
 
-void LevelGeometry::setMaterial(std::shared_ptr<Material> mat) {
+void AnimatedGeometry::setMaterial(std::shared_ptr<Material> mat) {
 	material = std::move(mat); // Assume ownership or shared reference of the passed material
 	// Directly assign the shader std::shared_ptr from the material's shader program
 	shader = material->getShaderProgram(); // This should return std::shared_ptr<Shader>
 }
 
-btCollisionShape* LevelGeometry::createBulletCollisionShape() const {
+btCollisionShape* AnimatedGeometry::createBulletCollisionShape() const {
 	auto mesh = new btTriangleMesh();
 
 	for (size_t i = 0; i < indices.size(); i += 3) {
@@ -182,9 +177,9 @@ btCollisionShape* LevelGeometry::createBulletCollisionShape() const {
 		int index1 = indices[i + 1];
 		int index2 = indices[i + 2];
 
-		const StaticVertex& v0 = vertices[index0];
-		const StaticVertex& v1 = vertices[index1];
-		const StaticVertex& v2 = vertices[index2];
+		const AnimatedVertex& v0 = vertices[index0];
+		const AnimatedVertex& v1 = vertices[index1];
+		const AnimatedVertex& v2 = vertices[index2];
 
 		btVector3 vertex0(v0.Position.x, v0.Position.y, v0.Position.z);
 		btVector3 vertex1(v1.Position.x, v1.Position.y, v1.Position.z);
@@ -199,7 +194,7 @@ btCollisionShape* LevelGeometry::createBulletCollisionShape() const {
 	return shape;
 }
 
-void LevelGeometry::addToPhysicsWorld(btDiscreteDynamicsWorld* dynamicsWorld) {
+void AnimatedGeometry::addToPhysicsWorld(btDiscreteDynamicsWorld* dynamicsWorld) {
 	btCollisionShape* shape = createBulletCollisionShape();
 
 	// Obtain the model matrix that combines position, rotation, and scale
@@ -226,7 +221,7 @@ void LevelGeometry::addToPhysicsWorld(btDiscreteDynamicsWorld* dynamicsWorld) {
 	dynamicsWorld->addRigidBody(body);
 }
 
-void LevelGeometry::calculateAABB() {
+void AnimatedGeometry::calculateAABB() {
 	if (vertices.empty()) return;
 
 	aabbMin = aabbMax = vertices[0].Position;
@@ -245,7 +240,7 @@ void LevelGeometry::calculateAABB() {
 	aabbMax = glm::vec3(maxCorner);
 }
 
-bool LevelGeometry::isInFrustum(const Frustum& frustum) const {
+bool AnimatedGeometry::isInFrustum(const Frustum& frustum) const {
 	for (int i = 0; i < 6; ++i) {
 		const auto& plane = frustum.planes[i];
 
@@ -261,7 +256,7 @@ bool LevelGeometry::isInFrustum(const Frustum& frustum) const {
 	return true; // AABB is inside the frustum
 }
 
-glm::mat4 LevelGeometry::getModelMatrix() const {
+glm::mat4 AnimatedGeometry::getModelMatrix() const {
 	glm::mat4 model = glm::mat4(1.0f);
 	// Apply scaling
 	model = glm::scale(model, scale);
@@ -272,7 +267,7 @@ glm::mat4 LevelGeometry::getModelMatrix() const {
 	return model;
 }
 
-void LevelGeometry::updateModelMatrix() {
+void AnimatedGeometry::updateModelMatrix() {
 	modelMatrix = glm::mat4(1.0f);
 	// Apply scaling first
 	modelMatrix = glm::scale(modelMatrix, scale);
@@ -282,26 +277,26 @@ void LevelGeometry::updateModelMatrix() {
 	modelMatrix = glm::translate(modelMatrix, position);
 }
 
-void LevelGeometry::setPosition(const glm::vec3& pos) {
+void AnimatedGeometry::setPosition(const glm::vec3& pos) {
 	position = pos;
 	updateModelMatrix();
 }
 
-void LevelGeometry::setRotation(float angle, const glm::vec3& axis) {
+void AnimatedGeometry::setRotation(float angle, const glm::vec3& axis) {
 	rotationAngle = angle;
 	rotationAxis = axis;
 	updateModelMatrix();
 }
 
-void LevelGeometry::setScale(const glm::vec3& scl) {
+void AnimatedGeometry::setScale(const glm::vec3& scl) {
 	scale = scl;
 	updateModelMatrix();
 }
 
-void LevelGeometry::setShader(std::shared_ptr<Shader> newShader) {
+void AnimatedGeometry::setShader(std::shared_ptr<Shader> newShader) {
 	shader = std::move(newShader); // Use std::move if you're transferring ownership
 }
 
-std::shared_ptr<Shader> LevelGeometry::getShader() const {
+std::shared_ptr<Shader> AnimatedGeometry::getShader() const {
 	return shader; // Directly return the std::shared_ptr<Shader>
 }

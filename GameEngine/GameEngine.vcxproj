@@ -142,8 +142,9 @@
     <ClCompile Include="camera\CameraController.cpp" />
     <ClCompile Include="camera\FrameTimer.cpp" />
     <ClCompile Include="GameEngine.cpp" />
-    <ClCompile Include="geometry\LevelGeometry.cpp" />
+    <ClCompile Include="geometry\AnimatedGeometry.cpp" />
     <ClCompile Include="geometry\ModelLoader.cpp" />
+    <ClCompile Include="geometry\StaticGeometry.cpp" />
     <ClCompile Include="GLEnumUtils.cpp" />
     <ClCompile Include="graphics\shader.cpp" />
     <ClCompile Include="imgui\imgui.cpp" />
@@ -162,7 +163,6 @@
     <ClCompile Include="post-processing\PostProcessing.cpp" />
     <ClCompile Include="post-processing\ScreenQuad.cpp" />
     <ClCompile Include="Render.cpp" />
-    <ClCompile Include="rendering\BatchRenderer.cpp" />
     <ClCompile Include="rendering\Frustum.cpp" />
     <ClCompile Include="rendering\Skybox.cpp" />
     <ClCompile Include="state\GameplayState.cpp" />
@@ -182,9 +182,10 @@
     <ClInclude Include="FileSystemUtils.h" />
     <ClInclude Include="FrameTimer.h" />
     <ClInclude Include="GameEngine.h" />
+    <ClInclude Include="geometry\AnimatedGeometry.h" />
+    <ClInclude Include="geometry\AnimatedVertex.h" />
     <ClInclude Include="geometry\StaticVertex.h" />
     <ClInclude Include="GLEnumUtils.h" />
-    <ClInclude Include="LevelGeometry.h" />
     <ClInclude Include="MaterialParser.h" />
     <ClInclude Include="Materials.h" />
     <ClInclude Include="ModelLoader.h" />
@@ -194,7 +195,6 @@
     <ClInclude Include="post-processing\PostProcessing.h" />
     <ClInclude Include="post-processing\ScreenQuad.h" />
     <ClInclude Include="Renderer.h" />
-    <ClInclude Include="rendering\BatchRenderer.h" />
     <ClInclude Include="rendering\Frustum.h" />
     <ClInclude Include="rendering\IRenderable.h" />
     <ClInclude Include="rendering\Skybox.h" />
@@ -204,6 +204,7 @@
     <ClInclude Include="state\GameStateManager.h" />
     <ClInclude Include="state\GameStateType.h" />
     <ClInclude Include="state\MenuState.h" />
+    <ClInclude Include="StaticGeometry.h" />
     <ClInclude Include="stb_vorbis.h" />
     <ClInclude Include="Technique.h" />
     <ClInclude Include="TechniqueParser.h" />

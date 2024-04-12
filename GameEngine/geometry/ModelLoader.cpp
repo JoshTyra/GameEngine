@@ -58,7 +58,7 @@ std::vector<std::shared_ptr<IRenderable>> ModelLoader::loadModel(const std::stri
     return meshes;
 }
 
-std::shared_ptr<LevelGeometry> ModelLoader::processMesh(aiMesh* mesh, const aiScene* scene, std::shared_ptr<Material> material) {
+std::shared_ptr<StaticGeometry> ModelLoader::processMesh(aiMesh* mesh, const aiScene* scene, std::shared_ptr<Material> material) {
     // Log number of meshes and current mesh pointer
     DEBUG_COUT << "[Info] Processing mesh " << scene->mNumMeshes << ", pointer: " << mesh << std::endl;
 
@@ -146,7 +146,7 @@ std::shared_ptr<LevelGeometry> ModelLoader::processMesh(aiMesh* mesh, const aiSc
     }
 
     // Process mesh...
-    auto geometry = std::make_shared<LevelGeometry>(vertices, indices, textures);
+    auto geometry = std::make_shared<StaticGeometry>(vertices, indices, textures);
     geometry->setMaterial(material); // Directly use the shared_ptr
 
     return geometry;

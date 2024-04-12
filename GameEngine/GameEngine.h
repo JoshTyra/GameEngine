@@ -25,7 +25,7 @@
 #include "FrameTimer.h"
 #include "FileSystemUtils.h"
 #include "TextureLoader.h"
-#include "LevelGeometry.h"
+#include "StaticGeometry.h"
 #include "ModelLoader.h"
 #include "Renderer.h"
 #include "AudioManager.h"

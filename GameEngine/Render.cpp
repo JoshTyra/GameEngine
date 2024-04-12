@@ -87,7 +87,7 @@ void Renderer::renderSkybox() const {
     }
 }
 
-void Renderer::renderGeometries(const std::vector<std::unique_ptr<LevelGeometry>>& geometries) {
+void Renderer::renderGeometries(const std::vector<std::unique_ptr<StaticGeometry>>& geometries) {
     // Creating a RenderingContext object here to encapsulate all the necessary state for rendering a frame.
     // This approach simplifies the method signatures of draw calls across different renderable entities and
     // makes the rendering pipeline more extensible. Instead of passing view and projection matrices separately
