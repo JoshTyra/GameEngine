@@ -13,7 +13,7 @@ AnimatedGeometry::AnimatedGeometry(const std::vector<AnimatedVertex>& vertices,
 	: vertices(vertices), indices(indices), textures(textures),
 	VAO(0), VBO(0), EBO(0), shader(nullptr),
 	position(glm::vec3(0.0f)), rotationAxis(glm::vec3(1.0f, 0.0f, 0.0f)),
-	rotationAngle(0.0f), scale(glm::vec3(1.0f)), modelMatrix(glm::mat4(1.0f)),
+	rotationAngle(-90.0f), scale(glm::vec3(0.025f)), modelMatrix(glm::mat4(1.0f)),
 	m_BoneInfoMap(boneInfoMap) {
 	setupMesh();
 	calculateAABB();

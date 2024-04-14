@@ -280,15 +280,14 @@ void ModelLoader::SetVertexBoneDataToDefault(AnimatedVertex& vertex) {
 
 void ModelLoader::ExtractBoneWeightForVertices(AnimatedVertex& vertex, aiMesh* mesh, int vertexIndex) {
     for (int boneIndex = 0; boneIndex < mesh->mNumBones; ++boneIndex) {
-        int boneID = -1;
         std::string boneName = mesh->mBones[boneIndex]->mName.C_Str();
+        int boneID;
         if (m_BoneInfoMap.find(boneName) == m_BoneInfoMap.end()) {
             BoneInfo newBoneInfo;
             newBoneInfo.id = m_BoneCounter;
             newBoneInfo.offset = AssimpGLMHelpers::ConvertMatrixToGLMFormat(mesh->mBones[boneIndex]->mOffsetMatrix);
             m_BoneInfoMap[boneName] = newBoneInfo;
-            boneID = m_BoneCounter;
-            m_BoneCounter++;
+            boneID = m_BoneCounter++;
         }
         else {
             boneID = m_BoneInfoMap[boneName].id;
@@ -296,8 +295,7 @@ void ModelLoader::ExtractBoneWeightForVertices(AnimatedVertex& vertex, aiMesh* m
 
         auto weights = mesh->mBones[boneIndex]->mWeights;
         for (int weightIndex = 0; weightIndex < mesh->mBones[boneIndex]->mNumWeights; ++weightIndex) {
-            int vertexId = weights[weightIndex].mVertexId;
-            if (vertexId == vertexIndex) {
+            if (weights[weightIndex].mVertexId == vertexIndex) {
                 float weight = weights[weightIndex].mWeight;
                 SetVertexBoneData(vertex, boneID, weight);
                 break;

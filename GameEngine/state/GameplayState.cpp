@@ -10,7 +10,7 @@ void GameplayState::enter() {
     auto [staticGeometries, _] = ModelLoader::loadModel(staticModelPath, staticMaterialPath);
 
     // Load animated geometry
-    std::string animatedModelPath = FileSystemUtils::getAssetFilePath("models/masterchief.dae");
+    std::string animatedModelPath = FileSystemUtils::getAssetFilePath("models/combat_sword_idle.fbx");
     std::string animatedMaterialPath = FileSystemUtils::getAssetFilePath("materials/masterchief.xml");
     auto [__, animatedGeometries] = ModelLoader::loadModel(animatedModelPath, animatedMaterialPath);
 
@@ -19,7 +19,7 @@ void GameplayState::enter() {
 
     for (const auto& animatedMesh : animatedMeshes) {
         const auto& boneInfoMap = animatedMesh->GetBoneInfoMap();
-        std::string animationPath = FileSystemUtils::getAssetFilePath("models/masterchief.dae");
+        std::string animationPath = FileSystemUtils::getAssetFilePath("models/combat_sword_idle.fbx");
 
         // Use shared_ptr for Animation
         auto animation = std::make_shared<Animation>(animationPath, boneInfoMap);
