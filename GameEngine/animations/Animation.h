@@ -5,8 +5,11 @@
 #include <map>
 #include <vector>
 #include <string>
+#include <assimp/Importer.hpp>
+#include <assimp/postprocess.h>
 #include "animations/Bone.h"
-#include "animations/Model.h"
+#include "utilities/assimp_glm_helpers.h"
+#include "iostream"
 
 struct AssimpNodeData {
     glm::mat4 transformation;
@@ -16,9 +19,10 @@ struct AssimpNodeData {
 };
 
 class Animation {
+
 public:
     Animation() = default;
-    Animation(const std::string& animationPath, Model* model);
+    Animation(const std::string& animationPath, const std::map<std::string, BoneInfo>& boneInfoMap);
     ~Animation() {}
 
     Bone* FindBone(const std::string& name);
@@ -28,7 +32,7 @@ public:
     inline const std::map<std::string, BoneInfo>& GetBoneIDMap() { return m_BoneInfoMap; }
 
 private:
-    void ReadMissingBones(const aiAnimation* animation, Model& model);
+    void ReadMissingBones(const aiAnimation* animation, const std::map<std::string, BoneInfo>& boneInfoMap);
     void ReadHeirarchyData(AssimpNodeData& dest, const aiNode* src);
 
     float m_Duration;
@@ -36,4 +40,5 @@ private:
     std::vector<Bone> m_Bones;
     AssimpNodeData m_RootNode;
     std::map<std::string, BoneInfo> m_BoneInfoMap;
+    Assimp::Importer importer;
 };

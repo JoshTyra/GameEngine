@@ -24,7 +24,8 @@ public:
     void render() override;
 
 private:
-    std::vector<std::shared_ptr<IRenderable>> staticGeometry; // Static Model storage
+    std::vector<std::shared_ptr<StaticGeometry>> staticGeometry;
+    std::vector<std::shared_ptr<AnimatedGeometry>> animatedMeshes;
 };
 
 #endif // GAMEPLAY_STATE_H

@@ -1,7 +1,9 @@
 #include "Animator.h"
 
-Animator::Animator(Animation* animation)
-    : m_CurrentTime(0.0), m_CurrentAnimation(animation) {
+Animator::Animator(std::shared_ptr<Animation> animation)
+    : m_CurrentTime(0.0), m_CurrentAnimation(animation) 
+{
+    assert(m_CurrentAnimation != nullptr && "Animator received a null Animation object.");
     m_FinalBoneMatrices.reserve(100);
 
     for (int i = 0; i < 100; i++)
@@ -9,6 +11,13 @@ Animator::Animator(Animation* animation)
 }
 
 void Animator::UpdateAnimation(float dt) {
+    std::cout << "Updating animation with delta time: " << dt << std::endl;
+
+    if (!m_CurrentAnimation) {
+        std::cerr << "UpdateAnimation called without a valid animation.";
+        return;
+    }
+
     m_DeltaTime = dt;
     if (m_CurrentAnimation) {
         m_CurrentTime += m_CurrentAnimation->GetTicksPerSecond() * dt;
@@ -17,24 +26,29 @@ void Animator::UpdateAnimation(float dt) {
     }
 }
 
-void Animator::PlayAnimation(Animation* pAnimation) {
+void Animator::PlayAnimation(std::shared_ptr<Animation> pAnimation) {
     m_CurrentAnimation = pAnimation;
     m_CurrentTime = 0.0f;
 }
 
 void Animator::CalculateBoneTransform(const AssimpNodeData* node, glm::mat4 parentTransform) {
+    std::cout << "Calculating bone transform for node: " << node->name << std::endl;
+
     if (!node) {
-        std::cerr << "Error: Null node encountered in Animator::CalculateBoneTransform" << std::endl;
-        return;
+        std::cerr << "Critical Error: Node is null in CalculateBoneTransform" << std::endl;
+        return;  // Exit to avoid further crashes
     }
 
     std::string nodeName;
-    if (!node->name.empty()) {
-        nodeName = node->name;
+    if (!node->name.data()) {
+        std::cerr << "Warning: Node name is null" << std::endl;
+    }
+    if (node->name.data() != nullptr) {
+        nodeName = std::string(node->name.data(), node->name.size());
     }
     else {
-        std::cerr << "Warning: Empty node name encountered in Animator::CalculateBoneTransform" << std::endl;
-        return;
+        nodeName = "InvalidNodeName";
+        std::cerr << "Warning: node->name is invalid, using default name" << std::endl;
     }
 
     glm::mat4 nodeTransform = node->transformation;

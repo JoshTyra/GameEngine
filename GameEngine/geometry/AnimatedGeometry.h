@@ -11,6 +11,8 @@
 #include "rendering/IRenderable.h"
 #include "geometry/AnimatedVertex.h"
 #include "Debug.h"
+#include "animations/Animation.h"
+#include "animations/Animator.h"
 
 // StaticGeometry class
 class AnimatedGeometry : public IRenderable {
@@ -20,7 +22,7 @@ public:
     AnimatedGeometry(const std::vector<AnimatedVertex>& vertices,
         const std::vector<unsigned int>& indices,
         const std::vector<Texture>& textures,
-        const std::vector<glm::mat4>& boneTransforms);
+        const std::map<std::string, BoneInfo>& boneInfoMap);
 
     virtual ~AnimatedGeometry();
     void draw(const RenderingContext& context) override;
@@ -69,12 +71,21 @@ public:
         return material;
     }
 
+    const std::map<std::string, BoneInfo>& GetBoneInfoMap() const {
+        return m_BoneInfoMap;
+    }
+
+    Animator* getAnimator() const {
+        return m_Animator.get();
+    }
+
     void calculateAABB();
     bool isInFrustum(const Frustum& frustum) const;
 
     void setModelMatrix(const glm::mat4& model) { modelMatrix = model; }
     glm::mat4 getModelMatrix() const;
     void updateModelMatrix();
+    void setAnimator(std::unique_ptr<Animator> animator);
 
 private:
     std::vector<AnimatedVertex> vertices;
@@ -88,6 +99,9 @@ private:
     float rotationAngle = 0.0f; // In degrees
     glm::vec3 scale = glm::vec3(1.0f);
     glm::mat4 modelMatrix;
+    std::unique_ptr<Animation> animation;
+    std::map<std::string, BoneInfo> m_BoneInfoMap;
+    std::unique_ptr<Animator> m_Animator;
 
     void setupMesh();
 };

@@ -1,13 +1,36 @@
 #include "GameplayState.h"
 
-
 void GameplayState::enter() {
     GLFWwindow* window = GameStateManager::instance().getWindowContext();
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-    std::string modelPath = FileSystemUtils::getAssetFilePath("models/tutorial.fbx");
-    std::string materialPath = FileSystemUtils::getAssetFilePath("materials/tutorial.txt");
-    staticGeometry = ModelLoader::loadModel(modelPath, materialPath);
+    // Load static geometry
+    std::string staticModelPath = FileSystemUtils::getAssetFilePath("models/tutorial.fbx");
+    std::string staticMaterialPath = FileSystemUtils::getAssetFilePath("materials/tutorial.txt");
+    auto [staticGeometries, _] = ModelLoader::loadModel(staticModelPath, staticMaterialPath);
+
+    // Load animated geometry
+    std::string animatedModelPath = FileSystemUtils::getAssetFilePath("models/masterchief.dae");
+    std::string animatedMaterialPath = FileSystemUtils::getAssetFilePath("materials/masterchief.xml");
+    auto [__, animatedGeometries] = ModelLoader::loadModel(animatedModelPath, animatedMaterialPath);
+
+    // Store the loaded geometries in the GameplayState
+    animatedMeshes = std::move(animatedGeometries);
+
+    for (const auto& animatedMesh : animatedMeshes) {
+        const auto& boneInfoMap = animatedMesh->GetBoneInfoMap();
+        std::string animationPath = FileSystemUtils::getAssetFilePath("models/masterchief.dae");
+
+        // Use shared_ptr for Animation
+        auto animation = std::make_shared<Animation>(animationPath, boneInfoMap);
+
+        // Create an Animator instance using the shared_ptr directly
+        auto animator = std::make_unique<Animator>(animation);  // Animator constructor needs to accept shared_ptr
+
+        // Set the Animator in the AnimatedGeometry
+        animatedMesh->setAnimator(std::move(animator));
+    }
+
 
     auto audioManager = GameStateManager::instance().getAudioManager();
     if (audioManager) {
@@ -50,6 +73,14 @@ void GameplayState::update(float deltaTime) {
 
         // Update listener position in the audio manager
         audioManager->updateListenerPosition(irrCameraPos, irrCameraFront, irrCameraUp);
+    }
+
+    // Update the animation for each AnimatedGeometry
+    for (const auto& animatedMesh : animatedMeshes) {
+        auto animator = animatedMesh->getAnimator();
+        if (animator) {
+            animator->UpdateAnimation(deltaTime);
+        }
     }
 }
 
@@ -97,9 +128,13 @@ void GameplayState::render() {
     // Create a collection for all renderable entities.
     std::vector<std::shared_ptr<IRenderable>> renderables;
 
-    // Correctly iterate over staticGeometry and add each geometry to renderables
     for (const auto& geometry : staticGeometry) {
         renderables.push_back(geometry);
+    }
+
+    // Add the animated meshes to the renderables vector
+    for (const auto& animatedMesh : animatedMeshes) {
+        renderables.push_back(animatedMesh);
     }
 
     // Now let the renderer handle all renderable entities.

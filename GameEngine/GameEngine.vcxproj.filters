@@ -88,6 +88,12 @@
     <Filter Include="Source Files\graphics">
       <UniqueIdentifier>{06b8bb87-f4aa-4d33-8f0a-7d97728eee87}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\animations">
+      <UniqueIdentifier>{8d8aa928-d093-43b6-8824-75bec64cc687}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\animations">
+      <UniqueIdentifier>{010173bc-4701-4f6f-b069-f8380b980271}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GameEngine.cpp">
@@ -198,6 +204,15 @@
     <ClCompile Include="geometry\StaticGeometry.cpp">
       <Filter>Source Files\geometry</Filter>
     </ClCompile>
+    <ClCompile Include="animations\Animation.cpp">
+      <Filter>Source Files\animations</Filter>
+    </ClCompile>
+    <ClCompile Include="animations\Animator.cpp">
+      <Filter>Source Files\animations</Filter>
+    </ClCompile>
+    <ClCompile Include="animations\Bone.cpp">
+      <Filter>Source Files\animations</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CameraController.h">
@@ -307,6 +322,15 @@
     </ClInclude>
     <ClInclude Include="StaticGeometry.h">
       <Filter>Header Files\geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="animations\Animation.h">
+      <Filter>Header Files\animations</Filter>
+    </ClInclude>
+    <ClInclude Include="animations\Animator.h">
+      <Filter>Header Files\animations</Filter>
+    </ClInclude>
+    <ClInclude Include="animations\Bone.h">
+      <Filter>Header Files\animations</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

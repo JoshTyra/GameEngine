@@ -1,29 +1,15 @@
 #include "Animation.h"
-#include "utilities/assimp_glm_helpers.h"
-#include "Model.h"
 
-Animation::Animation(const std::string& animationPath, Model* model) {
-    Assimp::Importer importer;
+Animation::Animation(const std::string& animationPath, const std::map<std::string, BoneInfo>& boneInfoMap)
+    : m_Duration(0.0f), m_TicksPerSecond(0.0f), m_BoneInfoMap(boneInfoMap) {
+    // Load the animation data from the file using Assimp
     const aiScene* scene = importer.ReadFile(animationPath, aiProcess_Triangulate);
-
-    if (!scene || !scene->mRootNode) {
-        // Handle the case when the scene or root node is null
-        std::cerr << "Error: Failed to load animation file: " << animationPath << std::endl;
-        return;
-    }
-
-    if (scene->mNumAnimations == 0) {
-        // Handle the case when no animations are found in the scene
-        std::cerr << "Error: No animations found in the file: " << animationPath << std::endl;
-        return;
-    }
-
+    assert(scene && scene->mRootNode);
     auto animation = scene->mAnimations[0];
     m_Duration = animation->mDuration;
     m_TicksPerSecond = animation->mTicksPerSecond;
-
     ReadHeirarchyData(m_RootNode, scene->mRootNode);
-    ReadMissingBones(animation, *model);
+    ReadMissingBones(animation, boneInfoMap);
 }
 
 Bone* Animation::FindBone(const std::string& name) {
@@ -36,32 +22,47 @@ Bone* Animation::FindBone(const std::string& name) {
     else return &(*iter);
 }
 
-void Animation::ReadMissingBones(const aiAnimation* animation, Model& model) {
+void Animation::ReadMissingBones(const aiAnimation* animation, const std::map<std::string, BoneInfo>& boneInfoMap) {
     int size = animation->mNumChannels;
-    auto& boneInfoMap = model.GetBoneInfoMap();
-    int& boneCount = model.GetBoneCount();
+    std::map<std::string, BoneInfo> localBoneInfoMap = boneInfoMap;
+    int boneCount = localBoneInfoMap.size();
 
     for (int i = 0; i < size; i++) {
         auto channel = animation->mChannels[i];
         std::string boneName = channel->mNodeName.data;
-        if (boneInfoMap.find(boneName) == boneInfoMap.end()) {
-            boneInfoMap[boneName].id = boneCount;
+
+        if (localBoneInfoMap.find(boneName) == localBoneInfoMap.end()) {
+            BoneInfo& boneInfo = localBoneInfoMap[boneName];
+            boneInfo.id = boneCount;
             boneCount++;
         }
+
         m_Bones.push_back(Bone(channel->mNodeName.data,
-            boneInfoMap[channel->mNodeName.data].id, channel));
+            localBoneInfoMap[channel->mNodeName.data].id, channel));
     }
-    m_BoneInfoMap = boneInfoMap;
+
+    m_BoneInfoMap = localBoneInfoMap;
 }
 
 void Animation::ReadHeirarchyData(AssimpNodeData& dest, const aiNode* src) {
     assert(src);
+
     dest.name = src->mName.data;
     dest.transformation = AssimpGLMHelpers::ConvertMatrixToGLMFormat(src->mTransformation);
     dest.childrenCount = src->mNumChildren;
-    for (int i = 0; i < src->mNumChildren; i++) {
-        AssimpNodeData newData;
-        ReadHeirarchyData(newData, src->mChildren[i]);
-        dest.children.push_back(newData);
+
+    if (src->mChildren && src->mNumChildren > 0) {
+        for (unsigned int i = 0; i < src->mNumChildren; i++) {
+            const aiNode* childNode = src->mChildren[i];
+            if (childNode) {
+                AssimpNodeData newData;
+                ReadHeirarchyData(newData, childNode);
+                dest.children.push_back(newData);
+            }
+            else {
+                // Handle invalid child node (e.g., log an error, set default values, etc.)
+                std::cerr << "Invalid child node encountered for node: " << dest.name << std::endl;
+            }
+        }
     }
 }

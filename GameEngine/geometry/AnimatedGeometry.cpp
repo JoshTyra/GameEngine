@@ -6,16 +6,15 @@ AnimatedGeometry::AnimatedGeometry()
 	rotationAngle(0.0f), scale(glm::vec3(0.025f)) {
 }
 
-// Overloaded constructor for initializing with mesh data
 AnimatedGeometry::AnimatedGeometry(const std::vector<AnimatedVertex>& vertices,
 	const std::vector<unsigned int>& indices,
 	const std::vector<Texture>& textures,
-	const std::vector<glm::mat4>& boneTransforms)
+	const std::map<std::string, BoneInfo>& boneInfoMap)
 	: vertices(vertices), indices(indices), textures(textures),
 	VAO(0), VBO(0), EBO(0), shader(nullptr),
 	position(glm::vec3(0.0f)), rotationAxis(glm::vec3(1.0f, 0.0f, 0.0f)),
-	rotationAngle(-90.0f), scale(glm::vec3(0.025f)), modelMatrix(glm::mat4(1.0f))
-{
+	rotationAngle(-90.0f), scale(glm::vec3(0.025f)), modelMatrix(glm::mat4(1.0f)),
+	m_BoneInfoMap(boneInfoMap) {
 	setupMesh();
 	calculateAABB();
 }
@@ -42,13 +41,21 @@ void AnimatedGeometry::setupMesh() {
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(AnimatedVertex), (void*)0);
 
-	// Vertex normals (if needed in shader)
+	// Vertex normals
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(AnimatedVertex), (void*)offsetof(AnimatedVertex, Normal));
 
-	// Vertex texture coords (first UV channel)
+	// Vertex texture coords
 	glEnableVertexAttribArray(2);
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(AnimatedVertex), (void*)offsetof(AnimatedVertex, TexCoords));
+
+	// Bone IDs
+	glEnableVertexAttribArray(5);
+	glVertexAttribIPointer(5, 4, GL_INT, sizeof(AnimatedVertex), (void*)offsetof(AnimatedVertex, m_BoneIDs));
+
+	// Weights
+	glEnableVertexAttribArray(6);
+	glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(AnimatedVertex), (void*)offsetof(AnimatedVertex, m_Weights));
 
 	glBindVertexArray(0);
 }
@@ -116,6 +123,21 @@ void AnimatedGeometry::draw(const RenderingContext& context) {
 	shader->setMat4("model", model);
 	shader->setMat4("view", context.viewMatrix);
 	shader->setMat4("projection", context.projectionMatrix);
+
+	if (m_Animator) {
+		auto transforms = m_Animator->GetFinalBoneMatrices();
+		auto numTransforms = transforms.size();
+
+		//std::cout << "Number of transforms: " << numTransforms << std::endl;
+
+		for (int i = 0; i < numTransforms; ++i) {
+			//std::cout << "Setting finalBonesMatrices[" << i << "]" << std::endl;
+			shader->setMat4("finalBonesMatrices[" + std::to_string(i) + "]", transforms[i]);
+		}
+	}
+	else {
+		std::cout << "m_Animator is null" << std::endl;
+	}
 
 	// Check for errors after setting uniforms
 	while ((error = glGetError()) != GL_NO_ERROR) {
@@ -299,4 +321,8 @@ void AnimatedGeometry::setShader(std::shared_ptr<Shader> newShader) {
 
 std::shared_ptr<Shader> AnimatedGeometry::getShader() const {
 	return shader; // Directly return the std::shared_ptr<Shader>
+}
+
+void AnimatedGeometry::setAnimator(std::unique_ptr<Animator> animator) {
+	m_Animator = std::move(animator);
 }
