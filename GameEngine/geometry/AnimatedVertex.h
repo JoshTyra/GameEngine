@@ -2,7 +2,7 @@
 
 #include <glm/glm.hpp>
 
-#define MAX_BONE_INFLUENCE 4
+#define MAX_BONE_INFLUENCE 2
 
 struct AnimatedVertex {
     // position
