@@ -9,6 +9,10 @@ void GameplayState::enter() {
     std::string staticMaterialPath = FileSystemUtils::getAssetFilePath("materials/tutorial.txt");
     auto [staticGeometries, _] = ModelLoader::loadModel(staticModelPath, staticMaterialPath);
 
+    // Store the loaded geometries in the GameplayState
+    // Assuming `staticMeshes` is a member variable like `animatedMeshes`
+    staticGeometry = std::move(staticGeometries);
+
     // Load animated geometry
     std::string animatedModelPath = FileSystemUtils::getAssetFilePath("models/combat_sword_idle.fbx");
     std::string animatedMaterialPath = FileSystemUtils::getAssetFilePath("materials/masterchief.xml");
