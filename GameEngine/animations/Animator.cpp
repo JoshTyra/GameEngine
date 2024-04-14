@@ -11,7 +11,7 @@ Animator::Animator(std::shared_ptr<Animation> animation)
 }
 
 void Animator::UpdateAnimation(float dt) {
-    std::cout << "Updating animation with delta time: " << dt << std::endl;
+    //std::cout << "Updating animation with delta time: " << dt << std::endl;
 
     if (!m_CurrentAnimation) {
         std::cerr << "UpdateAnimation called without a valid animation.";
@@ -32,7 +32,7 @@ void Animator::PlayAnimation(std::shared_ptr<Animation> pAnimation) {
 }
 
 void Animator::CalculateBoneTransform(const AssimpNodeData* node, glm::mat4 parentTransform) {
-    std::cout << "Calculating bone transform for node: " << node->name << std::endl;
+    //std::cout << "Calculating bone transform for node: " << node->name << std::endl;
 
     if (!node) {
         std::cerr << "Critical Error: Node is null in CalculateBoneTransform" << std::endl;
