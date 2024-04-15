@@ -10,7 +10,6 @@ void GameplayState::enter() {
     auto [staticGeometries, _] = ModelLoader::loadModel(staticModelPath, staticMaterialPath);
 
     // Store the loaded geometries in the GameplayState
-    // Assuming `staticMeshes` is a member variable like `animatedMeshes`
     staticGeometry = std::move(staticGeometries);
 
     // Load animated geometry
@@ -21,7 +20,10 @@ void GameplayState::enter() {
     // Store the loaded geometries in the GameplayState
     animatedMeshes = std::move(animatedGeometries);
 
+    glm::vec3 spawnPoint = glm::vec3(200.0f, 26.0f, 51.0f);
+
     for (const auto& animatedMesh : animatedMeshes) {
+        animatedMesh->setPosition(spawnPoint);
         const auto& boneInfoMap = animatedMesh->GetBoneInfoMap();
         std::string animationPath = FileSystemUtils::getAssetFilePath("models/combat_sword_idle.fbx");
 
