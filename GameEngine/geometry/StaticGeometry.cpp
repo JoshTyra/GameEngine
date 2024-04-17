@@ -69,6 +69,10 @@ void StaticGeometry::draw(const RenderingContext& context) {
 		std::cerr << "OpenGL Error before setting uniforms: " << error << std::endl;
 	}
 
+	float distance = glm::distance(context.cameraPosition, position);
+	float minDistance = 10.0f;
+	float mipmapLevel = std::max(0.0f, std::log2(distance / minDistance));
+
 	if (material) {
 		const Technique& technique = material->getTechniqueDetails();
 
@@ -128,6 +132,10 @@ void StaticGeometry::draw(const RenderingContext& context) {
 	if (shader->hasUniform("normalMatrix")) {
 		glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(model)));
 		shader->setMat3("normalMatrix", normalMatrix);
+	}
+
+	if (shader->hasUniform("mipmapLevel")) {
+		shader->setFloat("mipmapLevel", mipmapLevel);
 	}
 
 	// Check for errors after setting uniforms
