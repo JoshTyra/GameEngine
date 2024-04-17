@@ -51,7 +51,12 @@ void Renderer::renderFrame(const std::vector<std::shared_ptr<IRenderable>>& rend
     // makes the rendering pipeline more extensible. Instead of passing view and projection matrices separately
     // to each draw method, we now pass a single context object. This allows for easy addition of new state
     // parameters in the future without altering the interfaces of our renderable entities.
-    RenderingContext context(cameraController->getViewMatrix(), projectionMatrix);
+ 
+    // Get the camera position from the cameraController
+    glm::vec3 cameraPos = cameraController->getCameraPosition();
+
+    // Pass the camera position to the RenderingContext constructor
+    RenderingContext context(cameraController->getViewMatrix(), projectionMatrix, cameraPos);
 
     // Draw each IRenderable using the context
     for (const auto& renderable : renderables) {
@@ -87,13 +92,12 @@ void Renderer::renderSkybox() const {
     }
 }
 
-void Renderer::renderGeometries(const std::vector<std::unique_ptr<StaticGeometry>>& geometries) {
-    // Creating a RenderingContext object here to encapsulate all the necessary state for rendering a frame.
-    // This approach simplifies the method signatures of draw calls across different renderable entities and
-    // makes the rendering pipeline more extensible. Instead of passing view and projection matrices separately
-    // to each draw method, we now pass a single context object. This allows for easy addition of new state
-    // parameters in the future without altering the interfaces of our renderable entities.
-    RenderingContext context(cameraController->getViewMatrix(), projectionMatrix);
+void Renderer::renderGeometries(const std::vector<std::unique_ptr<StaticGeometry>>& geometries) {    
+    // Get the camera position from the cameraController
+    glm::vec3 cameraPos = cameraController->getCameraPosition();
+
+    // Pass the camera position to the RenderingContext constructor
+    RenderingContext context(cameraController->getViewMatrix(), projectionMatrix, cameraPos);
 
     // Iterate through each geometry and render
     for (const auto& geometry : geometries) {

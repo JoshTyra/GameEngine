@@ -15,6 +15,18 @@ bool Material::hasTexture(const std::string& unit) const {
     return textures.find(unit) != textures.end();
 }
 
+const std::map<std::string, std::string>& Material::getCubemapFaces() const {
+    return cubemapFaces;
+}
+
+bool Material::hasCubemapFaces() const {
+    return !cubemapFaces.empty();
+}
+
+void Material::setCubemapFaces(const std::map<std::string, std::string>& faces) {
+    cubemapFaces = faces;
+}
+
 std::string Material::getTexture(const std::string& unit) const {
     auto it = textures.find(unit);
     if (it != textures.end()) {
@@ -80,12 +92,12 @@ bool Material::hasParameter(const std::string& name) const {
     return parameters.find(name) != parameters.end();
 }
 
-// Initialize the static map
 const std::map<std::string, std::string> Material::textureUniformMap = {
     {"diffuse", "textures[0]"},
     {"emissive", "textures[1]"},
     {"detail1", "textures[2]"},
-    {"detail2", "textures[3]"}
+    {"detail2", "textures[3]"},
+    {"environment", "environmentMap"} // Use a separate uniform for the cubemap
 };
 
 

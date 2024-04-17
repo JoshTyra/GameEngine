@@ -120,6 +120,16 @@ void StaticGeometry::draw(const RenderingContext& context) {
 	shader->setMat4("view", context.viewMatrix);
 	shader->setMat4("projection", context.projectionMatrix);
 
+	if (shader->hasUniform("cameraPos")) {
+		glm::vec3 cameraPos = context.cameraPosition; // Get the camera position in world space
+		shader->setVec3("cameraPos", cameraPos);
+	}
+
+	if (shader->hasUniform("normalMatrix")) {
+		glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(model)));
+		shader->setMat3("normalMatrix", normalMatrix);
+	}
+
 	// Check for errors after setting uniforms
 	while ((error = glGetError()) != GL_NO_ERROR) {
 		std::cerr << "OpenGL Error after setting matrix uniforms: " << error << std::endl;
@@ -131,17 +141,25 @@ void StaticGeometry::draw(const RenderingContext& context) {
 	// Use the Material::textureUniformMap to get the correct uniform names
 	for (size_t i = 0; i < textures.size() && i < static_cast<size_t>(maxTextureUnits); ++i) {
 		glActiveTexture(GL_TEXTURE0 + i);
-		glBindTexture(GL_TEXTURE_2D, textures[i].id);
 
-		// Look up the uniform name from the map using the texture type
-		auto uniformNameIt = Material::textureUniformMap.find(textures[i].type);
-		if (uniformNameIt != Material::textureUniformMap.end()) {
-			// Use the found uniform name to set the texture uniform in the shader
-			shader->setInt(uniformNameIt->second, i);
-			DEBUG_COUT << "Binding texture " << textures[i].path << " to " << uniformNameIt->second << std::endl;
+		// Check if the texture is a cubemap
+		if (textures[i].type == "environment") {
+			glBindTexture(GL_TEXTURE_CUBE_MAP, textures[i].id);
+			shader->setInt("environmentMap", i); // Set the cubemap uniform to the correct texture unit
 		}
 		else {
-			std::cerr << "No uniform name found for texture type: " << textures[i].type << std::endl;
+			glBindTexture(GL_TEXTURE_2D, textures[i].id);
+
+			// Look up the uniform name from the map using the texture type
+			auto uniformNameIt = Material::textureUniformMap.find(textures[i].type);
+			if (uniformNameIt != Material::textureUniformMap.end()) {
+				// Use the found uniform name to set the texture uniform in the shader
+				shader->setInt(uniformNameIt->second, i);
+				DEBUG_COUT << "Binding texture " << textures[i].path << " to " << uniformNameIt->second << std::endl;
+			}
+			else {
+				std::cerr << "No uniform name found for texture type: " << textures[i].type << std::endl;
+			}
 		}
 	}
 

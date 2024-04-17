@@ -144,20 +144,51 @@ std::shared_ptr<StaticGeometry> ModelLoader::processStaticMesh(aiMesh* mesh, con
 
     // Process textures
     for (const auto& [unit, textureName] : material->getTextures()) {
-        std::string fullPath = FileSystemUtils::getAssetFilePath("textures/" + textureName);
-        DEBUG_COUT << "[Info] Loading texture for unit " << unit << ": " << fullPath.c_str() << std::endl;
+        if (unit == "environment") {
+            auto cubemapFaces = material->getCubemapFaces(); // Function to retrieve map of faces
+            Texture cubemapTexture;
+            glGenTextures(1, &cubemapTexture.id);
+            glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture.id);
 
-        auto texturePtr = TextureLoader::loadTexture(fullPath); // Use the full path
-        if (texturePtr) {
-            Texture texture;
-            texture.id = texturePtr->id; // Access the texture ID
-            texture.type = unit;
-            texture.path = fullPath; // Store the full path if needed
-            textures.push_back(texture);
-            DEBUG_COUT << "[Info] Texture loaded successfully for unit " << unit;
+            bool allFacesLoaded = true;
+            for (const auto& [faceName, path] : cubemapFaces) {
+                std::string fullPath = FileSystemUtils::getAssetFilePath("textures/" + path);
+                GLenum faceGL = TextureLoader::getGLCubemapFace(faceName);
+                if (faceGL != 0) {  // Check if the face name was valid
+                    TextureLoader::loadCubemapFace(cubemapTexture.id, fullPath, faceGL);
+                }
+                else {
+                    allFacesLoaded = false;
+                    std::cerr << "Invalid face name for cubemap: " << faceName << std::endl;
+                    break;
+                }
+            }
+
+            if (allFacesLoaded) {
+                // Set cubemap texture parameters
+                glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+                glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+                glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+                glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+                glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+                cubemapTexture.type = "environment";
+                cubemapTexture.path = "generated_cubemap";
+                textures.push_back(cubemapTexture); // Push back the created cubemap texture to the geometry's textures list
+                std::cout << "Cubemap texture added to textures vector. Type: " << cubemapTexture.type << ", Path: " << cubemapTexture.path << std::endl;
+            }
+            else {
+                glDeleteTextures(1, &cubemapTexture.id); // Clean up if not all faces are loaded correctly
+            }
         }
         else {
-            std::cerr << "Failed to load texture: " << fullPath << std::endl;
+            std::string fullPath = FileSystemUtils::getAssetFilePath("textures/" + textureName);
+            Texture texture = TextureLoader::loadTexture(fullPath);
+            if (texture.id != 0) { // Assuming 0 is used to denote failure to load
+                texture.type = unit;
+                texture.path = fullPath;
+                textures.push_back(texture);
+            }
         }
     }
 
@@ -235,20 +266,51 @@ std::shared_ptr<AnimatedGeometry> ModelLoader::processAnimatedMesh(aiMesh* mesh,
 
     // Process textures
     for (const auto& [unit, textureName] : material->getTextures()) {
-        std::string fullPath = FileSystemUtils::getAssetFilePath("textures/" + textureName);
-        DEBUG_COUT << "[Info] Loading texture for unit " << unit << ": " << fullPath.c_str() << std::endl;
+        if (unit == "environment") {
+            auto cubemapFaces = material->getCubemapFaces(); // Function to retrieve map of faces
+            Texture cubemapTexture;
+            glGenTextures(1, &cubemapTexture.id);
+            glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture.id);
 
-        auto texturePtr = TextureLoader::loadTexture(fullPath); // Use the full path
-        if (texturePtr) {
-            Texture texture;
-            texture.id = texturePtr->id; // Access the texture ID
-            texture.type = unit;
-            texture.path = fullPath; // Store the full path if needed
-            textures.push_back(texture);
-            DEBUG_COUT << "[Info] Texture loaded successfully for unit " << unit;
+            bool allFacesLoaded = true;
+            for (const auto& [faceName, path] : cubemapFaces) {
+                std::string fullPath = FileSystemUtils::getAssetFilePath("textures/" + path);
+                GLenum faceGL = TextureLoader::getGLCubemapFace(faceName);
+                if (faceGL != 0) {  // Check if the face name was valid
+                    TextureLoader::loadCubemapFace(cubemapTexture.id, fullPath, faceGL);
+                }
+                else {
+                    allFacesLoaded = false;
+                    std::cerr << "Invalid face name for cubemap: " << faceName << std::endl;
+                    break;
+                }
+            }
+
+            if (allFacesLoaded) {
+                // Set cubemap texture parameters
+                glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+                glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+                glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+                glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+                glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+                cubemapTexture.type = "environment";
+                cubemapTexture.path = "generated_cubemap";
+                textures.push_back(cubemapTexture); // Push back the created cubemap texture to the geometry's textures list
+                std::cout << "Cubemap texture added to textures vector. Type: " << cubemapTexture.type << ", Path: " << cubemapTexture.path << std::endl;
+            }
+            else {
+                glDeleteTextures(1, &cubemapTexture.id); // Clean up if not all faces are loaded correctly
+            }
         }
         else {
-            std::cerr << "Failed to load texture: " << fullPath << std::endl;
+            std::string fullPath = FileSystemUtils::getAssetFilePath("textures/" + textureName);
+            Texture texture = TextureLoader::loadTexture(fullPath);
+            if (texture.id != 0) { // Assuming 0 is used to denote failure to load
+                texture.type = unit;
+                texture.path = fullPath;
+                textures.push_back(texture);
+            }
         }
     }
 

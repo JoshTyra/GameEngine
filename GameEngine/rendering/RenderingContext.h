@@ -8,15 +8,11 @@ class RenderingContext {
 public:
     glm::mat4 viewMatrix;
     glm::mat4 projectionMatrix;
-    GLuint boneMatricesBindingPoint = 0; // Default value indicating unused
+    glm::vec3 cameraPosition;
 
-    // You can add more rendering state variables here
+    RenderingContext(const glm::mat4& view, const glm::mat4& projection, const glm::vec3& camPos)
+        : viewMatrix(view), projectionMatrix(projection), cameraPosition(camPos) {}
 
-    RenderingContext(const glm::mat4& view, const glm::mat4& projection)
-        : viewMatrix(view), projectionMatrix(projection) {}
-
-    RenderingContext(const glm::mat4& view, const glm::mat4& projection, GLuint boneBindingPoint)
-        : viewMatrix(view), projectionMatrix(projection), boneMatricesBindingPoint(boneBindingPoint) {}
-
-    // Additional methods or constructors for different contexts
+    RenderingContext(const glm::mat4& view, const glm::mat4& projection, GLuint boneBindingPoint, const glm::vec3& camPos)
+        : viewMatrix(view), projectionMatrix(projection), cameraPosition(camPos) {}
 };

@@ -123,6 +123,12 @@ void Shader::setMat4(const std::string& name, const glm::mat4& mat) const {
     }
 }
 
+void Shader::setMat3(const std::string& name, const glm::mat3& mat) const {
+    if (this->Program) {
+        glUniformMatrix3fv(glGetUniformLocation(this->Program, name.c_str()), 1, GL_FALSE, glm::value_ptr(mat));
+    }
+}
+
 void Shader::setInt(const std::string& name, int value) const {
     if (this->Program) {
         glUniform1i(glGetUniformLocation(this->Program, name.c_str()), value);
@@ -163,4 +169,12 @@ bool Shader::isProgramLinkedSuccessfully() const {
         return false;
     }
     return true;
+}
+
+bool Shader::hasUniform(const std::string& name) const {
+    if (this->Program) {
+        GLint location = glGetUniformLocation(this->Program, name.c_str());
+        return location != -1;
+    }
+    return false;
 }
