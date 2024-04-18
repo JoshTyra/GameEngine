@@ -26,7 +26,7 @@ Material MaterialParser::parseMaterialXML(const std::string& filename) {
             std::string textureName = textureElement->Attribute("name");
             if (unit == "environment") {
                 // Parse the XML file that defines the cubemap faces
-                std::map<std::string, std::string> cubemapFaces = parseCubemapXML(textureName);
+                std::vector<std::pair<std::string, std::string>> cubemapFaces = parseCubemapXML(textureName);
                 material.setCubemapFaces(cubemapFaces);
                 material.addTexture(unit, textureName);
             }
@@ -47,9 +47,9 @@ Material MaterialParser::parseMaterialXML(const std::string& filename) {
 }
 
 // Helper function to parse the cubemap XML and extract face paths
-std::map<std::string, std::string> MaterialParser::parseCubemapXML(const std::string& filename) {
+std::vector<std::pair<std::string, std::string>> MaterialParser::parseCubemapXML(const std::string& filename) {
     tinyxml2::XMLDocument doc;
-    std::map<std::string, std::string> facePaths;
+    std::vector<std::pair<std::string, std::string>> facePaths;
     doc.LoadFile(FileSystemUtils::getAssetFilePath("textures/" + filename).c_str());
 
     if (doc.LoadFile(FileSystemUtils::getAssetFilePath("textures/" + filename).c_str()) != tinyxml2::XML_SUCCESS) {
@@ -64,9 +64,10 @@ std::map<std::string, std::string> MaterialParser::parseCubemapXML(const std::st
             tinyxml2::XMLElement* faceElement = root->FirstChildElement(faceName);
             if (faceElement) {
                 std::string path = faceElement->Attribute("path");
-                facePaths[faceName] = path;
+                facePaths.emplace_back(faceName, path);
             }
         }
     }
+
     return facePaths;
 }

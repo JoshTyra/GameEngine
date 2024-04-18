@@ -70,7 +70,7 @@ void StaticGeometry::draw(const RenderingContext& context) {
 	}
 
 	float distance = glm::distance(context.cameraPosition, position);
-	float minDistance = 10.0f;
+	float minDistance = 1.0f;
 	float mipmapLevel = std::max(0.0f, std::log2(distance / minDistance));
 
 	if (material) {
@@ -108,10 +108,16 @@ void StaticGeometry::draw(const RenderingContext& context) {
 			shader->setFloat("TilingFactor1", tilingFactor1);
 		}
 
-		// Set tiling factor for the first detail texture if available
+		// Set tiling factor for the second detail texture if available
 		if (material->hasParameter("TilingFactor2")) {
 			float tilingFactor2 = material->getParameter("TilingFactor2");
 			shader->setFloat("TilingFactor2", tilingFactor2);
+		}
+
+		// Set material roughness parameter for materials that use this parameter
+		if (material->hasParameter("roughness")) {
+			float roughnessValue = material->getParameter("roughness");
+			shader->setFloat("roughness", roughnessValue);
 		}
 
 	}
@@ -134,9 +140,19 @@ void StaticGeometry::draw(const RenderingContext& context) {
 		shader->setMat3("normalMatrix", normalMatrix);
 	}
 
-	if (shader->hasUniform("mipmapLevel")) {
-		shader->setFloat("mipmapLevel", mipmapLevel);
-	}
+	//if (shader->hasUniform("lightIntensity")) {
+	//	shader->setFloat("lightIntensity", 1.0f);
+	//}
+
+	//if (shader->hasUniform("lightDirection")) {
+	//	glm::vec3 lightDir = glm::normalize(glm::vec3(0.0f, 1.0f, 0.0f));
+	//	shader->setVec3("lightDirection", lightDir);
+	//}
+
+	//if (shader->hasUniform("lightColor")) {
+	//	glm::vec3 lightCol = glm::vec3(1.0f, 1.0f, 1.0f);
+	//	shader->setVec3("lightColor", lightCol);
+	//}
 
 	// Check for errors after setting uniforms
 	while ((error = glGetError()) != GL_NO_ERROR) {

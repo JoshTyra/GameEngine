@@ -7,7 +7,7 @@ void GameplayState::enter() {
     // Load static geometry
     std::string staticModelPath = FileSystemUtils::getAssetFilePath("models/tutorial.fbx");
     std::string staticMaterialPath = FileSystemUtils::getAssetFilePath("materials/tutorial.txt");
-    auto [staticGeometries, _] = ModelLoader::loadModel(staticModelPath, staticMaterialPath);
+    auto [staticGeometries, unused1] = ModelLoader::loadModel(staticModelPath, staticMaterialPath);
 
     // Store the loaded geometries in the GameplayState
     staticGeometry = std::move(staticGeometries);
@@ -15,10 +15,18 @@ void GameplayState::enter() {
     // Load animated geometry
     std::string animatedModelPath = FileSystemUtils::getAssetFilePath("models/combat_sword_idle.fbx");
     std::string animatedMaterialPath = FileSystemUtils::getAssetFilePath("materials/masterchief.xml");
-    auto [__, animatedGeometries] = ModelLoader::loadModel(animatedModelPath, animatedMaterialPath);
+    auto [unused2, animatedGeometries] = ModelLoader::loadModel(animatedModelPath, animatedMaterialPath);
 
     // Store the loaded geometries in the GameplayState
     animatedMeshes = std::move(animatedGeometries);
+
+    // Load test cube
+    std::string cubeModelPath = FileSystemUtils::getAssetFilePath("models/testCube.fbx");
+    std::string cubeMaterialPath = FileSystemUtils::getAssetFilePath("materials/cube.xml");
+    auto [staticCube, unused3] = ModelLoader::loadModel(cubeModelPath, cubeMaterialPath);
+
+    // Store the test cube geometry in the GameplayState
+    testCube = std::move(staticCube);
 
     glm::vec3 spawnPoint = glm::vec3(200.0f, 26.0f, 51.0f);
 
@@ -142,6 +150,11 @@ void GameplayState::render() {
     for (const auto& animatedMesh : animatedMeshes) {
         renderables.push_back(animatedMesh);
     }
+
+    //// Add the animated meshes to the renderables vector
+    //for (const auto& cube : testCube) {
+    //    renderables.push_back(cube);
+    //}
 
     // Now let the renderer handle all renderable entities.
     renderer->renderFrame(renderables);

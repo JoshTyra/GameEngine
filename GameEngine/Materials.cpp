@@ -15,7 +15,7 @@ bool Material::hasTexture(const std::string& unit) const {
     return textures.find(unit) != textures.end();
 }
 
-const std::map<std::string, std::string>& Material::getCubemapFaces() const {
+const std::vector<std::pair<std::string, std::string>>& Material::getCubemapFaces() const {
     return cubemapFaces;
 }
 
@@ -23,7 +23,7 @@ bool Material::hasCubemapFaces() const {
     return !cubemapFaces.empty();
 }
 
-void Material::setCubemapFaces(const std::map<std::string, std::string>& faces) {
+void Material::setCubemapFaces(const std::vector<std::pair<std::string, std::string>>& faces) {
     cubemapFaces = faces;
 }
 

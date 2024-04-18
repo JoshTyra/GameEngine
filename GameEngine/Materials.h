@@ -13,14 +13,14 @@ public:
 
     const std::string& getTechnique() const;
     const std::map<std::string, std::string>& getTextures() const;
-    const std::map<std::string, std::string>& getCubemapFaces() const;  // Function to retrieve cubemap faces
+    const std::vector<std::pair<std::string, std::string>>& getCubemapFaces() const;  // Function to retrieve cubemap faces
     bool hasTexture(const std::string& unit) const;
     bool hasCubemapFaces() const;  // Check if cubemap faces are present
     std::string getTexture(const std::string& unit) const;
 
     void setTechnique(const std::string& techniqueName);
     void addTexture(const std::string& unit, const std::string& textureName);
-    void setCubemapFaces(const std::map<std::string, std::string>& faces);  // Add or set cubemap faces
+    void setCubemapFaces(const std::vector<std::pair<std::string, std::string>>& faces);  // Add or set cubemap faces
     void removeTexture(const std::string& unit);
 
     void setTechniqueDetails(const Technique& techniqueDetails);
@@ -37,7 +37,7 @@ public:
 private:
     std::string technique;
     std::map<std::string, std::string> textures; // unit -> texture name
-    std::map<std::string, std::string> cubemapFaces; // face identifier -> texture path
+    std::vector<std::pair<std::string, std::string>> cubemapFaces; // face identifier -> texture path
     std::map<std::string, float> parameters;
     Technique techniqueDetails; // Store detailed technique information
     std::shared_ptr<Shader> shaderProgram;

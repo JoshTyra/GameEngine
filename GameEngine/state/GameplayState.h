@@ -26,6 +26,7 @@ public:
 private:
     std::vector<std::shared_ptr<StaticGeometry>> staticGeometry;
     std::vector<std::shared_ptr<AnimatedGeometry>> animatedMeshes;
+    std::vector<std::shared_ptr<StaticGeometry>> testCube;
 };
 
 #endif // GAMEPLAY_STATE_H

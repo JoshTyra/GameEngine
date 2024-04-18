@@ -6,6 +6,10 @@
 #include <string>
 #include <vector>
 #include <map>
+#include "stb_image.h"
+#include <iostream>
+#include <memory>
+#include <sstream>
 
 class TextureLoader {
 public:
@@ -15,4 +19,5 @@ public:
     static GLenum getGLCubemapFace(const std::string& faceName);  // Helper function
 private:
     static GLenum mapFaceNameToGLenum(const std::string& faceName);
+    static std::map<std::string, GLuint> cubemapCache;
 };
