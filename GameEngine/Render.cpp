@@ -39,24 +39,22 @@ void Renderer::setProjectionMatrix(const glm::mat4& projectionMatrix) {
     this->projectionMatrix = projectionMatrix;
 }
 
-// Overload or new method for Renderer
 void Renderer::renderFrame(const std::vector<std::shared_ptr<IRenderable>>& renderables) {
     updateFrustum(projectionMatrix * cameraController->getViewMatrix());
     frameBufferManager->bindFrameBuffer(0);
     prepareFrame();
     renderSkybox();
 
-    // Creating a RenderingContext object here to encapsulate all the necessary state for rendering a frame.
-    // This approach simplifies the method signatures of draw calls across different renderable entities and
-    // makes the rendering pipeline more extensible. Instead of passing view and projection matrices separately
-    // to each draw method, we now pass a single context object. This allows for easy addition of new state
-    // parameters in the future without altering the interfaces of our renderable entities.
- 
     // Get the camera position from the cameraController
     glm::vec3 cameraPos = cameraController->getCameraPosition();
 
-    // Pass the camera position to the RenderingContext constructor
-    RenderingContext context(cameraController->getViewMatrix(), projectionMatrix, cameraPos);
+    // Specify the directional light properties
+    glm::vec3 lightDirection = glm::normalize(glm::vec3(-1.0f, -1.0f, -1.0f));
+    glm::vec3 lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
+    float lightIntensity = 1.0f;
+
+    RenderingContext context(cameraController->getViewMatrix(), projectionMatrix, cameraPos,
+        lightDirection, lightColor, lightIntensity);
 
     // Draw each IRenderable using the context
     for (const auto& renderable : renderables) {
@@ -64,7 +62,7 @@ void Renderer::renderFrame(const std::vector<std::shared_ptr<IRenderable>>& rend
     }
 
     frameBufferManager->unbindFrameBuffer();
-    glBindFramebuffer(GL_FRAMEBUFFER, 0); // Bind back to the default framebuffer
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void Renderer::prepareFrame() {
@@ -89,47 +87,6 @@ void Renderer::renderSkybox() const {
     if (skybox && cameraController) {
         glm::mat4 viewMatrixNoTranslation = glm::mat4(glm::mat3(cameraController->getViewMatrix()));
         skybox->draw(viewMatrixNoTranslation, projectionMatrix);
-    }
-}
-
-void Renderer::renderGeometries(const std::vector<std::unique_ptr<StaticGeometry>>& geometries) {    
-    // Get the camera position from the cameraController
-    glm::vec3 cameraPos = cameraController->getCameraPosition();
-
-    // Pass the camera position to the RenderingContext constructor
-    RenderingContext context(cameraController->getViewMatrix(), projectionMatrix, cameraPos);
-
-    // Iterate through each geometry and render
-    for (const auto& geometry : geometries) {
-        if (!geometry) {
-            std::cerr << "Encountered a null geometry." << std::endl;
-            continue;
-        }
-
-        // Perform the frustum culling check here
-        if (!geometry->isInFrustum(frustum)) {
-            continue; // Skip rendering this geometry as it's outside the frustum
-        }
-
-        auto material = geometry->getMaterial();
-        if (!material) {
-            std::cerr << "Geometry missing material." << std::endl;
-            continue;
-        }
-
-        auto shader = material->getShaderProgram();
-        if (!shader) {
-            std::cerr << "Material missing shader program." << std::endl;
-            continue;
-        }
-
-        shader->use(); // Bind the shader program
-
-        glm::mat4 modelMatrix = geometry->getModelMatrix();
-        shader->setMat4("model", modelMatrix);
-
-        // Now the geometry's draw method should accept a RenderingContext
-        geometry->draw(context);
     }
 }
 

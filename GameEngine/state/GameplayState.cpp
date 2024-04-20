@@ -151,10 +151,10 @@ void GameplayState::render() {
         renderables.push_back(animatedMesh);
     }
 
-    //// Add the animated meshes to the renderables vector
-    //for (const auto& cube : testCube) {
-    //    renderables.push_back(cube);
-    //}
+    // Add the animated meshes to the renderables vector
+    for (const auto& cube : testCube) {
+        renderables.push_back(cube);
+    }
 
     // Now let the renderer handle all renderable entities.
     renderer->renderFrame(renderables);

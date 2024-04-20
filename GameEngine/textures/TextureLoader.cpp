@@ -23,42 +23,6 @@ Texture TextureLoader::loadTexture(const std::string& path) {
     return texture;
 }
 
-void TextureLoader::loadCubemapFace(GLuint cubemapTextureId, const std::string& path, GLenum face) {
-    glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTextureId);
-    int width, height, nrChannels;
-    unsigned char* data = stbi_load(path.c_str(), &width, &height, &nrChannels, 0);
-    if (data) {
-        if (width == 0 || height == 0) {
-            std::cerr << "Cubemap face at path: " << path << " has invalid dimensions: " << width << "x" << height << std::endl;
-            stbi_image_free(data);
-            return;
-        }
-        GLenum format;
-        if (nrChannels == 1)
-            format = GL_RED;
-        else if (nrChannels == 3)
-            format = GL_RGB;
-        else if (nrChannels == 4)
-            format = GL_RGBA;
-        else {
-            std::cerr << "Unsupported number of channels: " << nrChannels << std::endl;
-            stbi_image_free(data);
-            return;
-        }
-        glTexImage2D(face, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-
-        GLenum error = glGetError();
-        if (error != GL_NO_ERROR) {
-            std::cerr << "Failed to load cubemap face. OpenGL error: " << error << std::endl;
-        }
-
-        stbi_image_free(data);
-    }
-    else {
-        std::cerr << "Cubemap texture failed to load at path: " << path << std::endl;
-    }
-}
-
 Texture TextureLoader::createCubemap(const std::vector<std::string>& paths) {
     if (paths.size() != 6) {
         std::cerr << "Cubemap must have exactly six faces" << std::endl;
@@ -82,46 +46,41 @@ Texture TextureLoader::createCubemap(const std::vector<std::string>& paths) {
         return cachedTexture;
     }
 
-    // Cubemap not found in cache, create a new one
     Texture cubemapTexture;
     glGenTextures(1, &cubemapTexture.id);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture.id);
-
-    //// Log the order of the cubemap faces
-    //std::cout << "Cubemap faces order:" << std::endl;
-    for (int i = 0; i < 6; i++) {
-        GLenum face = GL_TEXTURE_CUBE_MAP_POSITIVE_X + i;
-    //    std::string faceName;
-    //    switch (face) {
-    //    case GL_TEXTURE_CUBE_MAP_POSITIVE_X:
-    //        faceName = "Positive X";
-    //        break;
-    //    case GL_TEXTURE_CUBE_MAP_NEGATIVE_X:
-    //        faceName = "Negative X";
-    //        break;
-    //    case GL_TEXTURE_CUBE_MAP_POSITIVE_Y:
-    //        faceName = "Positive Y";
-    //        break;
-    //    case GL_TEXTURE_CUBE_MAP_NEGATIVE_Y:
-    //        faceName = "Negative Y";
-    //        break;
-    //    case GL_TEXTURE_CUBE_MAP_POSITIVE_Z:
-    //        faceName = "Positive Z";
-    //        break;
-    //    case GL_TEXTURE_CUBE_MAP_NEGATIVE_Z:
-    //        faceName = "Negative Z";
-    //        break;
-    //    }
-    //    std::cout << "Face " << i << ": " << faceName << ", Path: " << paths[i] << std::endl;
-        loadCubemapFace(cubemapTexture.id, paths[i], face);
-    }
-
-    // Set up texture parameters
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR); // Use trilinear filtering
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture.id);
+
+    bool all_faces_loaded = true;
+    for (int i = 0; i < 6; i++) {
+        GLenum face = GL_TEXTURE_CUBE_MAP_POSITIVE_X + i;
+        int width, height, nrChannels;
+        unsigned char* data = stbi_load(paths[i].c_str(), &width, &height, &nrChannels, 0);
+        if (data) {
+            GLenum format = (nrChannels == 4) ? GL_RGBA : GL_RGB;
+            glTexImage2D(face, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+            stbi_image_free(data);
+        }
+        else {
+            std::cerr << "Failed to load cubemap face: " << paths[i] << std::endl;
+            all_faces_loaded = false;
+        }
+    }
+
+    if (all_faces_loaded) {
+        // Only generate mipmaps if all faces have been loaded successfully
+        glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+    }
+
+    if (!all_faces_loaded) {
+        // Consider how to handle the error. Maybe clean up or log more info.
+        glDeleteTextures(1, &cubemapTexture.id);
+        return {}; // Return an empty texture as an error indicator
+    }
 
     // Add the new cubemap to the cache
     cubemapCache[key] = cubemapTexture.id;

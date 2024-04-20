@@ -28,7 +28,6 @@ public:
 private:
     void prepareFrame();
     void renderSkybox() const;
-    void renderGeometries(const std::vector<std::unique_ptr<StaticGeometry>>& geometries);
     void setupUniformBufferObject();
 
     std::shared_ptr<CameraController> cameraController;
