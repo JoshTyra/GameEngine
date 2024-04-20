@@ -124,6 +124,17 @@ void AnimatedGeometry::draw(const RenderingContext& context) {
 	shader->setMat4("view", context.viewMatrix);
 	shader->setMat4("projection", context.projectionMatrix);
 
+	// Pass the light uniforms to the shader
+	if (shader->hasUniform("lightDirection")) {
+		shader->setVec3("lightDirection", context.lightDirection);
+	}
+	if (shader->hasUniform("lightColor")) {
+		shader->setVec3("lightColor", context.lightColor);
+	}
+	if (shader->hasUniform("lightIntensity")) {
+		shader->setFloat("lightIntensity", context.lightIntensity);
+	}
+
 	if (m_Animator) {
 		auto transforms = m_Animator->GetFinalBoneMatrices();
 		auto numTransforms = transforms.size();
