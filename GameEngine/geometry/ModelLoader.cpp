@@ -18,7 +18,7 @@ std::string getFileExtension(const std::string& filename) {
 
 std::tuple<std::vector<std::shared_ptr<StaticGeometry>>, std::vector<std::shared_ptr<AnimatedGeometry>>> ModelLoader::loadModel(const std::string& path, const std::string& materialPath) {
     Assimp::Importer importer;
-    const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace | aiProcess_OptimizeGraph | aiProcess_OptimizeMeshes);
+    const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
 
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
         std::cerr << "ERROR::ASSIMP::" << importer.GetErrorString() << std::endl;
@@ -231,6 +231,19 @@ std::shared_ptr<AnimatedGeometry> ModelLoader::processAnimatedMesh(aiMesh* mesh,
         else {
             vertex.TexCoords = glm::vec2(0.0f);
             DEBUG_COUT << "[Info] Vertex " << i << " has no texture coordinates, assigning default (0, 0)" << std::endl;
+        }
+
+        // Check and handle tangents and bitangents
+        if (mesh->HasTangentsAndBitangents()) {
+            vertex.Tangent = glm::vec3(mesh->mTangents[i].x, mesh->mTangents[i].y, mesh->mTangents[i].z);
+            vertex.Bitangent = glm::vec3(mesh->mBitangents[i].x, mesh->mBitangents[i].y, mesh->mBitangents[i].z);
+            DEBUG_COUT << "[Info] Vertex " << i << " tangent: (" << vertex.Tangent.x << ", " << vertex.Tangent.y << ", " << vertex.Tangent.z << ")" << std::endl;
+            DEBUG_COUT << "[Info] Vertex " << i << " bitangent: (" << vertex.Bitangent.x << ", " << vertex.Bitangent.y << ", " << vertex.Bitangent.z << ")" << std::endl;
+        }
+        else {
+            vertex.Tangent = glm::vec3(0.0f);
+            vertex.Bitangent = glm::vec3(0.0f);
+            DEBUG_COUT << "[Info] Vertex " << i << " has no tangent/bitangent, assigning default (0, 0, 0)" << std::endl;
         }
 
         // Extract bone IDs and weights

@@ -97,6 +97,7 @@ const std::map<std::string, std::string> Material::textureUniformMap = {
     {"emissive", "textures[1]"},
     {"detail1", "textures[2]"},
     {"detail2", "textures[3]"},
+    {"normal", "textures[4]"},
     {"environment", "environmentMap"} // Use a separate uniform for the cubemap
 };
 
