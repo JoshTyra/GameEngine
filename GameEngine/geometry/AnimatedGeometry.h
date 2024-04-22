@@ -29,6 +29,7 @@ public:
     void addTexture(const Texture& texture);
     void setPosition(const glm::vec3& pos);
     void setRotation(float angle, const glm::vec3& axis);
+    void rotate(float angle, const glm::vec3& axis);
     void setScale(const glm::vec3& scl);
     btCollisionShape* createBulletCollisionShape() const; // Creates and returns the Bullet collision shape
     void addToPhysicsWorld(btDiscreteDynamicsWorld* dynamicsWorld); // Adds the geometry to the specified Bullet dynamics world

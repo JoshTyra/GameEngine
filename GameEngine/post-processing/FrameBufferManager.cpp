@@ -65,7 +65,7 @@ void FrameBufferManager::createPostProcessingEffects() {
     Shader brightPassShader(FileSystemUtils::getAssetFilePath("shaders/invert.vert"),
         FileSystemUtils::getAssetFilePath("shaders/bright_pass.frag"));
     PostProcessingEffect brightPassEffect(std::move(brightPassShader));
-    brightPassEffect.addUniform(ShaderUniform("brightnessThreshold", 0.3f));
+    brightPassEffect.addUniform(ShaderUniform("brightnessThreshold", 1.0f));
     postProcessing.addEffect("brightPass", std::move(brightPassEffect));
 
     // DownSample shader

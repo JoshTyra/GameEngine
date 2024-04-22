@@ -132,9 +132,14 @@ void AnimatedGeometry::draw(const RenderingContext& context) {
 	shader->setMat4("view", context.viewMatrix);
 	shader->setMat4("projection", context.projectionMatrix);
 
+	if (shader->hasUniform("cameraPos")) {
+		glm::vec3 cameraPos = context.cameraPosition; // Get the camera position in world space
+		shader->setVec3("cameraPos", cameraPos);
+	}
+
 	// Pass the light uniforms to the shader
-	if (shader->hasUniform("lightDirection")) {
-		shader->setVec3("lightDirection", context.lightDirection);
+	if (shader->hasUniform("lightPositionEyeSpace")) {
+		shader->setVec3("lightPositionEyeSpace", context.lightDirection);
 	}
 	if (shader->hasUniform("lightColor")) {
 		shader->setVec3("lightColor", context.lightColor);
@@ -345,3 +350,12 @@ std::shared_ptr<Shader> AnimatedGeometry::getShader() const {
 void AnimatedGeometry::setAnimator(std::unique_ptr<Animator> animator) {
 	m_Animator = std::move(animator);
 }
+
+// This rotate method is for the game engine to rotate the animated geometry
+// Not used for the bone calculations ieg: setRotation above
+void AnimatedGeometry::rotate(float angle, const glm::vec3& axis) {
+	// Accumulate the rotation by rotating the existing modelMatrix
+	modelMatrix = glm::rotate(modelMatrix, angle, axis);
+}
+
+

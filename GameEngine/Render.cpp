@@ -47,14 +47,26 @@ void Renderer::renderFrame(const std::vector<std::shared_ptr<IRenderable>>& rend
 
     // Get the camera position from the cameraController
     glm::vec3 cameraPos = cameraController->getCameraPosition();
-
-    // Specify the directional light properties
-    glm::vec3 lightDirection = glm::normalize(glm::vec3(-1.0f, -1.0f, -1.0f));
-    glm::vec3 lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
+    glm::vec3 lightColor = glm::vec3(0.5f, 0.5f, 1.0f);
     float lightIntensity = 1.0f;
 
-    RenderingContext context(cameraController->getViewMatrix(), projectionMatrix, cameraPos,
-        lightDirection, lightColor, lightIntensity);
+    // Assuming `cameraController` can provide the view matrix
+    glm::mat4 viewMatrix = cameraController->getViewMatrix();
+
+    // World space positions
+    glm::vec3 cameraPositionWorld = cameraController->getCameraPosition();
+    glm::vec3 lightDirectionWorld = glm::vec3(1.0f, 1.0f, 0.5f);  // Example light direction
+
+    // Convert camera position to eye space
+    glm::vec4 cameraPositionEye = viewMatrix * glm::vec4(cameraPositionWorld, 1.0);
+    glm::vec3 cameraPosEyeSpace = glm::vec3(cameraPositionEye); // We use vec3 since the position is a point
+
+    // Convert light direction to eye space (directional vector, w = 0)
+    glm::vec4 lightDirectionEye = viewMatrix * glm::vec4(lightDirectionWorld, 0.0);
+    glm::vec3 lightDirEyeSpace = glm::vec3(lightDirectionEye);
+
+    RenderingContext context(cameraController->getViewMatrix(), projectionMatrix, cameraPosEyeSpace,
+        lightDirEyeSpace, lightColor, lightIntensity);
 
     // Draw each IRenderable using the context
     for (const auto& renderable : renderables) {

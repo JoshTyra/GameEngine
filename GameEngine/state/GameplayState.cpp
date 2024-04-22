@@ -13,7 +13,7 @@ void GameplayState::enter() {
     staticGeometry = std::move(staticGeometries);
 
     // Load animated geometry
-    std::string animatedModelPath = FileSystemUtils::getAssetFilePath("models/combat_sword_idle.fbx");
+    std::string animatedModelPath = FileSystemUtils::getAssetFilePath("models/masterchief.fbx");
     std::string animatedMaterialPath = FileSystemUtils::getAssetFilePath("materials/masterchief.xml");
     auto [unused2, animatedGeometries] = ModelLoader::loadModel(animatedModelPath, animatedMaterialPath);
 
@@ -33,7 +33,7 @@ void GameplayState::enter() {
     for (const auto& animatedMesh : animatedMeshes) {
         animatedMesh->setPosition(spawnPoint);
         const auto& boneInfoMap = animatedMesh->GetBoneInfoMap();
-        std::string animationPath = FileSystemUtils::getAssetFilePath("models/combat_sword_idle.fbx");
+        std::string animationPath = FileSystemUtils::getAssetFilePath("models/masterchief_Rendering_Test.fbx");
 
         // Use shared_ptr for Animation
         auto animation = std::make_shared<Animation>(animationPath, boneInfoMap);
@@ -89,7 +89,6 @@ void GameplayState::update(float deltaTime) {
         audioManager->updateListenerPosition(irrCameraPos, irrCameraFront, irrCameraUp);
     }
 
-    // Update the animation for each AnimatedGeometry
     for (const auto& animatedMesh : animatedMeshes) {
         auto animator = animatedMesh->getAnimator();
         if (animator) {
@@ -142,9 +141,9 @@ void GameplayState::render() {
     // Create a collection for all renderable entities.
     std::vector<std::shared_ptr<IRenderable>> renderables;
 
-    for (const auto& geometry : staticGeometry) {
-        renderables.push_back(geometry);
-    }
+    //for (const auto& geometry : staticGeometry) {
+    //    renderables.push_back(geometry);
+    //}
 
     // Add the animated meshes to the renderables vector
     for (const auto& animatedMesh : animatedMeshes) {
