@@ -33,7 +33,7 @@ void GameplayState::enter() {
     for (const auto& animatedMesh : animatedMeshes) {
         animatedMesh->setPosition(spawnPoint);
         const auto& boneInfoMap = animatedMesh->GetBoneInfoMap();
-        std::string animationPath = FileSystemUtils::getAssetFilePath("models/masterchief_Rendering_Test.fbx");
+        std::string animationPath = FileSystemUtils::getAssetFilePath("models/combat_sword_idle.fbx");
 
         // Use shared_ptr for Animation
         auto animation = std::make_shared<Animation>(animationPath, boneInfoMap);
