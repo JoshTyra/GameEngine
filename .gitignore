@@ -1,5 +1,8 @@
 .vs/
 .git/
 x64/**
+!x64/Debug/
+!x64/Debug/media/
 !x64/Debug/media/shaders/
+!x64/Debug/media/shaders/*
 GameEngine/x64/
