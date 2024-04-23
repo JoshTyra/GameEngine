@@ -5,7 +5,7 @@ layout(location = 1) in vec3 norm;
 layout(location = 2) in vec2 tex;
 layout(location = 3) in vec3 tangent;
 layout(location = 4) in vec3 bitangent;
-layout(location = 5) in ivec4 boneIds;
+layout(location = 5) in ivec4 boneIDs;
 layout(location = 6) in vec4 weights;
 
 uniform mat4 projection;
@@ -26,11 +26,10 @@ out vec3 FragPos;
 
 void main()
 {
-    mat4 boneMatrix = finalBonesMatrices[boneIds[0]] * weights[0];
-    for (int i = 1; i < MAX_BONE_INFLUENCE; i++)
-    {
-        boneMatrix += finalBonesMatrices[boneIds[i]] * weights[i];
-    }
+    mat4 boneMatrix = finalBonesMatrices[boneIDs[0]] * weights[0];
+    boneMatrix += finalBonesMatrices[boneIDs[1]] * weights[1];
+    boneMatrix += finalBonesMatrices[boneIDs[2]] * weights[2];
+    boneMatrix += finalBonesMatrices[boneIDs[3]] * weights[3];
 
     vec4 worldPosition = model * boneMatrix * vec4(pos, 1.0);
     vec3 worldNormal = normalize(mat3(model) * mat3(boneMatrix) * norm);

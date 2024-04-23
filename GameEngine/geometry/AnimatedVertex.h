@@ -2,7 +2,7 @@
 
 #include <glm/glm.hpp>
 
-#define MAX_BONE_INFLUENCE 2
+#define MAX_BONE_INFLUENCE 4
 
 struct AnimatedVertex {
     // position
@@ -16,7 +16,7 @@ struct AnimatedVertex {
     // bitangent
     glm::vec3 Bitangent;
     // bone indexes which will influence this vertex
-    int m_BoneIDs[MAX_BONE_INFLUENCE];
-    // weights from each bone
-    float m_Weights[MAX_BONE_INFLUENCE];
+    glm::ivec4 BoneIDs;
+    // vertex weights
+    glm::vec4 Weights;
 };

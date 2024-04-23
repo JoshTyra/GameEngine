@@ -323,10 +323,8 @@ std::vector<std::string> ModelLoader::readMaterialList(const std::string& materi
 }
 
 void ModelLoader::SetVertexBoneDataToDefault(AnimatedVertex& vertex) {
-    for (int i = 0; i < MAX_BONE_INFLUENCE; i++) {
-        vertex.m_BoneIDs[i] = -1;
-        vertex.m_Weights[i] = 0.0f;
-    }
+    vertex.BoneIDs = glm::ivec4(-1);
+    vertex.Weights = glm::vec4(0.0f);
 }
 
 void ModelLoader::ExtractBoneWeightForVertices(AnimatedVertex& vertex, aiMesh* mesh, int vertexIndex) {
@@ -356,10 +354,10 @@ void ModelLoader::ExtractBoneWeightForVertices(AnimatedVertex& vertex, aiMesh* m
 }
 
 void ModelLoader::SetVertexBoneData(AnimatedVertex& vertex, int boneID, float weight) {
-    for (int i = 0; i < MAX_BONE_INFLUENCE; ++i) {
-        if (vertex.m_BoneIDs[i] < 0) {
-            vertex.m_Weights[i] = weight;
-            vertex.m_BoneIDs[i] = boneID;
+    for (int i = 0; i < 4; ++i) {
+        if (vertex.BoneIDs[i] < 0) {
+            vertex.Weights[i] = weight;
+            vertex.BoneIDs[i] = boneID;
             break;
         }
     }
