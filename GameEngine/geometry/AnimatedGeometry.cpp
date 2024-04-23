@@ -136,6 +136,14 @@ void AnimatedGeometry::draw(const RenderingContext& context) {
 		shader->setFloat("lightIntensity", context.lightIntensity);
 	}
 
+	if (shader->hasUniform("near")) {
+		shader->setFloat("near", context.nearPlane);
+	}
+
+	if (shader->hasUniform("far")) {
+		shader->setFloat("far", context.farPlane);
+	}
+
 	if (m_Animator) {
 		auto transforms = m_Animator->GetFinalBoneMatrices();
 		auto numTransforms = transforms.size();

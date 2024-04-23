@@ -35,8 +35,10 @@ void Renderer::setCameraController(std::shared_ptr<CameraController> cameraContr
     this->cameraController = cameraController;
 }
 
-void Renderer::setProjectionMatrix(const glm::mat4& projectionMatrix) {
+void Renderer::setProjectionMatrix(const glm::mat4& projectionMatrix, float nearPlane, float farPlane) {
     this->projectionMatrix = projectionMatrix;
+    this->nearPlane = nearPlane;
+    this->farPlane = farPlane;
 }
 
 void Renderer::renderFrame(const std::vector<std::shared_ptr<IRenderable>>& renderables) {
@@ -66,7 +68,7 @@ void Renderer::renderFrame(const std::vector<std::shared_ptr<IRenderable>>& rend
     glm::vec3 lightDirEyeSpace = glm::vec3(lightDirectionEye);
 
     RenderingContext context(cameraController->getViewMatrix(), projectionMatrix, cameraPosEyeSpace,
-        lightDirEyeSpace, lightColor, lightIntensity);
+        lightDirEyeSpace, lightColor, lightIntensity, nearPlane, farPlane);
 
     // Draw each IRenderable using the context
     for (const auto& renderable : renderables) {

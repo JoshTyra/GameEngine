@@ -49,6 +49,8 @@ public:
         return renderer;
     }
 
+    float nearPlane;
+    float farPlane;
 private:
     GLFWwindow* window;
     std::shared_ptr<Renderer> renderer;

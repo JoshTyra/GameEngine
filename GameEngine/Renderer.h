@@ -19,7 +19,7 @@ public:
     void updateFrustum(const glm::mat4& viewProjection);
 
     void setCameraController(std::shared_ptr<CameraController> cameraController);
-    void setProjectionMatrix(const glm::mat4& projectionMatrix);
+    void setProjectionMatrix(const glm::mat4& projectionMatrix, float nearPlane, float farPlane);
     void setSkybox(std::shared_ptr<Skybox> skybox);
     void renderFrame(const std::vector<std::shared_ptr<IRenderable>>& renderables);
     void finalizeFrame();
@@ -41,5 +41,7 @@ private:
     int screenWidth, screenHeight;
     std::unique_ptr<FrameBufferManager> frameBufferManager;
     GLFWwindow* window;
+    float nearPlane;
+    float farPlane;
 };
 

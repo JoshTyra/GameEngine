@@ -45,3 +45,30 @@ void main(void)
 	
 	//FragColor = vec4(FragPos, 1.0);
 }
+
+// Depth could be used for fog!
+/*
+#version 430 core
+
+uniform float near;
+uniform float far;
+
+in vec2 Texcoord;
+in vec3 ViewDirection;
+in vec3 LightDirection;
+in vec3 FragPos;
+
+out vec4 color;
+
+float linearizeDepth(float depth) {
+    float z = depth * 2.0 - 1.0; // Back to NDC 
+    return (2.0 * near * far) / (far + near - z * (far - near));
+}
+
+void main() {
+    float depth = linearizeDepth(gl_FragCoord.z);
+    float depthColor = depth / (far - near); // Normalize based on the known range
+    color = vec4(vec3(depthColor), 1.0);
+}
+*/
+
