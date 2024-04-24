@@ -130,7 +130,7 @@ void AnimatedGeometry::draw(const RenderingContext& context) {
 		shader->setVec3("lightPositionEyeSpace", context.lightDirection);
 	}
 	if (shader->hasUniform("lightColor")) {
-		shader->setVec3("lightColor", context.lightColor);
+		shader->setVec4("lightColor", context.lightColor);
 	}
 	if (shader->hasUniform("lightIntensity")) {
 		shader->setFloat("lightIntensity", context.lightIntensity);
@@ -170,17 +170,25 @@ void AnimatedGeometry::draw(const RenderingContext& context) {
 	// Use the Material::textureUniformMap to get the correct uniform names
 	for (size_t i = 0; i < textures.size() && i < static_cast<size_t>(maxTextureUnits); ++i) {
 		glActiveTexture(GL_TEXTURE0 + i);
-		glBindTexture(GL_TEXTURE_2D, textures[i].id);
 
-		// Look up the uniform name from the map using the texture type
-		auto uniformNameIt = Material::textureUniformMap.find(textures[i].type);
-		if (uniformNameIt != Material::textureUniformMap.end()) {
-			// Use the found uniform name to set the texture uniform in the shader
-			shader->setInt(uniformNameIt->second, i);
-			DEBUG_COUT << "Binding texture " << textures[i].path << " to " << uniformNameIt->second << std::endl;
+		// Check if the texture is a cubemap
+		if (textures[i].type == "environment") {
+			glBindTexture(GL_TEXTURE_CUBE_MAP, textures[i].id);
+			shader->setInt("environmentMap", i); // Set the cubemap uniform to the correct texture unit
 		}
 		else {
-			std::cerr << "No uniform name found for texture type: " << textures[i].type << std::endl;
+			glBindTexture(GL_TEXTURE_2D, textures[i].id);
+
+			// Look up the uniform name from the map using the texture type
+			auto uniformNameIt = Material::textureUniformMap.find(textures[i].type);
+			if (uniformNameIt != Material::textureUniformMap.end()) {
+				// Use the found uniform name to set the texture uniform in the shader
+				shader->setInt(uniformNameIt->second, i);
+				DEBUG_COUT << "Binding texture " << textures[i].path << " to " << uniformNameIt->second << std::endl;
+			}
+			else {
+				std::cerr << "No uniform name found for texture type: " << textures[i].type << std::endl;
+			}
 		}
 	}
 

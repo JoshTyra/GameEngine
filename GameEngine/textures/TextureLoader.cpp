@@ -55,7 +55,6 @@ Texture TextureLoader::createCubemap(const std::vector<std::string>& paths) {
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
     glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture.id);
 
-    bool all_faces_loaded = true;
     for (int i = 0; i < 6; i++) {
         GLenum face = GL_TEXTURE_CUBE_MAP_POSITIVE_X + i;
         int width, height, nrChannels;
@@ -67,23 +66,10 @@ Texture TextureLoader::createCubemap(const std::vector<std::string>& paths) {
         }
         else {
             std::cerr << "Failed to load cubemap face: " << paths[i] << std::endl;
-            all_faces_loaded = false;
         }
     }
 
-    if (all_faces_loaded) {
-        // Only generate mipmaps if all faces have been loaded successfully
-        glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
-    }
-
-    if (!all_faces_loaded) {
-        // Consider how to handle the error. Maybe clean up or log more info.
-        glDeleteTextures(1, &cubemapTexture.id);
-        return {}; // Return an empty texture as an error indicator
-    }
-
-    // Add the new cubemap to the cache
-    cubemapCache[key] = cubemapTexture.id;
+    glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
 
     return cubemapTexture;
 }

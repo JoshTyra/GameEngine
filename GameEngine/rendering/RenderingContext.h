@@ -10,14 +10,14 @@ public:
     glm::mat4 projectionMatrix;
     glm::vec3 cameraPosition;
     glm::vec3 lightDirection;
-    glm::vec3 lightColor;
+    glm::vec4 lightColor;
     float lightIntensity;
     float nearPlane;
     float farPlane;
 
     RenderingContext(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix,
         const glm::vec3& cameraPosition, const glm::vec3& lightDirection,
-        const glm::vec3& lightColor, float lightIntensity,
+        const glm::vec4& lightColor, float lightIntensity,
         float nearPlane, float farPlane)
         : viewMatrix(viewMatrix), projectionMatrix(projectionMatrix),
         cameraPosition(cameraPosition), lightDirection(lightDirection),

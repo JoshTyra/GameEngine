@@ -4,13 +4,13 @@ void GameplayState::enter() {
     GLFWwindow* window = GameStateManager::instance().getWindowContext();
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-    // Load static geometry
-    std::string staticModelPath = FileSystemUtils::getAssetFilePath("models/tutorial.fbx");
-    std::string staticMaterialPath = FileSystemUtils::getAssetFilePath("materials/tutorial.txt");
-    auto [staticGeometries, unused1] = ModelLoader::loadModel(staticModelPath, staticMaterialPath);
+    //// Load static geometry
+    //std::string staticModelPath = FileSystemUtils::getAssetFilePath("models/tutorial.fbx");
+    //std::string staticMaterialPath = FileSystemUtils::getAssetFilePath("materials/tutorial.txt");
+    //auto [staticGeometries, unused1] = ModelLoader::loadModel(staticModelPath, staticMaterialPath);
 
-    // Store the loaded geometries in the GameplayState
-    staticGeometry = std::move(staticGeometries);
+    //// Store the loaded geometries in the GameplayState
+    //staticGeometry = std::move(staticGeometries);
 
     // Load animated geometry
     std::string animatedModelPath = FileSystemUtils::getAssetFilePath("models/masterchief.fbx");
@@ -28,10 +28,10 @@ void GameplayState::enter() {
     //// Store the test cube geometry in the GameplayState
     //testCube = std::move(staticCube);
 
-    glm::vec3 spawnPoint = glm::vec3(200.0f, 26.0f, 51.0f);
+    //glm::vec3 spawnPoint = glm::vec3(0.0f, 0.0f, 0.0f);
 
     for (const auto& animatedMesh : animatedMeshes) {
-        animatedMesh->setPosition(spawnPoint);
+        //animatedMesh->setPosition(spawnPoint);
         const auto& boneInfoMap = animatedMesh->GetBoneInfoMap();
         std::string animationPath = FileSystemUtils::getAssetFilePath("models/combat_sword_idle.fbx");
 

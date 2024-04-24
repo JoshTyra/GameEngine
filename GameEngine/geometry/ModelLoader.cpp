@@ -272,12 +272,12 @@ std::shared_ptr<AnimatedGeometry> ModelLoader::processAnimatedMesh(aiMesh* mesh,
             auto cubemapFaces = material->getCubemapFaces(); // Function to retrieve map of faces
             std::vector<std::string> paths;
 
-            //std::cout << "Cubemap faces order from processStaticMesh:" << std::endl;
+            DEBUG_COUT << "Cubemap faces order from processAnimatedMesh:" << std::endl;
             for (const auto& [faceName, path] : cubemapFaces) {
                 std::string fullPath = FileSystemUtils::getAssetFilePath("textures/" + path);
                 paths.push_back(fullPath); // Collect all paths for the cubemap
 
-                //std::cout << "Face: " << faceName << ", Path: " << fullPath << std::endl;
+                DEBUG_COUT << "Face: " << faceName << ", Path: " << fullPath << std::endl;
             }
 
             // Use the new method to get or create a cubemap from the paths
@@ -285,7 +285,7 @@ std::shared_ptr<AnimatedGeometry> ModelLoader::processAnimatedMesh(aiMesh* mesh,
             if (cubemapTexture.id != 0) { // Check if texture was successfully created or retrieved from cache
                 cubemapTexture.type = "environment";
                 textures.push_back(cubemapTexture); // Push back the created or cached cubemap texture to the geometry's textures list
-                //std::cout << "Cubemap texture added to textures vector. Type: " << cubemapTexture.type << ", ID: " << cubemapTexture.id << std::endl;
+                DEBUG_COUT << "Cubemap texture added to textures vector. Type: " << cubemapTexture.type << ", ID: " << cubemapTexture.id << std::endl;
             }
             else {
                 std::cerr << "Failed to load or retrieve cubemap texture." << std::endl;

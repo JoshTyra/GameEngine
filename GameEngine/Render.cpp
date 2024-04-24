@@ -49,8 +49,8 @@ void Renderer::renderFrame(const std::vector<std::shared_ptr<IRenderable>>& rend
 
     // Get the camera position from the cameraController
     glm::vec3 cameraPos = cameraController->getCameraPosition();
-    glm::vec3 lightColor = glm::vec3(0.5f, 0.5f, 1.0f);
-    float lightIntensity = 1.0f;
+    glm::vec4 lightColor = glm::vec4(0.5f, 0.5f, 0.5f, 1.0f);
+    float lightIntensity = 1.5f;
 
     // Assuming `cameraController` can provide the view matrix
     glm::mat4 viewMatrix = cameraController->getViewMatrix();
