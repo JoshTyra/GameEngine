@@ -69,7 +69,7 @@ void StaticGeometry::draw(const RenderingContext& context) {
 		std::cerr << "OpenGL Error before setting uniforms: " << error << std::endl;
 	}
 
-	float distance = glm::distance(context.cameraPosition, position);
+	float distance = glm::distance(context.cameraPositionWorld, position);
 	float minDistance = 1.0f;
 	float mipmapLevel = std::max(0.0f, std::log2(distance / minDistance));
 
@@ -131,7 +131,7 @@ void StaticGeometry::draw(const RenderingContext& context) {
 	shader->setMat4("projection", context.projectionMatrix);
 
 	if (shader->hasUniform("cameraPos")) {
-		glm::vec3 cameraPos = context.cameraPosition; // Get the camera position in world space
+		glm::vec3 cameraPos = context.cameraPositionWorld; // Get the camera position in world space
 		shader->setVec3("cameraPos", cameraPos);
 	}
 
@@ -139,20 +139,6 @@ void StaticGeometry::draw(const RenderingContext& context) {
 		glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(model)));
 		shader->setMat3("normalMatrix", normalMatrix);
 	}
-
-	//if (shader->hasUniform("lightIntensity")) {
-	//	shader->setFloat("lightIntensity", 1.0f);
-	//}
-
-	//if (shader->hasUniform("lightDirection")) {
-	//	glm::vec3 lightDir = glm::normalize(glm::vec3(0.0f, 1.0f, 0.0f));
-	//	shader->setVec3("lightDirection", lightDir);
-	//}
-
-	//if (shader->hasUniform("lightColor")) {
-	//	glm::vec3 lightCol = glm::vec3(1.0f, 1.0f, 1.0f);
-	//	shader->setVec3("lightColor", lightCol);
-	//}
 
 	// Check for errors after setting uniforms
 	while ((error = glGetError()) != GL_NO_ERROR) {

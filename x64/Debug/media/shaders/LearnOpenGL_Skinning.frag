@@ -9,6 +9,7 @@ uniform vec4 lightColor;
 uniform float fSpecularPower = 16.0;
 uniform float reflectionStrength = 0.45; // Adjustable reflection strength
 uniform float lightIntensity;
+uniform float fReflectionBlend = 1.0;
 
 uniform vec3 cameraPos;              // Camera position in eye space
 
@@ -48,16 +49,17 @@ void main(void) {
 		color += fNDotL * lightIntensity * lightColor.rgb * fvBaseColor.rgb;
 	}
 
-    // Specular component influenced by the Fresnel effect
-    float spec = pow(fNDotH, fSpecularPower);
-    float specularIntensity = mix(0.2, 1.0, fresnel); // Blend with a base factor for visibility
-    vec3 specular = spec * specularIntensity * fvSpecular.rgb;
-    color += specular;
+	// Specular component influenced by the Fresnel effect
+	float spec = pow(fNDotH, fSpecularPower);
+	float specularIntensity = mix(0.2, 1.0, fresnel);
+	vec3 specular = spec * specularIntensity * fvSpecular.rgb * fvBaseColor.a;
+	color += specular;
 
-    // Reflection component, using Fresnel
-    vec3 reflectionVector = reflect(-fvViewDirection, fvNormal);
-    vec4 reflectionColor = texture(environmentMap, reflectionVector);
-    color += (reflectionColor.rgb * fvBaseColor.a) * reflectionStrength; // Blend with alpha for reflection
+	// Reflection component, using Fresnel
+	vec3 reflectionVector = reflect(-fvViewDirection, fvNormal);
+	vec4 reflectionColor = texture(environmentMap, reflectionVector);
+	vec3 blendedReflectionColor = mix(fvBaseColor.rgb, reflectionColor.rgb, fReflectionBlend);
+	color += (blendedReflectionColor * fvBaseColor.a) * reflectionStrength;
 
     // Final color output
     FragColor = vec4(color, fvBaseColor.a);

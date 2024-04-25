@@ -47,11 +47,6 @@ void Renderer::renderFrame(const std::vector<std::shared_ptr<IRenderable>>& rend
     prepareFrame();
     renderSkybox();
 
-    // Get the camera position from the cameraController
-    glm::vec3 cameraPos = cameraController->getCameraPosition();
-    glm::vec4 lightColor = glm::vec4(0.5f, 0.5f, 0.5f, 1.0f);
-    float lightIntensity = 1.5f;
-
     // Assuming `cameraController` can provide the view matrix
     glm::mat4 viewMatrix = cameraController->getViewMatrix();
 
@@ -61,14 +56,22 @@ void Renderer::renderFrame(const std::vector<std::shared_ptr<IRenderable>>& rend
 
     // Convert camera position to eye space
     glm::vec4 cameraPositionEye = viewMatrix * glm::vec4(cameraPositionWorld, 1.0);
-    glm::vec3 cameraPosEyeSpace = glm::vec3(cameraPositionEye); // We use vec3 since the position is a point
+    glm::vec3 cameraPositionEyeSpace = glm::vec3(cameraPositionEye); // We use vec3 since the position is a point
 
     // Convert light direction to eye space (directional vector, w = 0)
     glm::vec4 lightDirectionEye = viewMatrix * glm::vec4(lightDirectionWorld, 0.0);
-    glm::vec3 lightDirEyeSpace = glm::vec3(lightDirectionEye);
+    glm::vec3 lightDirectionEyeSpace = glm::vec3(lightDirectionEye);
 
-    RenderingContext context(cameraController->getViewMatrix(), projectionMatrix, cameraPosEyeSpace,
-        lightDirEyeSpace, lightColor, lightIntensity, nearPlane, farPlane);
+    // Assuming a single light color and intensity for simplicity
+    glm::vec4 lightColor = glm::vec4(0.5f, 0.5f, 0.5f, 1.0f);
+    float lightIntensity = 1.5f;
+
+    // Create RenderingContext with both world and eye space parameters
+    RenderingContext context(viewMatrix, projectionMatrix,
+        cameraPositionWorld, cameraPositionEyeSpace,
+        lightDirectionWorld, lightDirectionEyeSpace,
+        lightColor, lightIntensity,
+        nearPlane, farPlane);
 
     // Draw each IRenderable using the context
     for (const auto& renderable : renderables) {

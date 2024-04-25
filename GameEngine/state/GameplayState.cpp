@@ -4,17 +4,17 @@ void GameplayState::enter() {
     GLFWwindow* window = GameStateManager::instance().getWindowContext();
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-    //// Load static geometry
-    //std::string staticModelPath = FileSystemUtils::getAssetFilePath("models/tutorial.fbx");
-    //std::string staticMaterialPath = FileSystemUtils::getAssetFilePath("materials/tutorial.txt");
-    //auto [staticGeometries, unused1] = ModelLoader::loadModel(staticModelPath, staticMaterialPath);
+    // Load static geometry
+    std::string staticModelPath = FileSystemUtils::getAssetFilePath("models/tutorial.fbx");
+    std::string staticMaterialPath = FileSystemUtils::getAssetFilePath("materials/tutorial.txt");
+    auto [staticGeometries, unused1] = ModelLoader::loadModel(staticModelPath, staticMaterialPath);
 
-    //// Store the loaded geometries in the GameplayState
-    //staticGeometry = std::move(staticGeometries);
+    // Store the loaded geometries in the GameplayState
+    staticGeometry = std::move(staticGeometries);
 
     // Load animated geometry
     std::string animatedModelPath = FileSystemUtils::getAssetFilePath("models/masterchief.fbx");
-    std::string animatedMaterialPath = FileSystemUtils::getAssetFilePath("materials/masterchief.xml");
+    std::string animatedMaterialPath = FileSystemUtils::getAssetFilePath("materials/masterchief.txt");
     auto [unused2, animatedGeometries] = ModelLoader::loadModel(animatedModelPath, animatedMaterialPath);
 
     // Store the loaded geometries in the GameplayState
@@ -141,9 +141,9 @@ void GameplayState::render() {
     // Create a collection for all renderable entities.
     std::vector<std::shared_ptr<IRenderable>> renderables;
 
-    //for (const auto& geometry : staticGeometry) {
-    //    renderables.push_back(geometry);
-    //}
+    for (const auto& geometry : staticGeometry) {
+        renderables.push_back(geometry);
+    }
 
     // Add the animated meshes to the renderables vector
     for (const auto& animatedMesh : animatedMeshes) {

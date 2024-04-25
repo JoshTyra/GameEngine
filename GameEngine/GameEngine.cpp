@@ -7,7 +7,7 @@
 GameEngine::GameEngine()
     : stateManager(GameStateManager::instance()), frameTimer(20),
     cameraPos(0.0f, 0.0f, 3.0f), cameraUp(0.0f, 1.0f, 0.0f), cameraFront(0.0f, 0.0f, -1.0f),
-    cameraSpeed(6.0f), nearPlane(0.1f), farPlane(20.0f), // Adjusted to your suitable values
+    cameraSpeed(6.0f), nearPlane(0.1f), farPlane(80.0f), // Adjusted to your suitable values
     deltaTime(0.0f), lastFrame(0.0f), window(nullptr) {
 }
 

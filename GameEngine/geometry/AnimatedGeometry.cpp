@@ -121,13 +121,13 @@ void AnimatedGeometry::draw(const RenderingContext& context) {
 	shader->setMat4("projection", context.projectionMatrix);
 
 	if (shader->hasUniform("cameraPos")) {
-		glm::vec3 cameraPos = context.cameraPosition; // Get the camera position in world space
+		glm::vec3 cameraPos = context.cameraPositionEye; // Get the camera position in world space
 		shader->setVec3("cameraPos", cameraPos);
 	}
 
 	// Pass the light uniforms to the shader
 	if (shader->hasUniform("lightPositionEyeSpace")) {
-		shader->setVec3("lightPositionEyeSpace", context.lightDirection);
+		shader->setVec3("lightPositionEyeSpace", context.lightDirectionEye);
 	}
 	if (shader->hasUniform("lightColor")) {
 		shader->setVec4("lightColor", context.lightColor);
