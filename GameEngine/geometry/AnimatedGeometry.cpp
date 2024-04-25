@@ -152,7 +152,7 @@ void AnimatedGeometry::draw(const RenderingContext& context) {
 
 		for (int i = 0; i < numTransforms; ++i) {
 			//std::cout << "Setting finalBonesMatrices[" << i << "]" << std::endl;
-			shader->setMat4("finalBonesMatrices[" + std::to_string(i) + "]", transforms[i]);
+			shader->setMat4x3("finalBonesMatrices[" + std::to_string(i) + "]", transforms[i]);
 		}
 	}
 	else {

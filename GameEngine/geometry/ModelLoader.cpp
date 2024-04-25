@@ -16,6 +16,17 @@ std::string getFileExtension(const std::string& filename) {
     return path.extension().string();
 }
 
+void NormalizeVertexWeights(AnimatedVertex& vertex) {
+    float totalWeight = vertex.Weights.x + vertex.Weights.y + vertex.Weights.z + vertex.Weights.w;
+    if (totalWeight > 0.0) {  // Avoid division by zero
+        vertex.Weights /= totalWeight;
+    }
+    else {
+        // Handle the case where no weights are assigned (all are zero)
+        vertex.Weights = glm::vec4(1.0, 0.0, 0.0, 0.0); // Default to only being influenced by the first bone
+    }
+}
+
 std::tuple<std::vector<std::shared_ptr<StaticGeometry>>, std::vector<std::shared_ptr<AnimatedGeometry>>> ModelLoader::loadModel(const std::string& path, const std::string& materialPath) {
     Assimp::Importer importer;
     const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace | aiProcess_JoinIdenticalVertices | aiProcess_ImproveCacheLocality);
@@ -249,6 +260,7 @@ std::shared_ptr<AnimatedGeometry> ModelLoader::processAnimatedMesh(aiMesh* mesh,
         // Extract bone IDs and weights
         SetVertexBoneDataToDefault(vertex);
         ExtractBoneWeightForVertices(vertex, mesh, i);
+        NormalizeVertexWeights(vertex);
 
         vertices.push_back(vertex);
     }

@@ -12,12 +12,12 @@ uniform mat4 projection;
 uniform mat4 view;
 uniform mat4 model;
 uniform vec3 lightPositionEyeSpace;
-uniform vec3 cameraPos; // Added uniform for camera position
+uniform vec3 cameraPos;
 
 const int MAX_BONES = 40;
-const int MAX_BONE_INFLUENCE = 2;
+const int MAX_BONE_INFLUENCE = 4;
 
-uniform mat4 finalBonesMatrices[MAX_BONES];
+uniform mat4x3 finalBonesMatrices[MAX_BONES];
 
 out vec2 Texcoord;
 out vec3 ViewDirection;
@@ -26,15 +26,16 @@ out vec3 FragPos;
 
 void main()
 {
-    mat4 boneMatrix = finalBonesMatrices[boneIDs[0]] * weights[0];
-    boneMatrix += finalBonesMatrices[boneIDs[1]] * weights[1];
-    boneMatrix += finalBonesMatrices[boneIDs[2]] * weights[2];
-    boneMatrix += finalBonesMatrices[boneIDs[3]] * weights[3];
+    mat4x3 boneMatrix = mat4x3(0.0); // Initialize to zero matrix
+	for (int i = 0; i < MAX_BONE_INFLUENCE; i++) {
+		if (boneIDs[i] >= 0 && boneIDs[i] < MAX_BONES) // Check valid bone ID
+			boneMatrix += finalBonesMatrices[boneIDs[i]] * weights[i];
+	}
 
-    vec4 worldPosition = model * boneMatrix * vec4(pos, 1.0);
-    vec3 worldNormal = normalize(mat3(model) * mat3(boneMatrix) * norm);
-    vec3 worldTangent = normalize(mat3(model) * mat3(boneMatrix) * tangent);
-    vec3 worldBitangent = normalize(mat3(model) * mat3(boneMatrix) * bitangent);
+    vec4 worldPosition = model * vec4(boneMatrix * vec4(pos, 1.0), 1.0);
+    vec3 worldNormal = normalize(mat3(model) * (mat3(boneMatrix) * norm));
+    vec3 worldTangent = normalize(mat3(model) * (mat3(boneMatrix) * tangent));
+    vec3 worldBitangent = normalize(mat3(model) * (mat3(boneMatrix) * bitangent));
 
     vec4 viewPosition = view * worldPosition;
     gl_Position = projection * viewPosition;

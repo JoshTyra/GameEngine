@@ -40,6 +40,7 @@ public:
     }
 
     void use() const;
+    void setMat4x3(const std::string& name, const glm::mat4x3& mat) const;
     void setMat4(const std::string& name, const glm::mat4& mat) const;
     void setMat3(const std::string& name, const glm::mat3& mat) const;
     void setInt(const std::string& name, int value) const;
