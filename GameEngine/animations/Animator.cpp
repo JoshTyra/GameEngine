@@ -4,9 +4,9 @@ Animator::Animator(std::shared_ptr<Animation> animation)
     : m_CurrentTime(0.0), m_CurrentAnimation(animation) 
 {
     assert(m_CurrentAnimation != nullptr && "Animator received a null Animation object.");
-    m_FinalBoneMatrices.reserve(100);
+    m_FinalBoneMatrices.reserve(40);
 
-    for (int i = 0; i < 100; i++)
+    for (int i = 0; i < 40; i++)
         m_FinalBoneMatrices.push_back(glm::mat4(1.0f));
 }
 
@@ -32,11 +32,9 @@ void Animator::PlayAnimation(std::shared_ptr<Animation> pAnimation) {
 }
 
 void Animator::CalculateBoneTransform(const AssimpNodeData* node, glm::mat4 parentTransform) {
-    //std::cout << "Calculating bone transform for node: " << node->name << std::endl;
-
     if (!node) {
         std::cerr << "Critical Error: Node is null in CalculateBoneTransform" << std::endl;
-        return;  // Exit to avoid further crashes
+        return; // Exit to avoid further crashes
     }
 
     std::string nodeName;

@@ -4,7 +4,7 @@ uniform sampler2D textures[5];       // Array of textures, assuming diffuse text
 uniform samplerCube environmentMap;  // Cubemap for reflections
 
 uniform vec4 fvAmbient = vec4(0.3, 0.3, 0.3, 1.0); 
-uniform vec4 fvSpecular = vec4(0.3, 0.3, 0.3, 1.0);
+uniform vec4 fvSpecular = vec4(0.5, 0.5, 0.5, 1.0);
 uniform vec4 lightColor;
 uniform float fSpecularPower = 16.0;
 uniform float reflectionStrength = 0.45; // Adjustable reflection strength

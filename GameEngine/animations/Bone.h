@@ -39,6 +39,7 @@ private:
     glm::mat4 m_LocalTransform;
     std::string m_Name;
     int m_ID;
+    bool m_IsDirty;
 
 public:
     Bone(const std::string& name, int ID, const aiNodeAnim* channel);
@@ -47,6 +48,8 @@ public:
     glm::mat4 GetLocalTransform() { return m_LocalTransform; }
     std::string GetBoneName() const { return m_Name; }
     int GetBoneID() { return m_ID; }
+    bool IsDirty() const { return m_IsDirty; }
+    void SetDirty(bool isDirty) { m_IsDirty = isDirty; }
 
     int GetPositionIndex(float animationTime);
     int GetRotationIndex(float animationTime);

@@ -29,10 +29,22 @@ Bone::Bone(const std::string& name, int ID, const aiNodeAnim* channel)
 }
 
 void Bone::Update(float animationTime) {
+    if (m_NumPositions == 1 && m_NumRotations == 1 && m_NumScalings == 1) {
+        // If there is only one keyframe for position, rotation, and scaling,
+        // no need to interpolate, so we can return early
+        return;
+    }
+
     glm::mat4 translation = InterpolatePosition(animationTime);
     glm::mat4 rotation = InterpolateRotation(animationTime);
     glm::mat4 scale = InterpolateScaling(animationTime);
-    m_LocalTransform = translation * rotation * scale;
+
+    glm::mat4 newLocalTransform = translation * rotation * scale;
+
+    if (newLocalTransform != m_LocalTransform) {
+        m_LocalTransform = newLocalTransform;
+        m_IsDirty = true;
+    }
 }
 
 int Bone::GetPositionIndex(float animationTime) {
