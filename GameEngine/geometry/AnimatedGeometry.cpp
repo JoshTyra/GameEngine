@@ -117,8 +117,6 @@ void AnimatedGeometry::draw(const RenderingContext& context) {
 
 	// Pass the matrices to the shader.
 	shader->setMat4("model", model);
-	shader->setMat4("view", context.viewMatrix);
-	shader->setMat4("projection", context.projectionMatrix);
 
 	if (shader->hasUniform("cameraPos")) {
 		glm::vec3 cameraPos = context.cameraPositionEye; // Get the camera position in world space
