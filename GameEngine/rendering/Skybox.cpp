@@ -112,7 +112,7 @@ GLuint Skybox::loadCubemap(const std::vector<std::string>& faces) {
 void Skybox::draw(const glm::mat4& view, const glm::mat4& projection) const {
     glDepthFunc(GL_LEQUAL);
     skyboxShader->use(); // Use -> instead of .
-    skyboxShader->setMat4("view", glm::mat4(glm::mat3(view)));
+    skyboxShader->setMat4("view", view);
     skyboxShader->setMat4("projection", projection);
 
     glActiveTexture(GL_TEXTURE0);

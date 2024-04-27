@@ -102,7 +102,10 @@ void Renderer::prepareFrame() {
 
 void Renderer::renderSkybox() const {
     if (skybox && cameraController) {
+        // Create a view matrix for the skybox that removes translation.
         glm::mat4 viewMatrixNoTranslation = glm::mat4(glm::mat3(cameraController->getViewMatrix()));
+
+        // Explicitly set the view and projection matrices for the skybox shader.
         skybox->draw(viewMatrixNoTranslation, projectionMatrix);
     }
 }
