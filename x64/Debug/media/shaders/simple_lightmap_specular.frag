@@ -16,8 +16,6 @@ layout (std140, binding = 0) uniform Uniforms {
 in vec2 TexCoords;
 in vec2 LightMapTexCoords;
 in vec3 ReflectDir;
-in vec3 WorldPos;
-in vec3 Normal;
 
 uniform float roughness;
 
@@ -36,10 +34,8 @@ void main() {
 
     float ao = lightmapColor.a;
 
-    vec3 viewDir = normalize(cameraPositionWorld - WorldPos);
-
     // Calculate the Fresnel effect with Schlick's approximation
-    float fresnelCoeff = 0.04 + (1.0 - 0.04) * pow(1.0 - dot(viewDir, Normal), 5.0);
+    float fresnelCoeff = 0.04 + (1.0 - 0.04) * pow(1.0 - dot(normalize(ReflectDir), vec3(0, 0, 1)), 5.0);
 
     // Adjust the Fresnel coefficient based on the specular intensity
     fresnelCoeff *= specularIntensity;

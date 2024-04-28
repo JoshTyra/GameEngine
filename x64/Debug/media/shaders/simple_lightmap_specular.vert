@@ -29,10 +29,13 @@ void main() {
     LightMapTexCoords = aLightMapTexCoords;
 
     vec4 worldPos = model * vec4(aPos, 1.0);
-    vec3 normal = normalize(mat3(transpose(inverse(model))) * aNormal);
+    vec3 worldNormal = normalize(mat3(transpose(inverse(model))) * aNormal);
 
-    vec3 viewDir = normalize(cameraPositionWorld - vec3(worldPos));
-    ReflectDir = reflect(-viewDir, normal);
+    vec3 viewPos = vec3(view * worldPos);
+    vec3 viewNormal = normalize(mat3(view) * worldNormal);
+
+    vec3 viewDir = normalize(-viewPos);
+    ReflectDir = reflect(viewDir, viewNormal);
 
     gl_Position = projection * view * worldPos;
 }

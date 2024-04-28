@@ -332,8 +332,5 @@
     <ClInclude Include="animations\Bone.h">
       <Filter>Header Files\animations</Filter>
     </ClInclude>
-    <ClInclude Include="rendering\RenderingContext.h">
-      <Filter>Header Files\rendering</Filter>
-    </ClInclude>
   </ItemGroup>
 </Project>

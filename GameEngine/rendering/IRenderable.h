@@ -1,7 +1,6 @@
 // IRenderable.h
 #pragma once
 #include <glm/glm.hpp>
-#include "rendering/RenderingContext.h"
 
 class IRenderable {
 public:

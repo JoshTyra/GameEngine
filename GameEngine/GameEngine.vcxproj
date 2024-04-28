@@ -214,7 +214,6 @@
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="rendering\Frustum.h" />
     <ClInclude Include="rendering\IRenderable.h" />
-    <ClInclude Include="rendering\RenderingContext.h" />
     <ClInclude Include="rendering\Skybox.h" />
     <ClInclude Include="shader.h" />
     <ClInclude Include="state\GameplayState.h" />
