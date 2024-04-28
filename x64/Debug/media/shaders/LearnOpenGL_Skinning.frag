@@ -1,17 +1,26 @@
 #version 430 core
 
-uniform sampler2D textures[5];       // Array of textures, assuming diffuse texture is at index 0
-uniform samplerCube environmentMap;  // Cubemap for reflections
+layout (std140, binding = 0) uniform Uniforms {
+    mat4 view;
+    mat4 projection;
+    vec3 cameraPositionWorld;
+    vec3 cameraPositionEyeSpace;
+    vec4 lightColor;
+    vec3 lightDirectionWorld;
+    vec3 lightDirectionEyeSpace;
+    float lightIntensity;
+    float nearPlane;
+    float farPlane;
+};
 
-uniform vec4 fvAmbient = vec4(0.3, 0.3, 0.3, 1.0); 
+uniform sampler2D textures[5]; // Array of textures, assuming diffuse texture is at index 0
+uniform samplerCube environmentMap; // Cubemap for reflections
+
+uniform vec4 fvAmbient = vec4(0.3, 0.3, 0.3, 1.0);
 uniform vec4 fvSpecular = vec4(0.5, 0.5, 0.5, 1.0);
-uniform vec4 lightColor;
 uniform float fSpecularPower = 16.0;
 uniform float reflectionStrength = 0.45; // Adjustable reflection strength
-uniform float lightIntensity;
 uniform float fReflectionBlend = 1.0;
-
-uniform vec3 cameraPos;              // Camera position in eye space
 
 in vec2 Texcoord;
 in vec3 ViewDirection;
@@ -34,9 +43,11 @@ void main(void) {
     fvNormal = normalize(fvNormal);
 
     vec3 fvViewDirection = normalize(ViewDirection);
+
     float fNDotL = max(0.0, dot(fvNormal, fvLightDirection));
     vec3 fvHalfVector = normalize(fvLightDirection + fvViewDirection);
     float fNDotH = max(0.0, dot(fvNormal, fvHalfVector));
+
     float fresnel = computeFresnel(fvViewDirection, fvNormal, 0.04, 5.0); // Adjusted Fresnel parameters
 
     vec4 fvBaseColor = texture(textures[0], Texcoord); // Diffuse texture
@@ -46,20 +57,20 @@ void main(void) {
 
     // Diffuse component
     if (fNDotL > 0.0) {
-		color += fNDotL * lightIntensity * lightColor.rgb * fvBaseColor.rgb;
-	}
+        color += fNDotL * lightIntensity * lightColor.rgb * fvBaseColor.rgb;
+    }
 
-	// Specular component influenced by the Fresnel effect
-	float spec = pow(fNDotH, fSpecularPower);
-	float specularIntensity = mix(0.2, 1.0, fresnel);
-	vec3 specular = spec * specularIntensity * fvSpecular.rgb * fvBaseColor.a;
-	color += specular;
+    // Specular component influenced by the Fresnel effect
+    float spec = pow(fNDotH, fSpecularPower);
+    float specularIntensity = mix(0.2, 1.0, fresnel);
+    vec3 specular = spec * specularIntensity * fvSpecular.rgb * fvBaseColor.a;
+    color += specular;
 
-	// Reflection component, using Fresnel
-	vec3 reflectionVector = reflect(-fvViewDirection, fvNormal);
-	vec4 reflectionColor = texture(environmentMap, reflectionVector);
-	vec3 blendedReflectionColor = mix(fvBaseColor.rgb, reflectionColor.rgb, fReflectionBlend);
-	color += (blendedReflectionColor * fvBaseColor.a) * reflectionStrength;
+    // Reflection component, using Fresnel
+    vec3 reflectionVector = reflect(-fvViewDirection, fvNormal);
+    vec4 reflectionColor = texture(environmentMap, reflectionVector);
+    vec3 blendedReflectionColor = mix(fvBaseColor.rgb, reflectionColor.rgb, fReflectionBlend);
+    color += (blendedReflectionColor * fvBaseColor.a) * reflectionStrength;
 
     // Final color output
     FragColor = vec4(color, fvBaseColor.a);

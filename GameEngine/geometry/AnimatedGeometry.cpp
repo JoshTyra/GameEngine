@@ -56,7 +56,7 @@ void AnimatedGeometry::setupMesh() {
 	glBindVertexArray(0);
 }
 
-void AnimatedGeometry::draw(const RenderingContext& context) {
+void AnimatedGeometry::draw() {
 	if (!shader || !shader->Program) {
 		std::cerr << "Shader not set or invalid for geometry, cannot draw." << std::endl;
 		return;
@@ -117,30 +117,6 @@ void AnimatedGeometry::draw(const RenderingContext& context) {
 
 	// Pass the matrices to the shader.
 	shader->setMat4("model", model);
-
-	if (shader->hasUniform("cameraPos")) {
-		glm::vec3 cameraPos = context.cameraPositionEye; // Get the camera position in world space
-		shader->setVec3("cameraPos", cameraPos);
-	}
-
-	// Pass the light uniforms to the shader
-	if (shader->hasUniform("lightPositionEyeSpace")) {
-		shader->setVec3("lightPositionEyeSpace", context.lightDirectionEye);
-	}
-	if (shader->hasUniform("lightColor")) {
-		shader->setVec4("lightColor", context.lightColor);
-	}
-	if (shader->hasUniform("lightIntensity")) {
-		shader->setFloat("lightIntensity", context.lightIntensity);
-	}
-
-	if (shader->hasUniform("near")) {
-		shader->setFloat("near", context.nearPlane);
-	}
-
-	if (shader->hasUniform("far")) {
-		shader->setFloat("far", context.farPlane);
-	}
 
 	if (m_Animator) {
 		auto transforms = m_Animator->GetFinalBoneMatrices();

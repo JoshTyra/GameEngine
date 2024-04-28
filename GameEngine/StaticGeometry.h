@@ -22,7 +22,7 @@ public:
         const std::vector<Texture>& textures);
 
     virtual ~StaticGeometry();
-    void draw(const RenderingContext& context) override;
+    void draw() override;
     void addTexture(const Texture& texture);
     void setPosition(const glm::vec3& pos);
     void setRotation(float angle, const glm::vec3& axis);

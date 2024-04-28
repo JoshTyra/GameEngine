@@ -6,6 +6,6 @@
 class IRenderable {
 public:
     virtual ~IRenderable() = default;
-    virtual void draw(const RenderingContext& context) = 0;
+    virtual void draw() = 0;
 };
 

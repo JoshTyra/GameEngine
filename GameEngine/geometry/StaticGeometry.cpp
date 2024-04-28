@@ -56,7 +56,7 @@ void StaticGeometry::setupMesh() {
 	glBindVertexArray(0);
 }
 
-void StaticGeometry::draw(const RenderingContext& context) {
+void StaticGeometry::draw() {
 	if (!shader || !shader->Program) {
 		std::cerr << "Shader not set or invalid for geometry, cannot draw." << std::endl;
 		return;
@@ -68,10 +68,6 @@ void StaticGeometry::draw(const RenderingContext& context) {
 	while ((error = glGetError()) != GL_NO_ERROR) {
 		std::cerr << "OpenGL Error before setting uniforms: " << error << std::endl;
 	}
-
-	float distance = glm::distance(context.cameraPositionWorld, position);
-	float minDistance = 1.0f;
-	float mipmapLevel = std::max(0.0f, std::log2(distance / minDistance));
 
 	if (material) {
 		const Technique& technique = material->getTechniqueDetails();
@@ -119,7 +115,6 @@ void StaticGeometry::draw(const RenderingContext& context) {
 			float roughnessValue = material->getParameter("roughness");
 			shader->setFloat("roughness", roughnessValue);
 		}
-
 	}
 
 	// Update the model matrix based on current position, rotation, and scale.
@@ -127,11 +122,6 @@ void StaticGeometry::draw(const RenderingContext& context) {
 
 	// Pass the matrices to the shader.
 	shader->setMat4("model", model);
-
-	if (shader->hasUniform("cameraPos")) {
-		glm::vec3 cameraPos = context.cameraPositionWorld; // Get the camera position in world space
-		shader->setVec3("cameraPos", cameraPos);
-	}
 
 	if (shader->hasUniform("normalMatrix")) {
 		glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(model)));

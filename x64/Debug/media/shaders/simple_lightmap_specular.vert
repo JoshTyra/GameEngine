@@ -1,8 +1,17 @@
 #version 430 core
-layout (std140, binding = 0) uniform MatrixBlock {
+
+layout (std140, binding = 0) uniform Uniforms {
     mat4 view;
     mat4 projection;
-} Matrices;
+    vec3 cameraPositionWorld;
+    vec3 cameraPositionEyeSpace;
+    vec4 lightColor;
+    vec3 lightDirectionWorld;
+    vec3 lightDirectionEyeSpace;
+    float lightIntensity;
+    float nearPlane;
+    float farPlane;
+};
 
 layout (location = 0) in vec3 aPos;
 layout (location = 1) in vec3 aNormal;
@@ -11,18 +20,19 @@ layout (location = 3) in vec2 aLightMapTexCoords;
 
 out vec2 TexCoords;
 out vec2 LightMapTexCoords;
-out vec3 ReflectDir; // Output the reflection direction
+out vec3 ReflectDir;
 
 uniform mat4 model;
-uniform vec3 cameraPos; // Camera position in world space
-uniform mat3 normalMatrix; // Normal matrix for correct normal transformations
 
 void main() {
     TexCoords = aTexCoords;
     LightMapTexCoords = aLightMapTexCoords;
+
     vec4 worldPos = model * vec4(aPos, 1.0);
-    vec3 normal = normalize(normalMatrix * aNormal);
-    vec3 viewDir = normalize(cameraPos - vec3(worldPos));  // Calculate view direction
-    ReflectDir = reflect(viewDir, normal);  // Calculate reflection direction
-    gl_Position = Matrices.projection * Matrices.view * worldPos;
+    vec3 normal = normalize(mat3(transpose(inverse(model))) * aNormal);
+
+    vec3 viewDir = normalize(cameraPositionWorld - vec3(worldPos));
+    ReflectDir = reflect(-viewDir, normal);
+
+    gl_Position = projection * view * worldPos;
 }

@@ -26,9 +26,27 @@ Renderer::~Renderer() {
 void Renderer::setupUniformBufferObject() {
     glGenBuffers(1, &uboMatrices);
     glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
-    glBufferData(GL_UNIFORM_BUFFER, 2 * sizeof(glm::mat4), NULL, GL_STATIC_DRAW);
+    glBufferData(GL_UNIFORM_BUFFER, sizeof(Uniforms), NULL, GL_STATIC_DRAW); // Allocate memory for the whole struct
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
     glBindBufferBase(GL_UNIFORM_BUFFER, 0, uboMatrices);
+}
+
+void Renderer::updateUniformBufferObject() {
+    Uniforms uniforms;
+    uniforms.viewMatrix = cameraController->getViewMatrix();
+    uniforms.projectionMatrix = projectionMatrix;
+    uniforms.camera.cameraPositionWorld = cameraController->getCameraPosition();
+    uniforms.camera.cameraPositionEyeSpace = glm::vec3(uniforms.viewMatrix * glm::vec4(uniforms.camera.cameraPositionWorld, 1.0));
+    uniforms.lighting.lightColor = glm::vec4(0.5f, 0.5f, 0.5f, 1.0f);
+    uniforms.lighting.lightDirectionWorld = glm::vec3(1.0f, 1.0f, 0.5f);
+    uniforms.lighting.lightDirectionEyeSpace = glm::vec3(uniforms.viewMatrix * glm::vec4(uniforms.lighting.lightDirectionWorld, 0.0));
+    uniforms.lighting.lightIntensity = 1.5f;
+    uniforms.nearPlane = nearPlane;
+    uniforms.farPlane = farPlane;
+
+    glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
+    glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(Uniforms), &uniforms);
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
 
 void Renderer::setCameraController(std::shared_ptr<CameraController> cameraController) {
@@ -42,44 +60,28 @@ void Renderer::setProjectionMatrix(const glm::mat4& projectionMatrix, float near
 }
 
 void Renderer::renderFrame(const std::vector<std::shared_ptr<IRenderable>>& renderables) {
-    updateFrustum(projectionMatrix * cameraController->getViewMatrix());
-    frameBufferManager->bindFrameBuffer(0);
-    prepareFrame();
-    renderSkybox();
+	//Update the frustum for culling using the latest view and projection matrices
+	updateFrustum(projectionMatrix * cameraController->getViewMatrix());
+	// Bind the main framebuffer for rendering
+	frameBufferManager->bindFrameBuffer(0);
 
-    // Assuming `cameraController` can provide the view matrix
-    glm::mat4 viewMatrix = cameraController->getViewMatrix();
+	// Clear the frame and set initial OpenGL state for the frame
+	prepareFrame();
 
-    // World space positions
-    glm::vec3 cameraPositionWorld = cameraController->getCameraPosition();
-    glm::vec3 lightDirectionWorld = glm::vec3(1.0f, 1.0f, 0.5f);  // Example light direction
+	// Render the skybox
+	renderSkybox();
 
-    // Convert camera position to eye space
-    glm::vec4 cameraPositionEye = viewMatrix * glm::vec4(cameraPositionWorld, 1.0);
-    glm::vec3 cameraPositionEyeSpace = glm::vec3(cameraPositionEye); // We use vec3 since the position is a point
+	// Update all relevant UBOs with current frame data
+	updateUniformBufferObject();  // This function now updates the UBO with the camera and lighting information
 
-    // Convert light direction to eye space (directional vector, w = 0)
-    glm::vec4 lightDirectionEye = viewMatrix * glm::vec4(lightDirectionWorld, 0.0);
-    glm::vec3 lightDirectionEyeSpace = glm::vec3(lightDirectionEye);
+	// Draw each IRenderable using the updated UBO context
+	for (const auto& renderable : renderables) {
+		renderable->draw();  
+	}
 
-    // Assuming a single light color and intensity for simplicity
-    glm::vec4 lightColor = glm::vec4(0.5f, 0.5f, 0.5f, 1.0f);
-    float lightIntensity = 1.5f;
-
-    // Create RenderingContext with both world and eye space parameters
-    RenderingContext context(viewMatrix, projectionMatrix,
-        cameraPositionWorld, cameraPositionEyeSpace,
-        lightDirectionWorld, lightDirectionEyeSpace,
-        lightColor, lightIntensity,
-        nearPlane, farPlane);
-
-    // Draw each IRenderable using the context
-    for (const auto& renderable : renderables) {
-        renderable->draw(context);
-    }
-
-    frameBufferManager->unbindFrameBuffer();
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	// Unbind the framebuffer and revert to the default framebuffer
+	frameBufferManager->unbindFrameBuffer();
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void Renderer::prepareFrame() {
