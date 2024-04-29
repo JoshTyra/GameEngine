@@ -15,41 +15,39 @@ layout (std140, binding = 0) uniform Uniforms {
     float lightIntensity;
     float nearPlane;
     float farPlane;
-    float _pad5[8]; // Increase the size of the padding array to 8 elements
+    float _pad5[8];
 };
 
 in vec2 TexCoords;
 in vec2 LightMapTexCoords;
-in vec3 ReflectDir;
-
-uniform float roughness;
+in vec3 WorldPos;
+in vec3 WorldNormal;
 
 out vec4 FragColor;
 
-uniform sampler2D textures[2]; // An array of textures (base, lightmap)
-uniform samplerCube environmentMap; // Cubemap for reflections
+uniform sampler2D textures[2]; // An array of textures (diffuse, lightmap)
+uniform samplerCube environmentMap;
+uniform float roughness;
 
 void main() {
-    vec4 baseColor = texture(textures[0], TexCoords);
-    float specularIntensity = pow(baseColor.a, 1.0);
-
+    vec4 diffuseColor = texture(textures[0], TexCoords);
+    float specularMask = diffuseColor.a;
+    
     vec4 lightmapColor = texture(textures[1], LightMapTexCoords);
-
-    vec3 reflectedColor = texture(environmentMap, ReflectDir).rgb;
-
-    float ao = lightmapColor.a;
-
-    // Calculate the Fresnel effect with Schlick's approximation
-    float fresnelCoeff = 0.04 + (1.0 - 0.04) * pow(1.0 - dot(normalize(ReflectDir), vec3(0, 0, 1)), 5.0);
-
-    // Adjust the Fresnel coefficient based on the specular intensity
-    fresnelCoeff *= specularIntensity;
-
-    // Blend reflected color with base color based on the Fresnel effect and specular intensity
-    vec3 color = mix(baseColor.rgb, reflectedColor, fresnelCoeff * (1.0 - roughness));
-
-    // Apply the lightmap and ambient occlusion
-    color *= lightmapColor.rgb * ao;
-
-    FragColor = vec4(color, 1.0);
+	
+	// Multiply the diffuse color with the lightmap color
+	vec3 lightmappedDiffuse = diffuseColor.rgb * lightmapColor.rgb;
+    
+    vec3 viewDirWorld = normalize(WorldPos - cameraPositionWorld);
+    vec3 reflectDirWorld = reflect(-viewDirWorld, normalize(WorldNormal));
+    
+    vec3 reflectedColor = texture(environmentMap, reflectDirWorld).rgb;
+    
+    // Calculate the reflection strength based on the roughness value
+    float reflectionStrength = 1.0 - roughness;
+    
+	// Blend the reflected color with the lightmapped diffuse color based on the specular mask and reflection strength
+	vec3 finalColor = mix(lightmappedDiffuse, reflectedColor, specularMask * reflectionStrength);
+    
+    FragColor = vec4(finalColor, 1.0);
 }
