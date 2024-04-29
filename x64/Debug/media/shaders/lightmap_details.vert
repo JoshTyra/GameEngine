@@ -1,9 +1,22 @@
 #version 430 core
 
-layout (std140, binding = 0) uniform MatrixBlock {
+layout (std140, binding = 0) uniform Uniforms {
     mat4 view;
     mat4 projection;
-} Matrices;
+    vec3 cameraPositionWorld;
+    float _pad1;
+    vec3 cameraPositionEyeSpace;
+    float _pad2;
+    vec4 lightColor;
+    vec3 lightDirectionWorld;
+    float _pad3;
+    vec3 lightDirectionEyeSpace;
+    float _pad4;
+    float lightIntensity;
+    float nearPlane;
+    float farPlane;
+    float _pad5[8]; // Increase the size of the padding array to 8 elements
+};
 
 layout (location = 0) in vec3 aPos; // Position vector
 layout (location = 1) in vec3 aNormal; // Normal vector
@@ -18,5 +31,5 @@ uniform mat4 model;
 void main() {
     TexCoords = aTexCoords;
     LightMapTexCoords = aLightMapTexCoords;
-    gl_Position = Matrices.projection * Matrices.view * model * vec4(aPos, 1.0);
+    gl_Position = projection * view * model * vec4(aPos, 1.0);
 }
