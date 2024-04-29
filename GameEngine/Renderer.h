@@ -11,20 +11,20 @@
 #include "post-processing/FrameBufferManager.h"
 #include "rendering/IRenderable.h"
 
+struct Camera {
+    glm::vec3 cameraPositionWorld;
+    float _padding1;  // Ensure alignment
+    glm::vec3 cameraPositionEyeSpace;
+    float _padding2;  // Ensure alignment
+};
+
 struct Lighting {
     glm::vec4 lightColor;
     glm::vec3 lightDirectionWorld;
-    float _padding1; // Add a padding variable to maintain 16-byte alignment
+    float _padding3;  // Ensure alignment
     glm::vec3 lightDirectionEyeSpace;
+    float _padding4;  // Ensure alignment
     float lightIntensity;
-    glm::vec3 _padding2; // Add another padding variable to maintain 16-byte alignment
-};
-
-struct Camera {
-    glm::vec3 cameraPositionWorld;
-    float _padding1; // Add a padding variable to maintain 16-byte alignment
-    glm::vec3 cameraPositionEyeSpace;
-    float _padding2; // Add another padding variable to maintain 16-byte alignment
 };
 
 struct Uniforms {
@@ -34,7 +34,7 @@ struct Uniforms {
     Lighting lighting;
     float nearPlane;
     float farPlane;
-    glm::vec2 _padding; // Add a padding variable to maintain 16-byte alignment
+    float _padding5[8]; // Increase the size of the padding array to 8 elements
 };
 
 class Renderer {

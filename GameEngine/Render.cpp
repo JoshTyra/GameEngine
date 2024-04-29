@@ -3,7 +3,7 @@
 #include <iostream>
 
 Renderer::Renderer(int width, int height, GLFWwindow* window)
-    : screenWidth(width), screenHeight(height), projectionMatrix(glm::mat4(1.0f)), window(window) {
+    : screenWidth(width), screenHeight(height), projectionMatrix(glm::mat4(1.0f)), nearPlane(0.1f), farPlane(80.0f), window(window) {
     frameBufferManager = std::make_unique<FrameBufferManager>(window);
 
     // Create the main scene framebuffer
@@ -26,7 +26,7 @@ Renderer::~Renderer() {
 void Renderer::setupUniformBufferObject() {
     glGenBuffers(1, &uboMatrices);
     glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
-    glBufferData(GL_UNIFORM_BUFFER, sizeof(Uniforms), NULL, GL_STATIC_DRAW); // Allocate memory for the whole struct
+    glBufferData(GL_UNIFORM_BUFFER, 352, NULL, GL_STATIC_DRAW); // Allocate 352 bytes for the UBO
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
     glBindBufferBase(GL_UNIFORM_BUFFER, 0, uboMatrices);
 }
