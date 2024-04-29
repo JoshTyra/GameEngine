@@ -3,7 +3,7 @@
 #include <iostream>
 
 Renderer::Renderer(int width, int height, GLFWwindow* window)
-    : screenWidth(width), screenHeight(height), projectionMatrix(glm::mat4(1.0f)), nearPlane(0.1f), farPlane(80.0f), window(window) {
+    : screenWidth(width), screenHeight(height), projectionMatrix(glm::mat4(1.0f)), window(window) {
     frameBufferManager = std::make_unique<FrameBufferManager>(window);
 
     // Create the main scene framebuffer
