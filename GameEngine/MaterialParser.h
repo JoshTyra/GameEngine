@@ -6,4 +6,5 @@
 class MaterialParser {
 public:
     static Material parseMaterialXML(const std::string& filename);
+    static std::vector<std::pair<std::string, std::string>> parseCubemapXML(const std::string& filename);
 };

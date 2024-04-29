@@ -4,6 +4,17 @@
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_opengl3.h"
 
+GameEngine::GameEngine()
+    : stateManager(GameStateManager::instance()), frameTimer(20),
+    cameraPos(0.0f, 0.0f, 3.0f), cameraUp(0.0f, 1.0f, 0.0f), cameraFront(0.0f, 0.0f, -1.0f),
+    cameraSpeed(6.0f), nearPlane(0.1f), farPlane(80.0f), // Adjusted to your suitable values
+    deltaTime(0.0f), lastFrame(0.0f), window(nullptr) {
+}
+
+GameEngine::~GameEngine() {
+    shutdown();
+}
+
 void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity,
     GLsizei length, const GLchar* message, const void* userParam) {
     // Ignore non-significant error/warning codes
@@ -24,20 +35,10 @@ void framebufferSizeCallback(GLFWwindow* window, int width, int height) {
 
     // Recalculate the aspect ratio and update the projection matrix
     float aspectRatio = static_cast<float>(width) / static_cast<float>(height);
-    auto projectionMatrix = glm::perspective(glm::radians(45.0f), aspectRatio, 0.1f, 100.0f);
+    auto projectionMatrix = glm::perspective(glm::radians(45.0f), aspectRatio, engine->nearPlane, engine->farPlane);
 
     // Update the renderer's projection matrix
-    engine->getRenderer()->setProjectionMatrix(projectionMatrix);
-}
-
-GameEngine::GameEngine()
-    : stateManager(GameStateManager::instance()), frameTimer(20),
-    cameraPos(0.0f, 0.0f, 3.0f), cameraUp(0.0f, 1.0f, 0.0f), cameraFront(0.0f, 0.0f, -1.0f),
-    cameraSpeed(6.0f), deltaTime(0.0f), lastFrame(0.0f), window(nullptr) {
-}
-
-GameEngine::~GameEngine() {
-    shutdown();
+    engine->getRenderer()->setProjectionMatrix(projectionMatrix, engine->nearPlane, engine->farPlane);
 }
 
 void GameEngine::initialize() {
@@ -54,8 +55,8 @@ void GameEngine::initialize() {
 
     // Calculate the aspect ratio dynamically based on the framebuffer size
     float aspectRatio = static_cast<float>(width) / static_cast<float>(height);
-    auto projectionMatrix = glm::perspective(glm::radians(45.0f), aspectRatio, 0.1f, 100.0f);
-    renderer->setProjectionMatrix(projectionMatrix);
+    auto projectionMatrix = glm::perspective(glm::radians(45.0f), aspectRatio, nearPlane, farPlane);
+    renderer->setProjectionMatrix(projectionMatrix, nearPlane, farPlane);
 
     initializeCameraController();
     renderer->setCameraController(cameraController);

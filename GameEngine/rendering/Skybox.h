@@ -16,7 +16,7 @@ public:
 
 private:
     GLuint VAO, VBO, textureID;
-    Shader skyboxShader;
+    std::unique_ptr<Shader> skyboxShader; // Use std::unique_ptr for the shader
     static GLfloat skyboxVertices[108]; // Declared as static
     void setupSkybox();
     GLuint loadCubemap(const std::vector<std::string>& faces);

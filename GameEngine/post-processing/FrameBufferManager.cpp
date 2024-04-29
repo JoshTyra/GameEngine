@@ -41,6 +41,9 @@ void FrameBufferManager::createFrameBuffer(int width, int height) {
     glBindRenderbuffer(GL_RENDERBUFFER, 0);
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, frameBuffer.renderBufferId);
 
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+        std::cerr << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
+
     // Unbind the framebuffer
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
@@ -62,7 +65,7 @@ void FrameBufferManager::createPostProcessingEffects() {
     Shader brightPassShader(FileSystemUtils::getAssetFilePath("shaders/invert.vert"),
         FileSystemUtils::getAssetFilePath("shaders/bright_pass.frag"));
     PostProcessingEffect brightPassEffect(std::move(brightPassShader));
-    brightPassEffect.addUniform(ShaderUniform("brightnessThreshold", 0.3f));
+    brightPassEffect.addUniform(ShaderUniform("brightnessThreshold", 0.7f));
     postProcessing.addEffect("brightPass", std::move(brightPassEffect));
 
     // DownSample shader
@@ -95,14 +98,14 @@ void FrameBufferManager::createPostProcessingEffects() {
     //upSampleEffect.addUniform(ShaderUniform("inverseTextureSize", glm::vec2(1.0f / 1280.0f, 1.0f / 530.0f)));
     postProcessing.addEffect("upSample", std::move(upSampleEffect));
 
-    // Color Grading shader
-    Shader colorGradingShader(FileSystemUtils::getAssetFilePath("shaders/invert.vert"),
-        FileSystemUtils::getAssetFilePath("shaders/colorGrading.frag"));
-    PostProcessingEffect colorGradingEffect(std::move(colorGradingShader));
-    colorGradingEffect.addUniform(ShaderUniform("saturation", 1.5f)); // Example: Increase saturation
-    colorGradingEffect.addUniform(ShaderUniform("contrast", 1.1f)); // Example: Slightly increase contrast
-    colorGradingEffect.addUniform(ShaderUniform("tint", glm::vec3(0.05f, 0.05f, 0.05f))); // Example: Apply a slight tint
-    postProcessing.addEffect("colorGrading", std::move(colorGradingEffect));
+    //// Color Grading shader
+    //Shader colorGradingShader(FileSystemUtils::getAssetFilePath("shaders/invert.vert"),
+    //    FileSystemUtils::getAssetFilePath("shaders/colorGrading.frag"));
+    //PostProcessingEffect colorGradingEffect(std::move(colorGradingShader));
+    //colorGradingEffect.addUniform(ShaderUniform("saturation", 1.5f)); // Example: Increase saturation
+    //colorGradingEffect.addUniform(ShaderUniform("contrast", 1.1f)); // Example: Slightly increase contrast
+    //colorGradingEffect.addUniform(ShaderUniform("tint", glm::vec3(0.05f, 0.05f, 0.05f))); // Example: Apply a slight tint
+    //postProcessing.addEffect("colorGrading", std::move(colorGradingEffect));
 
     // BloomFinal shader
     Shader bloomFinalShader(FileSystemUtils::getAssetFilePath("shaders/invert.vert"),
@@ -111,7 +114,7 @@ void FrameBufferManager::createPostProcessingEffects() {
     bloomFinalEffect.addUniform(ShaderUniform("bloomIntensity", 1.25f));
     postProcessing.addEffect("bloomFinal", std::move(bloomFinalEffect));
 
-    activeEffects = { "brightPass", "downSample", "horizontalBlur", "verticalBlur", "upSample", "colorGrading", "bloomFinal" };
+    activeEffects = { "brightPass", "downSample", "horizontalBlur", "verticalBlur", "upSample", "bloomFinal" };
     postProcessing.setActiveEffects(activeEffects);
 }
 
@@ -154,20 +157,20 @@ void FrameBufferManager::applyPostProcessingEffects(GLuint inputTexture) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     postProcessing.applyEffect("upSample", currentInputTexture, 0);
 
-    // Assuming frameBuffers[6] is allocated for color grading effect
-    // You might need to create/setup this framebuffer if not done already
-    GLuint colorGradingFBO = frameBuffers[6].frameBufferId;
-    glBindFramebuffer(GL_FRAMEBUFFER, colorGradingFBO);
-    glViewport(0, 0, screenWidth, screenHeight); // Match full resolution for color grading
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    // Apply color grading to the upsampled texture (now in frameBuffers[5])
-    postProcessing.applyEffect("colorGrading", frameBuffers[5].textureId, 0);
+    //// Assuming frameBuffers[6] is allocated for color grading effect
+    //// You might need to create/setup this framebuffer if not done already
+    //GLuint colorGradingFBO = frameBuffers[6].frameBufferId;
+    //glBindFramebuffer(GL_FRAMEBUFFER, colorGradingFBO);
+    //glViewport(0, 0, screenWidth, screenHeight); // Match full resolution for color grading
+    //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    //// Apply color grading to the upsampled texture (now in frameBuffers[5])
+    //postProcessing.applyEffect("colorGrading", frameBuffers[5].textureId, 0);
 
     // 5. Apply the bloomFinal effect, combining the original scene and the processed bloom
     glBindFramebuffer(GL_FRAMEBUFFER, 0); // Render to the default framebuffer (screen)
     glViewport(0, 0, screenWidth, screenHeight); // Ensure viewport matches screen resolution for final output
     // Use the color-graded bloom texture (now in frameBuffers[6]) for the final combination
-    postProcessing.applyEffect("bloomFinal", frameBuffers[0].textureId, frameBuffers[6].textureId);
+    postProcessing.applyEffect("bloomFinal", frameBuffers[0].textureId, frameBuffers[5].textureId);
 }
 
 void FrameBufferManager::setActiveEffects(const std::vector<std::string>& effectNames) {

@@ -8,37 +8,31 @@
 #include "shader.h"
 #include "Materials.h"
 #include "rendering/Frustum.h"
+#include "rendering/IRenderable.h"
+#include "geometry/AnimatedVertex.h"
+#include "Debug.h"
+#include "animations/Animation.h"
+#include "animations/Animator.h"
 
-// Vertex structure
-struct Vertex {
-    glm::vec3 Position{ 0.0f, 0.0f, 0.0f };
-    glm::vec3 Normal{ 0.0f, 0.0f, 0.0f };
-    glm::vec2 TexCoords{ 0.0f, 0.0f };
-    glm::vec2 LightMapTexCoords{ 0.0f, 0.0f };
-    // Initialize other members with appropriate default values
-};
-
-// LevelGeometry class
-class LevelGeometry {
+// StaticGeometry class
+class AnimatedGeometry : public IRenderable {
 public:
-    // Destructor
-    ~LevelGeometry() {
-        // Clean up OpenGL resources
-        glDeleteVertexArrays(1, &VAO);
-        glDeleteBuffers(1, &VBO);
-        glDeleteBuffers(1, &EBO);
-    }
-    LevelGeometry();
-    LevelGeometry(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, const std::vector<Texture>& textures);
-    void Draw(const glm::mat4& model, const glm::mat4& view, const glm::mat4& projection);
+    AnimatedGeometry();
+
+    AnimatedGeometry(const std::vector<AnimatedVertex>& vertices,
+        const std::vector<unsigned int>& indices,
+        const std::vector<Texture>& textures,
+        const std::map<std::string, BoneInfo>& boneInfoMap);
+
+    virtual ~AnimatedGeometry();
+    void draw() override;
     void addTexture(const Texture& texture);
-    void setPosition(const glm::vec3& pos) { position = pos; }
-    void setRotation(float angle, const glm::vec3& axis) { rotationAngle = angle; rotationAxis = axis; }
-    void setScale(const glm::vec3& scl) { scale = scl; }
+    void setPosition(const glm::vec3& pos);
+    void setRotation(float angle, const glm::vec3& axis);
+    void rotate(float angle, const glm::vec3& axis);
+    void setScale(const glm::vec3& scl);
     btCollisionShape* createBulletCollisionShape() const; // Creates and returns the Bullet collision shape
     void addToPhysicsWorld(btDiscreteDynamicsWorld* dynamicsWorld); // Adds the geometry to the specified Bullet dynamics world
-
-    glm::mat4 getModelMatrix() const;
     glm::vec3 aabbMin;
     glm::vec3 aabbMax;
 
@@ -47,7 +41,7 @@ public:
         return this->textures;
     }
 
-    // Assuming textures is a std::vector<Texture> member of LevelGeometry
+    // Assuming textures is a std::vector<Texture> member of StaticGeometry
     unsigned int getDiffuseTextureID() const {
         for (const Texture& texture : textures) {
             if (texture.type == "diffuse") {
@@ -57,7 +51,7 @@ public:
         return 0; // Return an invalid ID if not found
     }
 
-    // Assuming textures is a std::vector<Texture> member of LevelGeometry
+    // Assuming textures is a std::vector<Texture> member of StaticGeometry
     unsigned int getLightmapTextureID() const {
         for (const Texture& texture : textures) {
             if (texture.type == "emissive") {
@@ -68,14 +62,9 @@ public:
     }
 
     // Method to set the shader program
-    void setShader(Shader* shader) {
-        this->shader = shader;
-    }
+    void setShader(std::shared_ptr<Shader> newShader);
 
-    // Method to get the shader program
-    Shader* getShader() const {
-        return shader;
-    }
+    std::shared_ptr<Shader> getShader() const;
 
     void setMaterial(std::shared_ptr<Material> mat);
 
@@ -83,24 +72,37 @@ public:
         return material;
     }
 
+    const std::map<std::string, BoneInfo>& GetBoneInfoMap() const {
+        return m_BoneInfoMap;
+    }
+
+    Animator* getAnimator() const {
+        return m_Animator.get();
+    }
+
     void calculateAABB();
     bool isInFrustum(const Frustum& frustum) const;
 
+    void setModelMatrix(const glm::mat4& model) { modelMatrix = model; }
+    glm::mat4 getModelMatrix() const;
+    void updateModelMatrix();
+    void setAnimator(std::unique_ptr<Animator> animator);
+
 private:
-    std::vector<Vertex> vertices;
+    std::vector<AnimatedVertex> vertices;
     std::vector<unsigned int> indices;
     std::vector<Texture> textures; // Store textures
     GLuint VAO, VBO, EBO;
-    Shader* shader;
+    std::shared_ptr<Shader> shader;
     std::shared_ptr<Material> material;
     glm::vec3 position = glm::vec3(0.0f);
     glm::vec3 rotationAxis = glm::vec3(0.0f, 1.0f, 0.0f);
     float rotationAngle = 0.0f; // In degrees
     glm::vec3 scale = glm::vec3(1.0f);
-
-    // Optional: Store Bullet physics objects if needed
-    // std::unique_ptr<btCollisionShape> collisionShape; // Use smart pointers for automatic memory management
-    // std::unique_ptr<btRigidBody> rigidBody;
+    glm::mat4 modelMatrix;
+    std::unique_ptr<Animation> animation;
+    std::map<std::string, BoneInfo> m_BoneInfoMap;
+    std::unique_ptr<Animator> m_Animator;
 
     void setupMesh();
 };

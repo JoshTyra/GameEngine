@@ -26,28 +26,62 @@ Renderer::~Renderer() {
 void Renderer::setupUniformBufferObject() {
     glGenBuffers(1, &uboMatrices);
     glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
-    glBufferData(GL_UNIFORM_BUFFER, 2 * sizeof(glm::mat4), NULL, GL_STATIC_DRAW);
+    glBufferData(GL_UNIFORM_BUFFER, 352, NULL, GL_STATIC_DRAW); // Allocate 352 bytes for the UBO
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
     glBindBufferBase(GL_UNIFORM_BUFFER, 0, uboMatrices);
+}
+
+void Renderer::updateUniformBufferObject() {
+    Uniforms uniforms;
+    uniforms.viewMatrix = cameraController->getViewMatrix();
+    uniforms.projectionMatrix = projectionMatrix;
+    uniforms.camera.cameraPositionWorld = cameraController->getCameraPosition();
+    uniforms.camera.cameraPositionEyeSpace = glm::vec3(uniforms.viewMatrix * glm::vec4(uniforms.camera.cameraPositionWorld, 1.0));
+    uniforms.lighting.lightColor = glm::vec4(0.5f, 0.5f, 0.5f, 1.0f);
+    uniforms.lighting.lightDirectionWorld = glm::vec3(1.0f, 1.0f, 0.5f);
+    uniforms.lighting.lightDirectionEyeSpace = glm::vec3(uniforms.viewMatrix * glm::vec4(uniforms.lighting.lightDirectionWorld, 0.0));
+    uniforms.lighting.lightIntensity = 1.5f;
+    uniforms.nearPlane = nearPlane;
+    uniforms.farPlane = farPlane;
+
+    glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
+    glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(Uniforms), &uniforms);
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
 
 void Renderer::setCameraController(std::shared_ptr<CameraController> cameraController) {
     this->cameraController = cameraController;
 }
 
-void Renderer::setProjectionMatrix(const glm::mat4& projectionMatrix) {
+void Renderer::setProjectionMatrix(const glm::mat4& projectionMatrix, float nearPlane, float farPlane) {
     this->projectionMatrix = projectionMatrix;
+    this->nearPlane = nearPlane;
+    this->farPlane = farPlane;
 }
 
-void Renderer::renderFrame(const std::vector<std::unique_ptr<LevelGeometry>>& geometries) {
-    glm::mat4 viewProjectionMatrix = projectionMatrix * cameraController->getViewMatrix();
-    updateFrustum(viewProjectionMatrix);
-    frameBufferManager->bindFrameBuffer(0);
-    prepareFrame();
-    renderSkybox();
-    renderGeometries(geometries);
-    frameBufferManager->unbindFrameBuffer();
-    glBindFramebuffer(GL_FRAMEBUFFER, 0); // Bind back to the default framebuffer
+void Renderer::renderFrame(const std::vector<std::shared_ptr<IRenderable>>& renderables) {
+	//Update the frustum for culling using the latest view and projection matrices
+	updateFrustum(projectionMatrix * cameraController->getViewMatrix());
+	// Bind the main framebuffer for rendering
+	frameBufferManager->bindFrameBuffer(0);
+
+	// Clear the frame and set initial OpenGL state for the frame
+	prepareFrame();
+
+	// Render the skybox
+	renderSkybox();
+
+	// Update all relevant UBOs with current frame data
+	updateUniformBufferObject();  // This function now updates the UBO with the camera and lighting information
+
+	// Draw each IRenderable using the updated UBO context
+	for (const auto& renderable : renderables) {
+		renderable->draw();  
+	}
+
+	// Unbind the framebuffer and revert to the default framebuffer
+	frameBufferManager->unbindFrameBuffer();
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void Renderer::prepareFrame() {
@@ -70,44 +104,11 @@ void Renderer::prepareFrame() {
 
 void Renderer::renderSkybox() const {
     if (skybox && cameraController) {
+        // Create a view matrix for the skybox that removes translation.
         glm::mat4 viewMatrixNoTranslation = glm::mat4(glm::mat3(cameraController->getViewMatrix()));
+
+        // Explicitly set the view and projection matrices for the skybox shader.
         skybox->draw(viewMatrixNoTranslation, projectionMatrix);
-    }
-}
-
-void Renderer::renderGeometries(const std::vector<std::unique_ptr<LevelGeometry>>& geometries) {
-    // Iterate through each geometry and render
-    for (const auto& geometry : geometries) {
-        if (!geometry) {
-            std::cerr << "Encountered a null geometry." << std::endl;
-            continue;
-        }
-
-        // Perform the frustum culling check here
-        if (!geometry->isInFrustum(frustum)) {
-            continue; // Skip rendering this geometry as it's outside the frustum
-        }
-
-        auto material = geometry->getMaterial();
-        if (!material) {
-            std::cerr << "Geometry missing material." << std::endl;
-            continue;
-        }
-
-        auto shader = material->getShaderProgram();
-        if (!shader) {
-            std::cerr << "Material missing shader program." << std::endl;
-            continue;
-        }
-
-        shader->use(); // Bind the shader program
-
-        // Set shader uniforms (view and projection matrices are set globally using UBO)
-        glm::mat4 modelMatrix = geometry->getModelMatrix();
-        shader->setMat4("model", modelMatrix);
-
-        // Assuming the geometry knows how to draw itself, including setting its own vertex array, textures, etc.
-        geometry->Draw(modelMatrix, cameraController->getViewMatrix(), projectionMatrix);
     }
 }
 
@@ -133,4 +134,8 @@ void Renderer::setSkybox(std::shared_ptr<Skybox> skybox) {
 
 void Renderer::updateFrustum(const glm::mat4& viewProjection) {
     frustum.update(viewProjection);
+}
+
+const glm::mat4& Renderer::getProjectionMatrix() const {
+    return projectionMatrix;
 }

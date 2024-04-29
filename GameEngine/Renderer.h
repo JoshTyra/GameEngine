@@ -4,11 +4,38 @@
 #include <memory>
 #include <utility>
 #include "CameraController.h"
-#include "LevelGeometry.h"
+#include "StaticGeometry.h"
 #include "rendering/Skybox.h"
 #include "post-processing/PostProcessing.h"
 #include "rendering/Frustum.h"
 #include "post-processing/FrameBufferManager.h"
+#include "rendering/IRenderable.h"
+
+struct Camera {
+    glm::vec3 cameraPositionWorld;
+    float _padding1;  // Ensure alignment
+    glm::vec3 cameraPositionEyeSpace;
+    float _padding2;  // Ensure alignment
+};
+
+struct Lighting {
+    glm::vec4 lightColor;
+    glm::vec3 lightDirectionWorld;
+    float _padding3;  // Ensure alignment
+    glm::vec3 lightDirectionEyeSpace;
+    float _padding4;  // Ensure alignment
+    float lightIntensity;
+};
+
+struct Uniforms {
+    glm::mat4 viewMatrix;
+    glm::mat4 projectionMatrix;
+    Camera camera;
+    Lighting lighting;
+    float nearPlane;
+    float farPlane;
+    float _padding5[8]; // Increase the size of the padding array to 8 elements
+};
 
 class Renderer {
     Frustum frustum;
@@ -18,20 +45,20 @@ public:
     void updateFrustum(const glm::mat4& viewProjection);
 
     void setCameraController(std::shared_ptr<CameraController> cameraController);
-    void setProjectionMatrix(const glm::mat4& projectionMatrix);
+    void setProjectionMatrix(const glm::mat4& projectionMatrix, float nearPlane, float farPlane);
     void setSkybox(std::shared_ptr<Skybox> skybox);
-
-    // New method to encapsulate the entire frame rendering process
-    void renderFrame(const std::vector<std::unique_ptr<LevelGeometry>>& geometries);
+    void renderFrame(const std::vector<std::shared_ptr<IRenderable>>& renderables);
     void finalizeFrame();
+    const glm::mat4& getProjectionMatrix() const;
 
 private:
     void prepareFrame();
     void renderSkybox() const;
-    void renderGeometries(const std::vector<std::unique_ptr<LevelGeometry>>& geometries);
     void setupUniformBufferObject();
+    void updateUniformBufferObject();
 
     std::shared_ptr<CameraController> cameraController;
+    glm::mat4 viewMatrix;
     glm::mat4 projectionMatrix;
     GLuint uboMatrices;
     std::shared_ptr<Skybox> skybox;
@@ -41,5 +68,7 @@ private:
     int screenWidth, screenHeight;
     std::unique_ptr<FrameBufferManager> frameBufferManager;
     GLFWwindow* window;
+    float nearPlane;
+    float farPlane;
 };
 

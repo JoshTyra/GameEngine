@@ -1,20 +1,50 @@
 #include "GameplayState.h"
-#include "GameStateManager.h"
-#include "FileSystemUtils.h"
-#include "ModelLoader.h"
-#include "imgui.h"
-#include "backends/imgui_impl_glfw.h"
-#include "backends/imgui_impl_opengl3.h"
-#include <glm/gtc/matrix_transform.hpp>
-#include <iostream>
 
 void GameplayState::enter() {
     GLFWwindow* window = GameStateManager::instance().getWindowContext();
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-    std::string modelPath = FileSystemUtils::getAssetFilePath("models/tutorial.fbx");
-    std::string materialPath = FileSystemUtils::getAssetFilePath("materials/tutorial.txt");
-    planeGeometry = ModelLoader::loadModel(modelPath, materialPath);
+    // Load static geometry
+    std::string staticModelPath = FileSystemUtils::getAssetFilePath("models/tutorial.fbx");
+    std::string staticMaterialPath = FileSystemUtils::getAssetFilePath("materials/tutorial.txt");
+    auto [staticGeometries, unused1] = ModelLoader::loadModel(staticModelPath, staticMaterialPath);
+
+    // Store the loaded geometries in the GameplayState
+    staticGeometry = std::move(staticGeometries);
+
+    // Load animated geometry
+    std::string animatedModelPath = FileSystemUtils::getAssetFilePath("models/masterchief.fbx");
+    std::string animatedMaterialPath = FileSystemUtils::getAssetFilePath("materials/masterchief.txt");
+    auto [unused2, animatedGeometries] = ModelLoader::loadModel(animatedModelPath, animatedMaterialPath);
+
+    // Store the loaded geometries in the GameplayState
+    animatedMeshes = std::move(animatedGeometries);
+
+    //// Load test cube
+    //std::string cubeModelPath = FileSystemUtils::getAssetFilePath("models/testCube.fbx");
+    //std::string cubeMaterialPath = FileSystemUtils::getAssetFilePath("materials/cube.xml");
+    //auto [staticCube, unused3] = ModelLoader::loadModel(cubeModelPath, cubeMaterialPath);
+
+    //// Store the test cube geometry in the GameplayState
+    //testCube = std::move(staticCube);
+
+    //glm::vec3 spawnPoint = glm::vec3(0.0f, 0.0f, 0.0f);
+
+    for (const auto& animatedMesh : animatedMeshes) {
+        //animatedMesh->setPosition(spawnPoint);
+        const auto& boneInfoMap = animatedMesh->GetBoneInfoMap();
+        std::string animationPath = FileSystemUtils::getAssetFilePath("models/combat_sword_idle.fbx");
+
+        // Use shared_ptr for Animation
+        auto animation = std::make_shared<Animation>(animationPath, boneInfoMap);
+
+        // Create an Animator instance using the shared_ptr directly
+        auto animator = std::make_unique<Animator>(animation);  // Animator constructor needs to accept shared_ptr
+
+        // Set the Animator in the AnimatedGeometry
+        animatedMesh->setAnimator(std::move(animator));
+    }
+
 
     auto audioManager = GameStateManager::instance().getAudioManager();
     if (audioManager) {
@@ -58,6 +88,13 @@ void GameplayState::update(float deltaTime) {
         // Update listener position in the audio manager
         audioManager->updateListenerPosition(irrCameraPos, irrCameraFront, irrCameraUp);
     }
+
+    for (const auto& animatedMesh : animatedMeshes) {
+        auto animator = animatedMesh->getAnimator();
+        if (animator) {
+            animator->UpdateAnimation(deltaTime);
+        }
+    }
 }
 
 void GameplayState::render() {
@@ -96,13 +133,33 @@ void GameplayState::render() {
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    if (cameraController && renderer) {
-        renderer->renderFrame(planeGeometry);
-        renderer->finalizeFrame();
-    }
-    else {
+    if (!cameraController || !renderer) {
         std::cerr << "Rendering setup incomplete: Camera controller or renderer not available." << std::endl;
+        return;
     }
+
+    // Create a collection for all renderable entities.
+    std::vector<std::shared_ptr<IRenderable>> renderables;
+
+    for (const auto& geometry : staticGeometry) {
+        renderables.push_back(geometry);
+    }
+
+    // Add the animated meshes to the renderables vector
+    for (const auto& animatedMesh : animatedMeshes) {
+        renderables.push_back(animatedMesh);
+    }
+
+    //// Add the animated meshes to the renderables vector
+    //for (const auto& cube : testCube) {
+    //    renderables.push_back(cube);
+    //}
+
+    // Now let the renderer handle all renderable entities.
+    renderer->renderFrame(renderables);
+
+    // Assuming finalizeFrame method takes care of post-frame operations.
+    renderer->finalizeFrame();
 
     // Render ImGui over your scene
     ImGui::Render();

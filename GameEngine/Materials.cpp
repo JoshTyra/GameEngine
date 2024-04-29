@@ -15,6 +15,18 @@ bool Material::hasTexture(const std::string& unit) const {
     return textures.find(unit) != textures.end();
 }
 
+const std::vector<std::pair<std::string, std::string>>& Material::getCubemapFaces() const {
+    return cubemapFaces;
+}
+
+bool Material::hasCubemapFaces() const {
+    return !cubemapFaces.empty();
+}
+
+void Material::setCubemapFaces(const std::vector<std::pair<std::string, std::string>>& faces) {
+    cubemapFaces = faces;
+}
+
 std::string Material::getTexture(const std::string& unit) const {
     auto it = textures.find(unit);
     if (it != textures.end()) {
@@ -47,18 +59,20 @@ void Material::setTechniqueDetails(const Technique& techniqueDetails) {
             fragmentShaderPath = fullPath;
         }
     }
-    shaderProgram = std::make_unique<Shader>(vertexShaderPath, fragmentShaderPath);
+
+    // Use std::make_shared for allocation
+    shaderProgram = std::make_shared<Shader>(vertexShaderPath, fragmentShaderPath);
     if (!shaderProgram->isProgramLinkedSuccessfully()) {
         std::cerr << "Failed to compile/link shader program for material." << std::endl;
     }
 }
 
-Shader* Material::getShaderProgram() const {
-    return shaderProgram.get();
+std::shared_ptr<Shader> Material::getShaderProgram() const {
+    return shaderProgram; // Simply return the shared_ptr
 }
 
-void Material::setShaderProgram(std::unique_ptr<Shader> shader) {
-    shaderProgram = std::move(shader);
+void Material::setShaderProgram(std::shared_ptr<Shader> shader) {
+    shaderProgram = shader; // Direct assignment thanks to shared_ptr
 }
 
 const Technique& Material::getTechniqueDetails() const {
@@ -78,12 +92,13 @@ bool Material::hasParameter(const std::string& name) const {
     return parameters.find(name) != parameters.end();
 }
 
-// Initialize the static map
 const std::map<std::string, std::string> Material::textureUniformMap = {
     {"diffuse", "textures[0]"},
     {"emissive", "textures[1]"},
     {"detail1", "textures[2]"},
-    {"detail2", "textures[3]"}
+    {"detail2", "textures[3]"},
+    {"normal", "textures[4]"},
+    {"environment", "environmentMap"} // Use a separate uniform for the cubemap
 };
 
 

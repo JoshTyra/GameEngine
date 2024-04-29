@@ -4,9 +4,17 @@
 #include <vector>
 #include <memory>
 #include "GameState.h"
-#include "LevelGeometry.h"
+#include "StaticGeometry.h"
 #include "CameraController.h"
 #include "Renderer.h"
+#include "GameStateManager.h"
+#include "FileSystemUtils.h"
+#include "ModelLoader.h"
+#include "imgui.h"
+#include "backends/imgui_impl_glfw.h"
+#include "backends/imgui_impl_opengl3.h"
+#include <glm/gtc/matrix_transform.hpp>
+#include <iostream>
 
 class GameplayState : public GameState {
 public:
@@ -16,7 +24,9 @@ public:
     void render() override;
 
 private:
-    std::vector<std::unique_ptr<LevelGeometry>> planeGeometry; // Model storage
+    std::vector<std::shared_ptr<StaticGeometry>> staticGeometry;
+    std::vector<std::shared_ptr<AnimatedGeometry>> animatedMeshes;
+    std::vector<std::shared_ptr<StaticGeometry>> testCube;
 };
 
 #endif // GAMEPLAY_STATE_H
