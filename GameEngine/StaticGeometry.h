@@ -32,6 +32,10 @@ public:
     glm::vec3 aabbMin;
     glm::vec3 aabbMax;
 
+    glm::vec3 getAABBMin() const { return aabbMin; }
+
+    glm::vec3 getAABBMax() const { return aabbMax; }
+
     // Getter function for textures
     const std::vector<Texture>& getTextures() const {
         return this->textures;

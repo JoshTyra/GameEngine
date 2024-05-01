@@ -213,6 +213,9 @@
     <ClCompile Include="animations\Bone.cpp">
       <Filter>Source Files\animations</Filter>
     </ClCompile>
+    <ClCompile Include="rendering\LODManager.cpp">
+      <Filter>Source Files\rendering</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CameraController.h">
@@ -331,6 +334,9 @@
     </ClInclude>
     <ClInclude Include="animations\Bone.h">
       <Filter>Header Files\animations</Filter>
+    </ClInclude>
+    <ClInclude Include="rendering\LODManager.h">
+      <Filter>Header Files\rendering</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
