@@ -5,12 +5,12 @@ void GameplayState::enter() {
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     // Load static geometry
-    std::string staticModelPath = FileSystemUtils::getAssetFilePath("models/tutorial.fbx");
-    std::string staticMaterialPath = FileSystemUtils::getAssetFilePath("materials/tutorial.txt");
-    auto [staticGeometries, unused1] = ModelLoader::loadModel(staticModelPath, staticMaterialPath);
+    //std::string staticModelPath = FileSystemUtils::getAssetFilePath("models/tutorial.fbx");
+    //std::string staticMaterialPath = FileSystemUtils::getAssetFilePath("materials/tutorial.txt");
+    //auto [staticGeometries, unused1] = ModelLoader::loadModel(staticModelPath, staticMaterialPath);
 
-    // Store the loaded geometries in the GameplayState
-    staticGeometry = std::move(staticGeometries);
+    //// Store the loaded geometries in the GameplayState
+    //staticGeometry = std::move(staticGeometries);
 
     // Load animated geometry
     std::string animatedModelPath = FileSystemUtils::getAssetFilePath("models/masterchief.fbx");
