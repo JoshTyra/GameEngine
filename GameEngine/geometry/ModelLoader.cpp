@@ -40,37 +40,37 @@ std::tuple<std::vector<std::shared_ptr<StaticGeometry>>, std::vector<std::shared
     if (cacheIt != materialCache.end()) {
         // Materials found in cache, retrieve them
         materials = cacheIt->second;
-        std::cout << "Retrieved " << materials.size() << " materials from cache for " << materialPath << std::endl;
+        //std::cout << "Retrieved " << materials.size() << " materials from cache for " << materialPath << std::endl;
     }
     else {
         // Materials not in cache, load them and add them to the cache
         materials = loadMaterials(materialPath);
         materialCache[materialPath] = materials;
-        std::cout << "Loaded " << materials.size() << " materials from " << materialPath << std::endl;
+        //std::cout << "Loaded " << materials.size() << " materials from " << materialPath << std::endl;
     }
 
     for (unsigned int i = 0; i < scene->mNumMeshes; i++) {
         aiMesh* mesh = scene->mMeshes[i];
-        std::cout << "Processing mesh " << i << ": " << mesh->mName.C_Str() << std::endl;
+        //std::cout << "Processing mesh " << i << ": " << mesh->mName.C_Str() << std::endl;
 
         std::shared_ptr<Material> material = nullptr;
 
         if (!materials.empty()) {
             // Use the corresponding material if available, or fallback to the first material
             material = (i < materials.size()) ? materials[i] : materials.front();
-            std::cout << "Assigned material: " << (material ? material->getTechnique() : "None") << std::endl;
+            //std::cout << "Assigned material: " << (material ? material->getTechnique() : "None") << std::endl;
         }
 
         if (mesh->HasBones()) {
             auto lodGeometries = processAnimatedMesh(mesh, scene, material);
-            std::cout << "Processed " << lodGeometries.size() << " animated geometries for mesh " << mesh->mName.C_Str() << std::endl;
+            //std::cout << "Processed " << lodGeometries.size() << " animated geometries for mesh " << mesh->mName.C_Str() << std::endl;
 
             // Filter the AnimatedGeometry instances to include only LOD1
             for (const auto& geometry : lodGeometries) {
                 std::string meshName = mesh->mName.C_Str();
                 if (meshName.find(":LOD1") != std::string::npos) {
                     animatedMeshes.push_back(geometry);
-                    std::cout << "Added LOD1 geometry for mesh: " << meshName << std::endl;
+                    //std::cout << "Added LOD1 geometry for mesh: " << meshName << std::endl;
                 }
             }
         }
@@ -90,25 +90,25 @@ std::vector<std::shared_ptr<Material>> ModelLoader::loadMaterials(const std::str
     std::string extension = getFileExtension(materialPath);
     std::transform(extension.begin(), extension.end(), extension.begin(), ::tolower); // Ensure extension is lowercase
 
-    std::cout << "Loading materials from file: " << materialPath << " (extension: " << extension << ")" << std::endl;
+    //std::cout << "Loading materials from file: " << materialPath << " (extension: " << extension << ")" << std::endl;
 
     if (extension == ".txt") {
         // It's a material list file
         auto materialFiles = readMaterialList(materialPath);
-        std::cout << "Read " << materialFiles.size() << " material files from list" << std::endl;
+        //std::cout << "Read " << materialFiles.size() << " material files from list" << std::endl;
 
         for (const auto& materialFile : materialFiles) {
-            std::cout << "Parsing material file: " << materialFile << std::endl;
+            //std::cout << "Parsing material file: " << materialFile << std::endl;
             materials.push_back(std::make_shared<Material>(MaterialParser::parseMaterialXML(materialFile)));
         }
     }
     else if (extension == ".xml") {
         // It's a single material file
-        std::cout << "Parsing single material file: " << materialPath << std::endl;
+        //std::cout << "Parsing single material file: " << materialPath << std::endl;
         materials.push_back(std::make_shared<Material>(MaterialParser::parseMaterialXML(materialPath)));
     }
 
-    std::cout << "Loaded " << materials.size() << " materials" << std::endl;
+    //std::cout << "Loaded " << materials.size() << " materials" << std::endl;
 
     return materials;
 }
@@ -313,20 +313,20 @@ std::vector<std::shared_ptr<AnimatedGeometry>> ModelLoader::processAnimatedMesh(
     std::vector<Texture> textures;
 
     // Process textures
-    std::cout << "Processing textures for mesh: " << mesh->mName.C_Str() << std::endl;
+    //std::cout << "Processing textures for mesh: " << mesh->mName.C_Str() << std::endl;
     for (const auto& [unit, textureName] : material->getTextures()) {
-        std::cout << "Texture unit: " << unit << ", Texture name: " << textureName << std::endl;
+        //std::cout << "Texture unit: " << unit << ", Texture name: " << textureName << std::endl;
         if (unit == "environment") {
             // Retrieve cubemap faces from the material
             auto cubemapFaces = material->getCubemapFaces();
             std::vector<std::string> paths;
 
-            std::cout << "Cubemap faces order from processAnimatedMesh:" << std::endl;
+            //std::cout << "Cubemap faces order from processAnimatedMesh:" << std::endl;
             for (const auto& [faceName, path] : cubemapFaces) {
                 std::string fullPath = FileSystemUtils::getAssetFilePath("textures/" + path);
                 paths.push_back(fullPath);
 
-                std::cout << "Face: " << faceName << ", Path: " << fullPath << std::endl;
+                //std::cout << "Face: " << faceName << ", Path: " << fullPath << std::endl;
             }
 
             // Use the new method to get or create a cubemap from the paths
@@ -334,10 +334,10 @@ std::vector<std::shared_ptr<AnimatedGeometry>> ModelLoader::processAnimatedMesh(
             if (cubemapTexture.id != 0) {
                 cubemapTexture.type = "environment";
                 textures.push_back(cubemapTexture);
-                std::cout << "Cubemap texture added to textures vector. Type: " << cubemapTexture.type << ", ID: " << cubemapTexture.id << std::endl;
+                //std::cout << "Cubemap texture added to textures vector. Type: " << cubemapTexture.type << ", ID: " << cubemapTexture.id << std::endl;
             }
             else {
-                std::cerr << "Failed to load or retrieve cubemap texture." << std::endl;
+                //std::cerr << "Failed to load or retrieve cubemap texture." << std::endl;
             }
         }
         else {
@@ -348,7 +348,7 @@ std::vector<std::shared_ptr<AnimatedGeometry>> ModelLoader::processAnimatedMesh(
                 texture.type = unit;
                 texture.path = fullPath;
                 textures.push_back(texture);
-                std::cout << "Texture loaded. Type: " << texture.type << ", Path: " << texture.path << std::endl;
+                //std::cout << "Texture loaded. Type: " << texture.type << ", Path: " << texture.path << std::endl;
             }
             else {
                 std::cerr << "Failed to load texture: " << fullPath << std::endl;
