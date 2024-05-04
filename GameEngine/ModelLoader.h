@@ -1,5 +1,8 @@
 #pragma once
 
+#include <memory>
+#include <algorithm>
+#include <filesystem>
 #include <vector>
 #include <string>
 #include <assimp/Importer.hpp>
@@ -9,8 +12,12 @@
 #include "geometry/AnimatedGeometry.h"
 #include "TextureLoader.h"
 #include "Materials.h"
+#include <MaterialParser.h>
 #include "rendering/IRenderable.h"
 #include "animations/Bone.h"
+#include "FileSystemUtils.h"
+#include "Debug.h"
+#include <unordered_map>
 
 class ModelLoader {
 public:

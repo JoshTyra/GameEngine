@@ -1,12 +1,6 @@
 #include "ModelLoader.h"
-#include "FileSystemUtils.h"
-#include <Materials.h>
-#include <MaterialParser.h>
-#include <memory> // For std::shared_ptr
-#include <algorithm> // For std::transform
-#include <filesystem> // For path operations
-#include "Debug.h"
 
+std::unordered_map<std::string, std::vector<std::shared_ptr<Material>>> materialCache; // Global material cache
 std::map<std::string, BoneInfo> ModelLoader::m_BoneInfoMap;
 int ModelLoader::m_BoneCounter = 0;
 
@@ -39,12 +33,26 @@ std::tuple<std::vector<std::shared_ptr<StaticGeometry>>, std::vector<std::shared
     std::vector<std::shared_ptr<StaticGeometry>> staticMeshes;
     std::vector<std::shared_ptr<AnimatedGeometry>> animatedMeshes;
 
-    std::vector<std::shared_ptr<Material>> materials = loadMaterials(materialPath);
-    std::cout << "Loaded " << materials.size() << " materials from " << materialPath << std::endl;
+    std::vector<std::shared_ptr<Material>> materials;
+
+    // Check if the materials for the given materialPath are already in the cache
+    auto cacheIt = materialCache.find(materialPath);
+    if (cacheIt != materialCache.end()) {
+        // Materials found in cache, retrieve them
+        materials = cacheIt->second;
+        std::cout << "Retrieved " << materials.size() << " materials from cache for " << materialPath << std::endl;
+    }
+    else {
+        // Materials not in cache, load them and add them to the cache
+        materials = loadMaterials(materialPath);
+        materialCache[materialPath] = materials;
+        std::cout << "Loaded " << materials.size() << " materials from " << materialPath << std::endl;
+    }
 
     for (unsigned int i = 0; i < scene->mNumMeshes; i++) {
         aiMesh* mesh = scene->mMeshes[i];
         std::cout << "Processing mesh " << i << ": " << mesh->mName.C_Str() << std::endl;
+
         std::shared_ptr<Material> material = nullptr;
 
         if (!materials.empty()) {
