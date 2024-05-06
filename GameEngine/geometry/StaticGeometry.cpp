@@ -319,3 +319,7 @@ void StaticGeometry::setShader(std::shared_ptr<Shader> newShader) {
 std::shared_ptr<Shader> StaticGeometry::getShader() const {
 	return shader; // Directly return the std::shared_ptr<Shader>
 }
+
+void StaticGeometry::update(float deltaTime)
+{
+}

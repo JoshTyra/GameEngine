@@ -21,7 +21,7 @@ void NormalizeVertexWeights(AnimatedVertex& vertex) {
     }
 }
 
-std::tuple<std::vector<std::shared_ptr<StaticGeometry>>, std::vector<std::shared_ptr<AnimatedGeometry>>> ModelLoader::loadModel(const std::string& path, const std::string& materialPath) {
+std::vector<std::unique_ptr<IRenderable>> ModelLoader::loadModel(const std::string& path, const std::string& materialPath) {
     Assimp::Importer importer;
     const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace | aiProcess_JoinIdenticalVertices | aiProcess_ImproveCacheLocality);
 
@@ -30,9 +30,7 @@ std::tuple<std::vector<std::shared_ptr<StaticGeometry>>, std::vector<std::shared
         throw std::runtime_error("Failed to load model");
     }
 
-    std::vector<std::shared_ptr<StaticGeometry>> staticMeshes;
-    std::vector<std::shared_ptr<AnimatedGeometry>> animatedMeshes;
-
+    std::vector<std::unique_ptr<IRenderable>> renderables;
     std::vector<std::shared_ptr<Material>> materials;
 
     // Check if the materials for the given materialPath are already in the cache
@@ -40,47 +38,33 @@ std::tuple<std::vector<std::shared_ptr<StaticGeometry>>, std::vector<std::shared
     if (cacheIt != materialCache.end()) {
         // Materials found in cache, retrieve them
         materials = cacheIt->second;
-        //std::cout << "Retrieved " << materials.size() << " materials from cache for " << materialPath << std::endl;
     }
     else {
         // Materials not in cache, load them and add them to the cache
         materials = loadMaterials(materialPath);
         materialCache[materialPath] = materials;
-        //std::cout << "Loaded " << materials.size() << " materials from " << materialPath << std::endl;
     }
 
     for (unsigned int i = 0; i < scene->mNumMeshes; i++) {
         aiMesh* mesh = scene->mMeshes[i];
-        //std::cout << "Processing mesh " << i << ": " << mesh->mName.C_Str() << std::endl;
 
         std::shared_ptr<Material> material = nullptr;
-
         if (!materials.empty()) {
             // Use the corresponding material if available, or fallback to the first material
             material = (i < materials.size()) ? materials[i] : materials.front();
-            //std::cout << "Assigned material: " << (material ? material->getTechnique() : "None") << std::endl;
         }
 
         if (mesh->HasBones()) {
-            auto lodGeometries = processAnimatedMesh(mesh, scene, material);
-            //std::cout << "Processed " << lodGeometries.size() << " animated geometries for mesh " << mesh->mName.C_Str() << std::endl;
-
-            // Filter the AnimatedGeometry instances to include only LOD1
-            for (const auto& geometry : lodGeometries) {
-                std::string meshName = mesh->mName.C_Str();
-                if (meshName.find(":LOD1") != std::string::npos) {
-                    animatedMeshes.push_back(geometry);
-                    //std::cout << "Added LOD1 geometry for mesh: " << meshName << std::endl;
-                }
-            }
+            auto animatedGeometry = processAnimatedMesh(mesh, scene, material);
+            renderables.push_back(std::move(animatedGeometry));
         }
         else {
             auto staticGeometry = processStaticMesh(mesh, scene, material);
-            staticMeshes.push_back(std::move(staticGeometry));
+            renderables.push_back(std::move(staticGeometry));
         }
     }
 
-    return std::make_tuple(staticMeshes, animatedMeshes);
+    return renderables;
 }
 
 std::vector<std::shared_ptr<Material>> ModelLoader::loadMaterials(const std::string& materialPath) {
@@ -113,7 +97,7 @@ std::vector<std::shared_ptr<Material>> ModelLoader::loadMaterials(const std::str
     return materials;
 }
 
-std::shared_ptr<StaticGeometry> ModelLoader::processStaticMesh(aiMesh* mesh, const aiScene* scene, std::shared_ptr<Material> material) {
+std::unique_ptr<StaticGeometry> ModelLoader::processStaticMesh(aiMesh* mesh, const aiScene* scene, std::shared_ptr<Material> material) {
     // Log number of meshes and current mesh pointer
     DEBUG_COUT << "[Info] Processing mesh " << scene->mNumMeshes << ", pointer: " << mesh << std::endl;
 
@@ -219,35 +203,30 @@ std::shared_ptr<StaticGeometry> ModelLoader::processStaticMesh(aiMesh* mesh, con
         }
     }
 
-    // Process mesh...
-    auto geometry = std::make_shared<StaticGeometry>(vertices, indices, textures);
-    geometry->setMaterial(material); // Directly use the shared_ptr
+    // Create a single StaticGeometry instance
+    auto geometry = std::make_unique<StaticGeometry>(vertices, indices, textures);
+    geometry->setMaterial(material);
 
     return geometry;
 }
 
-std::vector<std::shared_ptr<AnimatedGeometry>> ModelLoader::processAnimatedMesh(aiMesh* mesh, const aiScene* scene, std::shared_ptr<Material> material) {
+std::unique_ptr<AnimatedGeometry> ModelLoader::processAnimatedMesh(aiMesh* mesh, const aiScene* scene, std::shared_ptr<Material> material) {
     // Log number of meshes and current mesh pointer
     DEBUG_COUT << "[Info] Processing mesh " << scene->mNumMeshes << ", pointer: " << mesh << std::endl;
 
     // Validate mesh pointer
     if (!mesh) {
         std::cerr << "[Error] Skipping mesh due to null pointer." << std::endl;
-        return {};
+        return nullptr;
     }
-
-    // Extract the LOD level from the mesh name
-    std::string meshName = mesh->mName.C_Str();
-    std::string lodSuffix = meshName.substr(meshName.find(":LOD") + 1);
-    int lodLevel = std::stoi(lodSuffix.substr(3)); // Extract the LOD level from the suffix
 
     // Log mesh vertex count
     DEBUG_COUT << "[Info] Mesh vertex count: " << mesh->mNumVertices << std::endl;
 
     // Initialize data structures
-    std::map<int, std::vector<AnimatedVertex>> lodVertices;
-    std::map<int, std::vector<unsigned int>> lodIndices;
-    std::map<int, std::vector<Texture>> lodTextures;
+    std::vector<AnimatedVertex> vertices;
+    std::vector<unsigned int> indices;
+    std::vector<Texture> textures;
 
     // Process vertices
     for (unsigned int i = 0; i < mesh->mNumVertices; i++) {
@@ -295,7 +274,7 @@ std::vector<std::shared_ptr<AnimatedGeometry>> ModelLoader::processAnimatedMesh(
         ExtractBoneWeightForVertices(vertex, mesh, i);
         NormalizeVertexWeights(vertex);
 
-        lodVertices[lodLevel].push_back(vertex);
+        vertices.push_back(vertex);
     }
 
     // Process indices
@@ -305,70 +284,63 @@ std::vector<std::shared_ptr<AnimatedGeometry>> ModelLoader::processAnimatedMesh(
         DEBUG_COUT << "[Info] Face " << i << ", number of indices: " << face.mNumIndices << std::endl;
 
         for (unsigned int j = 0; j < face.mNumIndices; j++) {
-            lodIndices[lodLevel].push_back(face.mIndices[j]);
+            indices.push_back(face.mIndices[j]);
             DEBUG_COUT << "[Info] Face " << i << ", index " << j << ": " << face.mIndices[j] << std::endl;
         }
     }
 
-    std::vector<Texture> textures;
-
     // Process textures
-    //std::cout << "Processing textures for mesh: " << mesh->mName.C_Str() << std::endl;
     for (const auto& [unit, textureName] : material->getTextures()) {
-        //std::cout << "Texture unit: " << unit << ", Texture name: " << textureName << std::endl;
         if (unit == "environment") {
             // Retrieve cubemap faces from the material
-            auto cubemapFaces = material->getCubemapFaces();
+            auto cubemapFaces = material->getCubemapFaces(); // Function to retrieve map of faces
             std::vector<std::string> paths;
 
-            //std::cout << "Cubemap faces order from processAnimatedMesh:" << std::endl;
+            DEBUG_COUT << "Cubemap faces order from processAnimatedMesh:" << std::endl;
             for (const auto& [faceName, path] : cubemapFaces) {
                 std::string fullPath = FileSystemUtils::getAssetFilePath("textures/" + path);
-                paths.push_back(fullPath);
+                paths.push_back(fullPath); // Collect all paths for the cubemap
 
-                //std::cout << "Face: " << faceName << ", Path: " << fullPath << std::endl;
+                DEBUG_COUT << "Face: " << faceName << ", Path: " << fullPath << std::endl;
             }
 
             // Use the new method to get or create a cubemap from the paths
             Texture cubemapTexture = TextureLoader::createCubemap(paths);
-            if (cubemapTexture.id != 0) {
+            if (cubemapTexture.id != 0) { // Check if texture was successfully created or retrieved from cache
                 cubemapTexture.type = "environment";
-                textures.push_back(cubemapTexture);
-                //std::cout << "Cubemap texture added to textures vector. Type: " << cubemapTexture.type << ", ID: " << cubemapTexture.id << std::endl;
+                textures.push_back(cubemapTexture); // Push back the created or cached cubemap texture to the geometry's textures list
+                DEBUG_COUT << "Cubemap texture added to textures vector. Type: " << cubemapTexture.type << ", ID: " << cubemapTexture.id << std::endl;
             }
             else {
-                //std::cerr << "Failed to load or retrieve cubemap texture." << std::endl;
+                std::cerr << "Failed to load or retrieve cubemap texture." << std::endl;
             }
         }
         else {
             // Load other textures normally
             std::string fullPath = FileSystemUtils::getAssetFilePath("textures/" + textureName);
             Texture texture = TextureLoader::loadTexture(fullPath);
-            if (texture.id != 0) {
+            if (texture.id != 0) { // Assuming 0 is used to denote failure to load
                 texture.type = unit;
                 texture.path = fullPath;
                 textures.push_back(texture);
-                //std::cout << "Texture loaded. Type: " << texture.type << ", Path: " << texture.path << std::endl;
-            }
-            else {
-                std::cerr << "Failed to load texture: " << fullPath << std::endl;
             }
         }
     }
 
-    // Assign the textures to the specific LOD level
-    lodTextures[lodLevel] = textures;
-    //std::cout << "Textures assigned to LOD level: " << lodLevel << std::endl;
+    auto geometry = std::make_unique<AnimatedGeometry>(vertices, indices, textures, m_BoneInfoMap);
+    geometry->setMaterial(material);
 
-    // Create AnimatedGeometry instances for each LOD level
-    std::vector<std::shared_ptr<AnimatedGeometry>> lodGeometries;
-    for (const auto& [lod, vertices] : lodVertices) {
-        auto geometry = std::make_shared<AnimatedGeometry>(vertices, lodIndices[lod], lodTextures[lod], m_BoneInfoMap);
-        geometry->setMaterial(material);
-        lodGeometries.push_back(geometry);
-    }
+    // Load the animation data
+    std::string animationPath = FileSystemUtils::getAssetFilePath("models/combat_sword_idle.fbx");
+    auto animation = std::make_shared<Animation>(animationPath, m_BoneInfoMap);
 
-    return lodGeometries;
+    // Create an Animator instance using the shared_ptr directly
+    auto animator = std::make_unique<Animator>(animation);
+
+    // Set the Animator in the AnimatedGeometry
+    geometry->setAnimator(std::move(animator));
+
+    return geometry;
 }
 
 std::vector<std::string> ModelLoader::readMaterialList(const std::string& materialListFile) {

@@ -26,6 +26,7 @@ public:
 
     virtual ~AnimatedGeometry();
     void draw() override;
+    void update(float deltaTime) override;
     void addTexture(const Texture& texture);
     void setPosition(const glm::vec3& pos);
     void setRotation(float angle, const glm::vec3& axis);

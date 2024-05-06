@@ -47,7 +47,7 @@ public:
     void setCameraController(std::shared_ptr<CameraController> cameraController);
     void setProjectionMatrix(const glm::mat4& projectionMatrix, float nearPlane, float farPlane);
     void setSkybox(std::shared_ptr<Skybox> skybox);
-    void renderFrame(const std::vector<std::shared_ptr<IRenderable>>& renderables);
+    void renderFrame(const std::vector<std::unique_ptr<IRenderable>>& renderables);
     void finalizeFrame();
     const glm::mat4& getProjectionMatrix() const;
 

@@ -21,11 +21,11 @@
 
 class ModelLoader {
 public:
-    static std::tuple<std::vector<std::shared_ptr<StaticGeometry>>, std::vector<std::shared_ptr<AnimatedGeometry>>> loadModel(const std::string& path, const std::string& materialPath);
+    static std::vector<std::unique_ptr<IRenderable>> loadModel(const std::string& path, const std::string& materialPath);
 
 private:
-    static std::shared_ptr<StaticGeometry> processStaticMesh(aiMesh* mesh, const aiScene* scene, std::shared_ptr<Material> material);
-    static std::vector<std::shared_ptr<AnimatedGeometry>> processAnimatedMesh(aiMesh* mesh, const aiScene* scene, std::shared_ptr<Material> material);
+    static std::unique_ptr<AnimatedGeometry> processAnimatedMesh(aiMesh* mesh, const aiScene* scene, std::shared_ptr<Material> material);
+    static std::unique_ptr<StaticGeometry> processStaticMesh(aiMesh* mesh, const aiScene* scene, std::shared_ptr<Material> material);
     static std::vector<Texture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, const std::string& typeName, std::vector<Texture>& loadedTextures);
     static std::vector<std::string> readMaterialList(const std::string& materialListFile);
     static std::vector<std::shared_ptr<Material>> loadMaterials(const std::string& materialPath);

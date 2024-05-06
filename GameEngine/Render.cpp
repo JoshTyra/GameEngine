@@ -59,7 +59,7 @@ void Renderer::setProjectionMatrix(const glm::mat4& projectionMatrix, float near
     this->farPlane = farPlane;
 }
 
-void Renderer::renderFrame(const std::vector<std::shared_ptr<IRenderable>>& renderables) {
+void Renderer::renderFrame(const std::vector<std::unique_ptr<IRenderable>>& renderables) {
 	//Update the frustum for culling using the latest view and projection matrices
 	updateFrustum(projectionMatrix * cameraController->getViewMatrix());
 	// Bind the main framebuffer for rendering

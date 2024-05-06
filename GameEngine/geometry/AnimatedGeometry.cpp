@@ -336,4 +336,11 @@ void AnimatedGeometry::rotate(float angle, const glm::vec3& axis) {
 	modelMatrix = glm::rotate(modelMatrix, angle, axis);
 }
 
+void AnimatedGeometry::update(float deltaTime)
+{
+	if (m_Animator) {
+		m_Animator->UpdateAnimation(deltaTime);
+	}
+}
+
 

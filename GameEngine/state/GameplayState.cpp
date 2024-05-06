@@ -5,46 +5,22 @@ void GameplayState::enter() {
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     // Load static geometry
-    //std::string staticModelPath = FileSystemUtils::getAssetFilePath("models/tutorial.fbx");
-    //std::string staticMaterialPath = FileSystemUtils::getAssetFilePath("materials/tutorial.txt");
-    //auto [staticGeometries, unused1] = ModelLoader::loadModel(staticModelPath, staticMaterialPath);
-
-    //// Store the loaded geometries in the GameplayState
-    //staticGeometry = std::move(staticGeometries);
+    std::string staticModelPath = FileSystemUtils::getAssetFilePath("models/tutorial.fbx");
+    std::string staticMaterialPath = FileSystemUtils::getAssetFilePath("materials/tutorial.txt");
+    auto staticRenderables = ModelLoader::loadModel(staticModelPath, staticMaterialPath);
 
     // Load animated geometry
-    std::string animatedModelPath = FileSystemUtils::getAssetFilePath("models/masterchief.fbx");
-    std::string animatedMaterialPath = FileSystemUtils::getAssetFilePath("materials/masterchief.txt");
-    auto [unused2, animatedGeometries] = ModelLoader::loadModel(animatedModelPath, animatedMaterialPath);
+    std::string animatedModelPath = FileSystemUtils::getAssetFilePath("models/masterchief_no_lods.fbx");
+    std::string animatedMaterialPath = FileSystemUtils::getAssetFilePath("materials/masterchief_no_lods.txt");
+    auto animatedRenderables = ModelLoader::loadModel(animatedModelPath, animatedMaterialPath);
 
-    // Store the loaded geometries in the GameplayState
-    animatedMeshes = std::move(animatedGeometries);
-
-    //// Load test cube
-    //std::string cubeModelPath = FileSystemUtils::getAssetFilePath("models/testCube.fbx");
-    //std::string cubeMaterialPath = FileSystemUtils::getAssetFilePath("materials/cube.xml");
-    //auto [staticCube, unused3] = ModelLoader::loadModel(cubeModelPath, cubeMaterialPath);
-
-    //// Store the test cube geometry in the GameplayState
-    //testCube = std::move(staticCube);
-
-    //glm::vec3 spawnPoint = glm::vec3(0.0f, 0.0f, 0.0f);
-
-    for (const auto& animatedMesh : animatedMeshes) {
-        //animatedMesh->setPosition(spawnPoint);
-        const auto& boneInfoMap = animatedMesh->GetBoneInfoMap();
-        std::string animationPath = FileSystemUtils::getAssetFilePath("models/combat_sword_idle.fbx");
-
-        // Use shared_ptr for Animation
-        auto animation = std::make_shared<Animation>(animationPath, boneInfoMap);
-
-        // Create an Animator instance using the shared_ptr directly
-        auto animator = std::make_unique<Animator>(animation);  // Animator constructor needs to accept shared_ptr
-
-        // Set the Animator in the AnimatedGeometry
-        animatedMesh->setAnimator(std::move(animator));
+    // Move static and animated renderables into the renderables vector
+    for (auto& renderable : staticRenderables) {
+        renderables.push_back(std::move(renderable));
     }
-
+    for (auto& renderable : animatedRenderables) {
+        renderables.push_back(std::move(renderable));
+    }
 
     auto audioManager = GameStateManager::instance().getAudioManager();
     if (audioManager) {
@@ -89,11 +65,8 @@ void GameplayState::update(float deltaTime) {
         audioManager->updateListenerPosition(irrCameraPos, irrCameraFront, irrCameraUp);
     }
 
-    for (const auto& animatedMesh : animatedMeshes) {
-        auto animator = animatedMesh->getAnimator();
-        if (animator) {
-            animator->UpdateAnimation(deltaTime);
-        }
+    for (const auto& renderable : renderables) {
+        renderable->update(deltaTime);
     }
 }
 
@@ -137,23 +110,6 @@ void GameplayState::render() {
         std::cerr << "Rendering setup incomplete: Camera controller or renderer not available." << std::endl;
         return;
     }
-
-    // Create a collection for all renderable entities.
-    std::vector<std::shared_ptr<IRenderable>> renderables;
-
-    for (const auto& geometry : staticGeometry) {
-        renderables.push_back(geometry);
-    }
-
-    // Add the animated meshes to the renderables vector
-    for (const auto& animatedMesh : animatedMeshes) {
-        renderables.push_back(animatedMesh);
-    }
-
-    //// Add the animated meshes to the renderables vector
-    //for (const auto& cube : testCube) {
-    //    renderables.push_back(cube);
-    //}
 
     // Now let the renderer handle all renderable entities.
     renderer->renderFrame(renderables);
