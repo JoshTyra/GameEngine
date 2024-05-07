@@ -4,6 +4,9 @@ void GameplayState::enter() {
     GLFWwindow* window = GameStateManager::instance().getWindowContext();
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
+    // Create the scene root node
+    sceneRoot = std::make_unique<Node>("SceneRoot");
+
     // Load static geometry
     std::string staticModelPath = FileSystemUtils::getAssetFilePath("models/tutorial.fbx");
     std::string staticMaterialPath = FileSystemUtils::getAssetFilePath("materials/tutorial.txt");
@@ -14,12 +17,45 @@ void GameplayState::enter() {
     std::string animatedMaterialPath = FileSystemUtils::getAssetFilePath("materials/masterchief_no_lods.txt");
     auto animatedRenderables = ModelLoader::loadModel(animatedModelPath, animatedMaterialPath);
 
-    // Move static and animated renderables into the renderables vector
+    // Add static renderables to the scene graph
+    const glm::vec3 staticNodeScale(0.025f, 0.025f, 0.025f);
+    const glm::vec3 staticNodeRotationAxis(1.0f, 0.0f, 0.0f);
+    const float staticNodeRotationAngle = glm::radians(-90.0f);
+
     for (auto& renderable : staticRenderables) {
-        renderables.push_back(std::move(renderable));
+        renderable->setScale(staticNodeScale);
+        renderable->setRotation(glm::angleAxis(staticNodeRotationAngle, staticNodeRotationAxis));
+        sceneRoot->addChild(std::move(renderable));
     }
+
+    // Add animated renderables to the scene graph
+    const glm::vec3 animatedNodeScale(0.025f, 0.025f, 0.025f);
+    const glm::vec3 animatedNodeRotationAxis(1.0f, 0.0f, 0.0f);
+    const float animatedNodeRotationAngle = glm::radians(-90.0f);
+
     for (auto& renderable : animatedRenderables) {
-        renderables.push_back(std::move(renderable));
+        renderable->setScale(animatedNodeScale);
+        renderable->setRotation(glm::angleAxis(animatedNodeRotationAngle, animatedNodeRotationAxis));
+
+        // Load the animation file based on the mesh name
+        std::string animationPath = FileSystemUtils::getAssetFilePath("models/combat_sword_idle.fbx");
+
+        // Check if the animation file exists
+        if (std::filesystem::exists(animationPath)) {
+            // Load the animation
+            auto animation = std::make_shared<Animation>(animationPath, ModelLoader::getBoneInfoMap());
+
+            // Create an Animator instance using the shared_ptr directly
+            auto animator = std::make_shared<Animator>(animation);
+
+            // Set the Animator in the renderable node
+            renderable->setAnimator(std::move(animator));
+        }
+        else {
+            std::cout << "Animation file not found for mesh: " << "masterchief" << std::endl;
+        }
+
+        sceneRoot->addChild(std::move(renderable));
     }
 
     auto audioManager = GameStateManager::instance().getAudioManager();
@@ -65,9 +101,8 @@ void GameplayState::update(float deltaTime) {
         audioManager->updateListenerPosition(irrCameraPos, irrCameraFront, irrCameraUp);
     }
 
-    for (const auto& renderable : renderables) {
-        renderable->update(deltaTime);
-    }
+    // Update the scene graph
+    sceneRoot->update(deltaTime);
 }
 
 void GameplayState::render() {
@@ -112,7 +147,7 @@ void GameplayState::render() {
     }
 
     // Now let the renderer handle all renderable entities.
-    renderer->renderFrame(renderables);
+    renderer->renderFrame(sceneRoot.get());
 
     // Assuming finalizeFrame method takes care of post-frame operations.
     renderer->finalizeFrame();

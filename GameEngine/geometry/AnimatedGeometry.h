@@ -15,7 +15,7 @@
 #include "animations/Animator.h"
 
 // StaticGeometry class
-class AnimatedGeometry : public IRenderable {
+class AnimatedGeometry {
 public:
     AnimatedGeometry();
 
@@ -25,13 +25,8 @@ public:
         const std::map<std::string, BoneInfo>& boneInfoMap);
 
     virtual ~AnimatedGeometry();
-    void draw() override;
-    void update(float deltaTime) override;
+    void draw(const glm::mat4& transform, Animator* animator = nullptr);
     void addTexture(const Texture& texture);
-    void setPosition(const glm::vec3& pos);
-    void setRotation(float angle, const glm::vec3& axis);
-    void rotate(float angle, const glm::vec3& axis);
-    void setScale(const glm::vec3& scl);
     btCollisionShape* createBulletCollisionShape() const; // Creates and returns the Bullet collision shape
     void addToPhysicsWorld(btDiscreteDynamicsWorld* dynamicsWorld); // Adds the geometry to the specified Bullet dynamics world
     glm::vec3 aabbMin;
@@ -81,17 +76,12 @@ public:
         return m_BoneInfoMap;
     }
 
-    Animator* getAnimator() const {
-        return m_Animator.get();
-    }
-
     void calculateAABB();
     bool isInFrustum(const Frustum& frustum) const;
 
     void setModelMatrix(const glm::mat4& model) { modelMatrix = model; }
     glm::mat4 getModelMatrix() const;
     void updateModelMatrix();
-    void setAnimator(std::unique_ptr<Animator> animator);
 
 private:
     std::vector<AnimatedVertex> vertices;
@@ -107,7 +97,6 @@ private:
     glm::mat4 modelMatrix;
     std::unique_ptr<Animation> animation;
     std::map<std::string, BoneInfo> m_BoneInfoMap;
-    std::unique_ptr<Animator> m_Animator;
 
     void setupMesh();
 };

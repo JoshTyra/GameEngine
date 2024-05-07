@@ -94,6 +94,12 @@
     <Filter Include="Source Files\animations">
       <UniqueIdentifier>{010173bc-4701-4f6f-b069-f8380b980271}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\node">
+      <UniqueIdentifier>{63560493-f53a-4eae-baeb-4e0531ad5825}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\node">
+      <UniqueIdentifier>{e1302047-bff2-45a2-aca0-3065aa9f0d4f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GameEngine.cpp">
@@ -216,6 +222,12 @@
     <ClCompile Include="rendering\LODManager.cpp">
       <Filter>Source Files\rendering</Filter>
     </ClCompile>
+    <ClCompile Include="node\Node.cpp">
+      <Filter>Source Files\node</Filter>
+    </ClCompile>
+    <ClCompile Include="node\RenderableNode.cpp">
+      <Filter>Source Files\node</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CameraController.h">
@@ -305,9 +317,6 @@
     <ClInclude Include="post-processing\FrameBufferManager.h">
       <Filter>Header Files\postprocessing</Filter>
     </ClInclude>
-    <ClInclude Include="rendering\IRenderable.h">
-      <Filter>Header Files\rendering</Filter>
-    </ClInclude>
     <ClInclude Include="geometry\StaticVertex.h">
       <Filter>Header Files\geometry</Filter>
     </ClInclude>
@@ -337,6 +346,12 @@
     </ClInclude>
     <ClInclude Include="rendering\LODManager.h">
       <Filter>Header Files\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="node\Node.h">
+      <Filter>Header Files\node</Filter>
+    </ClInclude>
+    <ClInclude Include="node\RenderableNode.h">
+      <Filter>Header Files\node</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

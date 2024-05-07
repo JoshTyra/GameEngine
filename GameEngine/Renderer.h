@@ -10,6 +10,7 @@
 #include "rendering/Frustum.h"
 #include "post-processing/FrameBufferManager.h"
 #include "rendering/IRenderable.h"
+#include "node/Node.h"
 
 struct Camera {
     glm::vec3 cameraPositionWorld;
@@ -42,20 +43,20 @@ class Renderer {
 public:
     Renderer(int width, int height, GLFWwindow* window);
     ~Renderer();
-    void updateFrustum(const glm::mat4& viewProjection);
 
     void setCameraController(std::shared_ptr<CameraController> cameraController);
     void setProjectionMatrix(const glm::mat4& projectionMatrix, float nearPlane, float farPlane);
+    void renderFrame(Node* rootNode);
     void setSkybox(std::shared_ptr<Skybox> skybox);
-    void renderFrame(const std::vector<std::unique_ptr<IRenderable>>& renderables);
     void finalizeFrame();
     const glm::mat4& getProjectionMatrix() const;
 
 private:
-    void prepareFrame();
-    void renderSkybox() const;
     void setupUniformBufferObject();
     void updateUniformBufferObject();
+    void prepareFrame();
+    void renderSkybox() const;
+    void updateFrustum(const glm::mat4& viewProjection);
 
     std::shared_ptr<CameraController> cameraController;
     glm::mat4 viewMatrix;

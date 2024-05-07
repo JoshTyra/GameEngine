@@ -3,6 +3,7 @@
 std::unordered_map<std::string, std::vector<std::shared_ptr<Material>>> materialCache; // Global material cache
 std::map<std::string, BoneInfo> ModelLoader::m_BoneInfoMap;
 int ModelLoader::m_BoneCounter = 0;
+Assimp::Importer ModelLoader::importer;
 
 // Helper function to determine file extension
 std::string getFileExtension(const std::string& filename) {
@@ -21,8 +22,8 @@ void NormalizeVertexWeights(AnimatedVertex& vertex) {
     }
 }
 
-std::vector<std::unique_ptr<IRenderable>> ModelLoader::loadModel(const std::string& path, const std::string& materialPath) {
-    Assimp::Importer importer;
+std::vector<std::unique_ptr<RenderableNode>> ModelLoader::loadModel(const std::string& path, const std::string& materialPath) {
+
     const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace | aiProcess_JoinIdenticalVertices | aiProcess_ImproveCacheLocality);
 
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
@@ -45,26 +46,30 @@ std::vector<std::unique_ptr<IRenderable>> ModelLoader::loadModel(const std::stri
         materialCache[materialPath] = materials;
     }
 
+    std::vector<std::unique_ptr<RenderableNode>> renderableNodes;
+
     for (unsigned int i = 0; i < scene->mNumMeshes; i++) {
         aiMesh* mesh = scene->mMeshes[i];
 
         std::shared_ptr<Material> material = nullptr;
         if (!materials.empty()) {
-            // Use the corresponding material if available, or fallback to the first material
             material = (i < materials.size()) ? materials[i] : materials.front();
         }
 
+        std::unique_ptr<RenderableNode> renderableNode;
         if (mesh->HasBones()) {
-            auto animatedGeometry = processAnimatedMesh(mesh, scene, material);
-            renderables.push_back(std::move(animatedGeometry));
+            renderableNode = processAnimatedMesh(mesh, scene, material);
         }
         else {
-            auto staticGeometry = processStaticMesh(mesh, scene, material);
-            renderables.push_back(std::move(staticGeometry));
+            renderableNode = processStaticMesh(mesh, scene, material);
+        }
+
+        if (renderableNode) {
+            renderableNodes.push_back(std::move(renderableNode));
         }
     }
 
-    return renderables;
+    return renderableNodes;
 }
 
 std::vector<std::shared_ptr<Material>> ModelLoader::loadMaterials(const std::string& materialPath) {
@@ -97,7 +102,7 @@ std::vector<std::shared_ptr<Material>> ModelLoader::loadMaterials(const std::str
     return materials;
 }
 
-std::unique_ptr<StaticGeometry> ModelLoader::processStaticMesh(aiMesh* mesh, const aiScene* scene, std::shared_ptr<Material> material) {
+std::unique_ptr<RenderableNode> ModelLoader::processStaticMesh(aiMesh* mesh, const aiScene* scene, std::shared_ptr<Material> material) {
     // Log number of meshes and current mesh pointer
     DEBUG_COUT << "[Info] Processing mesh " << scene->mNumMeshes << ", pointer: " << mesh << std::endl;
 
@@ -203,14 +208,13 @@ std::unique_ptr<StaticGeometry> ModelLoader::processStaticMesh(aiMesh* mesh, con
         }
     }
 
-    // Create a single StaticGeometry instance
     auto geometry = std::make_unique<StaticGeometry>(vertices, indices, textures);
     geometry->setMaterial(material);
 
-    return geometry;
+    return std::make_unique<RenderableNode>(mesh->mName.C_Str(), std::move(geometry));
 }
 
-std::unique_ptr<AnimatedGeometry> ModelLoader::processAnimatedMesh(aiMesh* mesh, const aiScene* scene, std::shared_ptr<Material> material) {
+std::unique_ptr<RenderableNode> ModelLoader::processAnimatedMesh(aiMesh* mesh, const aiScene* scene, std::shared_ptr<Material> material) {
     // Log number of meshes and current mesh pointer
     DEBUG_COUT << "[Info] Processing mesh " << scene->mNumMeshes << ", pointer: " << mesh << std::endl;
 
@@ -330,17 +334,9 @@ std::unique_ptr<AnimatedGeometry> ModelLoader::processAnimatedMesh(aiMesh* mesh,
     auto geometry = std::make_unique<AnimatedGeometry>(vertices, indices, textures, m_BoneInfoMap);
     geometry->setMaterial(material);
 
-    // Load the animation data
-    std::string animationPath = FileSystemUtils::getAssetFilePath("models/combat_sword_idle.fbx");
-    auto animation = std::make_shared<Animation>(animationPath, m_BoneInfoMap);
+    auto renderableNode = std::make_unique<RenderableNode>(mesh->mName.C_Str(), std::move(geometry));
 
-    // Create an Animator instance using the shared_ptr directly
-    auto animator = std::make_unique<Animator>(animation);
-
-    // Set the Animator in the AnimatedGeometry
-    geometry->setAnimator(std::move(animator));
-
-    return geometry;
+    return renderableNode;
 }
 
 std::vector<std::string> ModelLoader::readMaterialList(const std::string& materialListFile) {
@@ -395,6 +391,10 @@ void ModelLoader::SetVertexBoneData(AnimatedVertex& vertex, int boneID, float we
             break;
         }
     }
+}
+
+const std::map<std::string, BoneInfo>& ModelLoader::getBoneInfoMap() {
+    return m_BoneInfoMap;
 }
 
 

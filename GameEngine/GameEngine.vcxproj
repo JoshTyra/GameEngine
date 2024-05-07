@@ -171,6 +171,8 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Materials.cpp" />
     <ClCompile Include="materials\MaterialParser.cpp" />
+    <ClCompile Include="node\Node.cpp" />
+    <ClCompile Include="node\RenderableNode.cpp" />
     <ClCompile Include="physics\PhysicsDebugDrawer.cpp" />
     <ClCompile Include="physics\PhysicsManager.cpp" />
     <ClCompile Include="post-processing\FrameBufferManager.cpp" />
@@ -207,6 +209,8 @@
     <ClInclude Include="MaterialParser.h" />
     <ClInclude Include="Materials.h" />
     <ClInclude Include="ModelLoader.h" />
+    <ClInclude Include="node\Node.h" />
+    <ClInclude Include="node\RenderableNode.h" />
     <ClInclude Include="physics\PhysicsDebugDrawer.h" />
     <ClInclude Include="physics\PhysicsManager.h" />
     <ClInclude Include="post-processing\FrameBufferManager.h" />
@@ -214,7 +218,6 @@
     <ClInclude Include="post-processing\ScreenQuad.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="rendering\Frustum.h" />
-    <ClInclude Include="rendering\IRenderable.h" />
     <ClInclude Include="rendering\LODManager.h" />
     <ClInclude Include="rendering\Skybox.h" />
     <ClInclude Include="shader.h" />

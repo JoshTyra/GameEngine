@@ -24,7 +24,7 @@ public:
     void render() override;
 
 private:
-    std::vector<std::unique_ptr<IRenderable>> renderables;
+    std::unique_ptr<Node> sceneRoot;
 };
 
 #endif // GAMEPLAY_STATE_H
