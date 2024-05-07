@@ -128,7 +128,7 @@ void Renderer::finalizeFrame() {
     glEnable(GL_DEPTH_TEST);
 }
 
-void Renderer::setSkybox(std::shared_ptr<Skybox> skybox) {
+void Renderer::setSkybox(std::shared_ptr<SkyboxNode> skybox) {
     this->skybox = skybox;
 }
 

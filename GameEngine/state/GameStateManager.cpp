@@ -44,7 +44,7 @@ std::shared_ptr<CameraNode> GameStateManager::getCameraController() const {
     return cameraController;
 }
 
-void GameStateManager::setSkybox(std::shared_ptr<Skybox> newSkybox) {
+void GameStateManager::setSkybox(std::shared_ptr<SkyboxNode> newSkybox) {
     this->skybox = std::move(newSkybox);
     // Update the renderer with the new skybox
     if (this->renderer) {
@@ -52,7 +52,7 @@ void GameStateManager::setSkybox(std::shared_ptr<Skybox> newSkybox) {
     }
 }
 
-Skybox* GameStateManager::getSkybox() const {
+SkyboxNode* GameStateManager::getSkybox() const {
     return skybox.get();
 }
 
