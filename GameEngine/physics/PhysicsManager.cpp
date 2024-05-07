@@ -1,10 +1,10 @@
 #include "PhysicsManager.h"
 #include "FileSystemUtils.h"
 #include "Renderer.h"
-#include "CameraController.h"
+#include "CameraNode.h"
 
 Renderer* g_renderer = nullptr; // Actual definition
-CameraController* g_cameraController = nullptr; // Actual definition
+CameraNode* g_cameraController = nullptr; // Actual definition
 
 PhysicsManager::PhysicsManager()
     : dynamicsWorld(nullptr), collisionConfiguration(nullptr),

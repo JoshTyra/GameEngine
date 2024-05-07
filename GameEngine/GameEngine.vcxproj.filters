@@ -123,7 +123,7 @@
     <ClCompile Include="imgui\imgui.cpp">
       <Filter>Source Files\imgui</Filter>
     </ClCompile>
-    <ClCompile Include="camera\CameraController.cpp">
+    <ClCompile Include="camera\CameraNode.cpp">
       <Filter>Source Files\camera</Filter>
     </ClCompile>
     <ClCompile Include="rendering\Skybox.cpp">
@@ -230,7 +230,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="CameraController.h">
+    <ClInclude Include="CameraNode.h">
       <Filter>Header Files\camera</Filter>
     </ClInclude>
     <ClInclude Include="FileSystemUtils.h">

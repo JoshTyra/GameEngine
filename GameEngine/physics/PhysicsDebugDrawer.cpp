@@ -2,7 +2,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 
-PhysicsDebugDrawer::PhysicsDebugDrawer(const std::string& vertexShaderPath, const std::string& fragmentShaderPath, Renderer* renderer, CameraController* cameraController)
+PhysicsDebugDrawer::PhysicsDebugDrawer(const std::string& vertexShaderPath, const std::string& fragmentShaderPath, Renderer* renderer, CameraNode* cameraController)
     : debugShader(vertexShaderPath, fragmentShaderPath), renderer(renderer), cameraController(cameraController), m_debugMode(DBG_DrawWireframe) {
     // Initialize OpenGL resources for debug drawing (e.g., VAO, VBO)
     glGenVertexArrays(1, &VAO);
@@ -62,7 +62,7 @@ void PhysicsDebugDrawer::render(const glm::mat4& viewMatrix, const glm::mat4& pr
     debugShader.use();
 
     if (!cameraController) {
-        std::cerr << "CameraController is not set in PhysicsDebugDrawer." << std::endl;
+        std::cerr << "CameraNode is not set in PhysicsDebugDrawer." << std::endl;
         return;
     }
 

@@ -19,7 +19,7 @@
 #include <backends/imgui_impl_opengl3.h>
 #include <btBulletDynamicsCommon.h>
 
-#include "CameraController.h"
+#include "CameraNode.h"
 #include "shader.h"
 #include "rendering/Skybox.h"
 #include "FrameTimer.h"
@@ -55,7 +55,7 @@ private:
     GLFWwindow* window;
     std::shared_ptr<Renderer> renderer;
     std::shared_ptr<AudioManager> audioManager;
-    std::shared_ptr<CameraController> cameraController;
+    std::shared_ptr<CameraNode> cameraController;
     GameStateManager& stateManager;
     FrameTimer frameTimer;
     int depthBits;

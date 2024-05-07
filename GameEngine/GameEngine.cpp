@@ -171,18 +171,18 @@ void GameEngine::initializeImGui() {
 
 void GameEngine::initializeCameraController() {
 
-    cameraController = std::make_shared<CameraController>(
+    cameraController = std::make_shared<CameraNode>(
         window, cameraPos, cameraFront, cameraUp, cameraSpeed, audioManager
     );
 
     GameStateManager::instance().setCameraController(cameraController);
 
-    // Set this CameraController instance as the user pointer for the GLFW window.
+    // Set this CameraNode instance as the user pointer for the GLFW window.
     glfwSetWindowUserPointer(window, cameraController.get());
 
-    // Directly set static callback methods from CameraController as GLFW callbacks.
-    glfwSetKeyCallback(window, CameraController::keyCallback);
-    glfwSetCursorPosCallback(window, CameraController::mouseCallbackStatic);
+    // Directly set static callback methods from CameraNode as GLFW callbacks.
+    glfwSetKeyCallback(window, CameraNode::keyCallback);
+    glfwSetCursorPosCallback(window, CameraNode::mouseCallbackStatic);
 }
 
 void GameEngine::setupCallbacks()

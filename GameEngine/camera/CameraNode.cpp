@@ -1,35 +1,35 @@
-#include "CameraController.h"
+#include "CameraNode.h"
 #include <iostream>
 #include "Debug.h"
 
-bool CameraController::keyWPressed = false;
-bool CameraController::keySPressed = false;
-bool CameraController::keyAPressed = false;
-bool CameraController::keyDPressed = false;
+bool CameraNode::keyWPressed = false;
+bool CameraNode::keySPressed = false;
+bool CameraNode::keyAPressed = false;
+bool CameraNode::keyDPressed = false;
 
 // Correctly defined constructor
-CameraController::CameraController(GLFWwindow* window, glm::vec3 cameraPos, glm::vec3 cameraFront, glm::vec3 cameraUp, float cameraSpeed, std::shared_ptr<AudioManager> audioManager)
+CameraNode::CameraNode(GLFWwindow* window, glm::vec3 cameraPos, glm::vec3 cameraFront, glm::vec3 cameraUp, float cameraSpeed, std::shared_ptr<AudioManager> audioManager)
     : window(window), cameraPos(cameraPos), cameraFront(cameraFront), cameraUp(cameraUp), cameraSpeed(cameraSpeed), audioManager(audioManager)
 {
 }
 
-glm::mat4 CameraController::getViewMatrix() const {
+glm::mat4 CameraNode::getViewMatrix() const {
     return glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
 }
 
-glm::vec3 CameraController::getCameraPosition() const {
+glm::vec3 CameraNode::getCameraPosition() const {
     return cameraPos;
 }
 
-glm::vec3 CameraController::getCameraFront() const {
+glm::vec3 CameraNode::getCameraFront() const {
     return cameraFront;
 }
 
-glm::vec3 CameraController::getCameraUp() const {
+glm::vec3 CameraNode::getCameraUp() const {
     return cameraUp;
 }
 
-void CameraController::keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+void CameraNode::keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
     if (key == GLFW_KEY_W)
         keyWPressed = (action != GLFW_RELEASE);
     if (key == GLFW_KEY_S)
@@ -42,7 +42,7 @@ void CameraController::keyCallback(GLFWwindow* window, int key, int scancode, in
         glfwSetWindowShouldClose(window, GLFW_TRUE);
 }
 
-void CameraController::processInput(float deltaTime) {
+void CameraNode::processInput(float deltaTime) {
     float speed = cameraSpeed * deltaTime;
     if (keyWPressed)
         cameraPos += speed * cameraFront;
@@ -54,7 +54,7 @@ void CameraController::processInput(float deltaTime) {
         cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * speed;
 }
 
-void CameraController::updateAudioListener() {
+void CameraNode::updateAudioListener() {
     if (audioManager) {
         // The look direction can be derived from the camera's front vector.
         glm::vec3 lookDirection = cameraFront; // Assuming this is already normalized
@@ -70,14 +70,14 @@ void CameraController::updateAudioListener() {
     }
 }
 
-void CameraController::mouseCallbackStatic(GLFWwindow* window, double xpos, double ypos) {
-    CameraController* controller = static_cast<CameraController*>(glfwGetWindowUserPointer(window));
+void CameraNode::mouseCallbackStatic(GLFWwindow* window, double xpos, double ypos) {
+    CameraNode* controller = static_cast<CameraNode*>(glfwGetWindowUserPointer(window));
     if (controller) {
         controller->handleMouseMovement(xpos, ypos);
     }
 }
 
-void CameraController::handleMouseMovement(double xpos, double ypos) {
+void CameraNode::handleMouseMovement(double xpos, double ypos) {
     if (firstMouse) {
         lastX = xpos;
         lastY = ypos;
