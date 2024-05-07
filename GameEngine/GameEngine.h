@@ -21,7 +21,7 @@
 
 #include "CameraNode.h"
 #include "shader.h"
-#include "rendering/Skybox.h"
+#include "rendering/SkyboxNode.h"
 #include "FrameTimer.h"
 #include "FileSystemUtils.h"
 #include "TextureLoader.h"

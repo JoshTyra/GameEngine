@@ -126,7 +126,7 @@
     <ClCompile Include="camera\CameraNode.cpp">
       <Filter>Source Files\camera</Filter>
     </ClCompile>
-    <ClCompile Include="rendering\Skybox.cpp">
+    <ClCompile Include="rendering\SkyboxNode.cpp">
       <Filter>Source Files\rendering</Filter>
     </ClCompile>
     <ClCompile Include="camera\FrameTimer.cpp">
@@ -287,7 +287,7 @@
     <ClInclude Include="physics\PhysicsManager.h">
       <Filter>Header Files\physics</Filter>
     </ClInclude>
-    <ClInclude Include="rendering\Skybox.h">
+    <ClInclude Include="rendering\SkyboxNode.h">
       <Filter>Header Files\rendering</Filter>
     </ClInclude>
     <ClInclude Include="state\GameStateManager.h">

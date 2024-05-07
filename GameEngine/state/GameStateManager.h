@@ -6,7 +6,7 @@
 #include "Renderer.h"
 #include "CameraNode.h"
 #include "GameState.h"
-#include "rendering/Skybox.h"
+#include "rendering/SkyboxNode.h"
 #include "AudioManager.h"
 
 class GameStateManager {
@@ -26,8 +26,8 @@ public:
     void setCameraController(std::shared_ptr<CameraNode> cameraController);
     std::shared_ptr<CameraNode> getCameraController() const;
 
-    void setSkybox(std::shared_ptr<Skybox> newSkybox);
-    Skybox* getSkybox() const;
+    void setSkybox(std::shared_ptr<SkyboxNode> newSkybox);
+    SkyboxNode* getSkybox() const;
 
     // Renderer access methods
     void setRenderer(std::shared_ptr<Renderer> renderer); // Assume using shared_ptr for simplicity
@@ -47,7 +47,7 @@ private:
     bool exitRequested = false;
     GLFWwindow* window = nullptr;
     std::shared_ptr<CameraNode> cameraController;
-    std::shared_ptr<Skybox> skybox;
+    std::shared_ptr<SkyboxNode> skybox;
     std::shared_ptr<Renderer> renderer;
     std::shared_ptr<AudioManager> audioManager;
 };

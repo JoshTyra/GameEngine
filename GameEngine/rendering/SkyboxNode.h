@@ -6,11 +6,12 @@
 #include "Shader.h" // Adjust the path if necessary
 #include "FileSystemUtils.h"
 #include <glm/glm.hpp>
+#include <node/Node.h>
 
-class Skybox {
+class SkyboxNode : public Node {
 public:
-    Skybox(const std::vector<std::string>& faces);
-    ~Skybox();
+    SkyboxNode(const std::vector<std::string>& faces);
+    ~SkyboxNode();
     void draw(const glm::mat4& view, const glm::mat4& projection) const;
     void updateCubemap(const std::vector<std::string>& faces); // For dynamic skybox updates
 

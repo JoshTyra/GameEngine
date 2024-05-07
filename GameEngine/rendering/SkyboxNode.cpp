@@ -1,9 +1,9 @@
-#include "Skybox.h"
+#include "SkyboxNode.h"
 #include "stb_image.h"
 #include "FileSystemUtils.h"
 #include <iostream>
 
-GLfloat Skybox::skyboxVertices[] = {
+GLfloat SkyboxNode::skyboxVertices[] = {
     -1.0f,  1.0f, -1.0f,
     -1.0f, -1.0f, -1.0f,
      1.0f, -1.0f, -1.0f,
@@ -47,7 +47,7 @@ GLfloat Skybox::skyboxVertices[] = {
      1.0f, -1.0f,  1.0f
 };
 
-Skybox::Skybox(const std::vector<std::string>& faces)
+SkyboxNode::SkyboxNode(const std::vector<std::string>& faces)
     : skyboxShader(std::make_unique<Shader>(
         FileSystemUtils::getAssetFilePath("shaders/skybox.vert"),
         FileSystemUtils::getAssetFilePath("shaders/skybox.frag"))) {
@@ -59,13 +59,13 @@ Skybox::Skybox(const std::vector<std::string>& faces)
     textureID = loadCubemap(faces);
 }
 
-Skybox::~Skybox() {
+SkyboxNode::~SkyboxNode() {
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
     glDeleteTextures(1, &textureID);
 }
 
-void Skybox::setupSkybox() {
+void SkyboxNode::setupSkybox() {
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
     glBindVertexArray(VAO);
@@ -78,7 +78,7 @@ void Skybox::setupSkybox() {
     glBindVertexArray(0); // Unbind VAO
 }
 
-GLuint Skybox::loadCubemap(const std::vector<std::string>& faces) {
+GLuint SkyboxNode::loadCubemap(const std::vector<std::string>& faces) {
     GLuint textureID;
     glGenTextures(1, &textureID);
     glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
@@ -109,7 +109,7 @@ GLuint Skybox::loadCubemap(const std::vector<std::string>& faces) {
     return textureID;
 }
 
-void Skybox::draw(const glm::mat4& view, const glm::mat4& projection) const {
+void SkyboxNode::draw(const glm::mat4& view, const glm::mat4& projection) const {
     glDepthFunc(GL_LEQUAL);
     skyboxShader->use(); // Use -> instead of .
     skyboxShader->setMat4("view", view);
@@ -124,7 +124,7 @@ void Skybox::draw(const glm::mat4& view, const glm::mat4& projection) const {
     glDepthFunc(GL_LESS);
 }
 
-void Skybox::updateCubemap(const std::vector<std::string>& newFaces) {
+void SkyboxNode::updateCubemap(const std::vector<std::string>& newFaces) {
     // Optional: Implement functionality to update the cubemap textures dynamically
     glDeleteTextures(1, &textureID); // Delete the old texture
     textureID = loadCubemap(newFaces); // Load new cubemap

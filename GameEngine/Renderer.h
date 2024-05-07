@@ -5,7 +5,7 @@
 #include <utility>
 #include "CameraNode.h"
 #include "StaticGeometry.h"
-#include "rendering/Skybox.h"
+#include "rendering/SkyboxNode.h"
 #include "post-processing/PostProcessing.h"
 #include "rendering/Frustum.h"
 #include "post-processing/FrameBufferManager.h"
@@ -47,7 +47,7 @@ public:
     void setCameraController(std::shared_ptr<CameraNode> cameraController);
     void setProjectionMatrix(const glm::mat4& projectionMatrix, float nearPlane, float farPlane);
     void renderFrame(Node* rootNode);
-    void setSkybox(std::shared_ptr<Skybox> skybox);
+    void setSkybox(std::shared_ptr<SkyboxNode> skybox);
     void finalizeFrame();
     const glm::mat4& getProjectionMatrix() const;
 
@@ -62,7 +62,7 @@ private:
     glm::mat4 viewMatrix;
     glm::mat4 projectionMatrix;
     GLuint uboMatrices;
-    std::shared_ptr<Skybox> skybox;
+    std::shared_ptr<SkyboxNode> skybox;
     GLuint fbo;
     GLuint fboTexture;
     std::shared_ptr<PostProcessing> postProcessing;

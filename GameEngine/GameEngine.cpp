@@ -201,7 +201,7 @@ void GameEngine::initializeGameStates() {
         "back.tga"      // Back face of the skybox, typically negative Z
     };
 
-    auto skybox = std::make_unique<Skybox>(skyboxFaces);
+    auto skybox = std::make_unique<SkyboxNode>(skyboxFaces);
     stateManager.setSkybox(std::move(skybox));
 
     // Initialize and transition to the initial game state, e.g., MenuState
