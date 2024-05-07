@@ -13,7 +13,7 @@
 #include "Debug.h"
 
 // StaticGeometry class
-class StaticGeometry : public IRenderable {
+class StaticGeometry {
 public:
     StaticGeometry();
 
@@ -22,15 +22,16 @@ public:
         const std::vector<Texture>& textures);
 
     virtual ~StaticGeometry();
-    void draw() override;
+    void draw(const glm::mat4& transform);
     void addTexture(const Texture& texture);
-    void setPosition(const glm::vec3& pos);
-    void setRotation(float angle, const glm::vec3& axis);
-    void setScale(const glm::vec3& scl);
     btCollisionShape* createBulletCollisionShape() const; // Creates and returns the Bullet collision shape
     void addToPhysicsWorld(btDiscreteDynamicsWorld* dynamicsWorld); // Adds the geometry to the specified Bullet dynamics world
     glm::vec3 aabbMin;
     glm::vec3 aabbMax;
+
+    glm::vec3 getAABBMin() const { return aabbMin; }
+
+    glm::vec3 getAABBMax() const { return aabbMax; }
 
     // Getter function for textures
     const std::vector<Texture>& getTextures() const {

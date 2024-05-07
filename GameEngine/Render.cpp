@@ -59,29 +59,29 @@ void Renderer::setProjectionMatrix(const glm::mat4& projectionMatrix, float near
     this->farPlane = farPlane;
 }
 
-void Renderer::renderFrame(const std::vector<std::shared_ptr<IRenderable>>& renderables) {
-	//Update the frustum for culling using the latest view and projection matrices
-	updateFrustum(projectionMatrix * cameraController->getViewMatrix());
-	// Bind the main framebuffer for rendering
-	frameBufferManager->bindFrameBuffer(0);
 
-	// Clear the frame and set initial OpenGL state for the frame
-	prepareFrame();
+void Renderer::renderFrame(Node* rootNode) {
+    // Update the frustum for culling using the latest view and projection matrices
+    updateFrustum(projectionMatrix * cameraController->getViewMatrix());
 
-	// Render the skybox
-	renderSkybox();
+    // Bind the main framebuffer for rendering
+    frameBufferManager->bindFrameBuffer(0);
 
-	// Update all relevant UBOs with current frame data
-	updateUniformBufferObject();  // This function now updates the UBO with the camera and lighting information
+    // Clear the frame and set initial OpenGL state for the frame
+    prepareFrame();
 
-	// Draw each IRenderable using the updated UBO context
-	for (const auto& renderable : renderables) {
-		renderable->draw();  
-	}
+    // Render the skybox
+    renderSkybox();
 
-	// Unbind the framebuffer and revert to the default framebuffer
-	frameBufferManager->unbindFrameBuffer();
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    // Update all relevant UBOs with current frame data
+    updateUniformBufferObject();
+
+    // Traverse the scene graph and render each node
+    rootNode->render(glm::mat4(1.0f));
+
+    // Unbind the framebuffer and revert to the default framebuffer
+    frameBufferManager->unbindFrameBuffer();
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void Renderer::prepareFrame() {

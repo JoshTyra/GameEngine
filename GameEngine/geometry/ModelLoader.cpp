@@ -1,14 +1,9 @@
 #include "ModelLoader.h"
-#include "FileSystemUtils.h"
-#include <Materials.h>
-#include <MaterialParser.h>
-#include <memory> // For std::shared_ptr
-#include <algorithm> // For std::transform
-#include <filesystem> // For path operations
-#include "Debug.h"
 
+std::unordered_map<std::string, std::vector<std::shared_ptr<Material>>> materialCache; // Global material cache
 std::map<std::string, BoneInfo> ModelLoader::m_BoneInfoMap;
 int ModelLoader::m_BoneCounter = 0;
+Assimp::Importer ModelLoader::importer;
 
 // Helper function to determine file extension
 std::string getFileExtension(const std::string& filename) {
@@ -27,8 +22,8 @@ void NormalizeVertexWeights(AnimatedVertex& vertex) {
     }
 }
 
-std::tuple<std::vector<std::shared_ptr<StaticGeometry>>, std::vector<std::shared_ptr<AnimatedGeometry>>> ModelLoader::loadModel(const std::string& path, const std::string& materialPath) {
-    Assimp::Importer importer;
+std::vector<std::unique_ptr<RenderableNode>> ModelLoader::loadModel(const std::string& path, const std::string& materialPath) {
+
     const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace | aiProcess_JoinIdenticalVertices | aiProcess_ImproveCacheLocality);
 
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
@@ -36,31 +31,45 @@ std::tuple<std::vector<std::shared_ptr<StaticGeometry>>, std::vector<std::shared
         throw std::runtime_error("Failed to load model");
     }
 
-    std::vector<std::shared_ptr<StaticGeometry>> staticMeshes;
-    std::vector<std::shared_ptr<AnimatedGeometry>> animatedMeshes;
+    std::vector<std::unique_ptr<IRenderable>> renderables;
+    std::vector<std::shared_ptr<Material>> materials;
 
-    std::vector<std::shared_ptr<Material>> materials = loadMaterials(materialPath);
+    // Check if the materials for the given materialPath are already in the cache
+    auto cacheIt = materialCache.find(materialPath);
+    if (cacheIt != materialCache.end()) {
+        // Materials found in cache, retrieve them
+        materials = cacheIt->second;
+    }
+    else {
+        // Materials not in cache, load them and add them to the cache
+        materials = loadMaterials(materialPath);
+        materialCache[materialPath] = materials;
+    }
+
+    std::vector<std::unique_ptr<RenderableNode>> renderableNodes;
 
     for (unsigned int i = 0; i < scene->mNumMeshes; i++) {
         aiMesh* mesh = scene->mMeshes[i];
-        std::shared_ptr<Material> material = nullptr;
 
+        std::shared_ptr<Material> material = nullptr;
         if (!materials.empty()) {
-            // Use the corresponding material if available, or fallback to the first material
             material = (i < materials.size()) ? materials[i] : materials.front();
         }
 
+        std::unique_ptr<RenderableNode> renderableNode;
         if (mesh->HasBones()) {
-            auto animatedGeometry = processAnimatedMesh(mesh, scene, material);
-            animatedMeshes.push_back(std::move(animatedGeometry));
+            renderableNode = processAnimatedMesh(mesh, scene, material);
         }
         else {
-            auto staticGeometry = processStaticMesh(mesh, scene, material);
-            staticMeshes.push_back(std::move(staticGeometry));
+            renderableNode = processStaticMesh(mesh, scene, material);
+        }
+
+        if (renderableNode) {
+            renderableNodes.push_back(std::move(renderableNode));
         }
     }
 
-    return std::make_tuple(staticMeshes, animatedMeshes);
+    return renderableNodes;
 }
 
 std::vector<std::shared_ptr<Material>> ModelLoader::loadMaterials(const std::string& materialPath) {
@@ -70,22 +79,30 @@ std::vector<std::shared_ptr<Material>> ModelLoader::loadMaterials(const std::str
     std::string extension = getFileExtension(materialPath);
     std::transform(extension.begin(), extension.end(), extension.begin(), ::tolower); // Ensure extension is lowercase
 
+    //std::cout << "Loading materials from file: " << materialPath << " (extension: " << extension << ")" << std::endl;
+
     if (extension == ".txt") {
         // It's a material list file
         auto materialFiles = readMaterialList(materialPath);
+        //std::cout << "Read " << materialFiles.size() << " material files from list" << std::endl;
+
         for (const auto& materialFile : materialFiles) {
+            //std::cout << "Parsing material file: " << materialFile << std::endl;
             materials.push_back(std::make_shared<Material>(MaterialParser::parseMaterialXML(materialFile)));
         }
     }
     else if (extension == ".xml") {
         // It's a single material file
+        //std::cout << "Parsing single material file: " << materialPath << std::endl;
         materials.push_back(std::make_shared<Material>(MaterialParser::parseMaterialXML(materialPath)));
     }
+
+    //std::cout << "Loaded " << materials.size() << " materials" << std::endl;
 
     return materials;
 }
 
-std::shared_ptr<StaticGeometry> ModelLoader::processStaticMesh(aiMesh* mesh, const aiScene* scene, std::shared_ptr<Material> material) {
+std::unique_ptr<RenderableNode> ModelLoader::processStaticMesh(aiMesh* mesh, const aiScene* scene, std::shared_ptr<Material> material) {
     // Log number of meshes and current mesh pointer
     DEBUG_COUT << "[Info] Processing mesh " << scene->mNumMeshes << ", pointer: " << mesh << std::endl;
 
@@ -191,14 +208,13 @@ std::shared_ptr<StaticGeometry> ModelLoader::processStaticMesh(aiMesh* mesh, con
         }
     }
 
-    // Process mesh...
-    auto geometry = std::make_shared<StaticGeometry>(vertices, indices, textures);
-    geometry->setMaterial(material); // Directly use the shared_ptr
+    auto geometry = std::make_unique<StaticGeometry>(vertices, indices, textures);
+    geometry->setMaterial(material);
 
-    return geometry;
+    return std::make_unique<RenderableNode>(mesh->mName.C_Str(), std::move(geometry));
 }
 
-std::shared_ptr<AnimatedGeometry> ModelLoader::processAnimatedMesh(aiMesh* mesh, const aiScene* scene, std::shared_ptr<Material> material) {
+std::unique_ptr<RenderableNode> ModelLoader::processAnimatedMesh(aiMesh* mesh, const aiScene* scene, std::shared_ptr<Material> material) {
     // Log number of meshes and current mesh pointer
     DEBUG_COUT << "[Info] Processing mesh " << scene->mNumMeshes << ", pointer: " << mesh << std::endl;
 
@@ -315,10 +331,12 @@ std::shared_ptr<AnimatedGeometry> ModelLoader::processAnimatedMesh(aiMesh* mesh,
         }
     }
 
-    auto geometry = std::make_shared<AnimatedGeometry>(vertices, indices, textures, m_BoneInfoMap);
+    auto geometry = std::make_unique<AnimatedGeometry>(vertices, indices, textures, m_BoneInfoMap);
     geometry->setMaterial(material);
 
-    return geometry;
+    auto renderableNode = std::make_unique<RenderableNode>(mesh->mName.C_Str(), std::move(geometry));
+
+    return renderableNode;
 }
 
 std::vector<std::string> ModelLoader::readMaterialList(const std::string& materialListFile) {
@@ -373,6 +391,10 @@ void ModelLoader::SetVertexBoneData(AnimatedVertex& vertex, int boneID, float we
             break;
         }
     }
+}
+
+const std::map<std::string, BoneInfo>& ModelLoader::getBoneInfoMap() {
+    return m_BoneInfoMap;
 }
 
 

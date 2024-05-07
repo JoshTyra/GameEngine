@@ -1,9 +1,7 @@
 #include "AnimatedGeometry.h"
 
 AnimatedGeometry::AnimatedGeometry()
-	: VAO(0), VBO(0), EBO(0), shader(nullptr), modelMatrix(glm::mat4(1.0f)),
-	position(glm::vec3(0.0f)), rotationAxis(glm::vec3(0.0f, 0.0f, 0.0f)),
-	rotationAngle(0.0f), scale(glm::vec3(1.0f)) {
+	: VAO(0), VBO(0), EBO(0), shader(nullptr) {
 }
 
 AnimatedGeometry::AnimatedGeometry(const std::vector<AnimatedVertex>& vertices,
@@ -12,8 +10,6 @@ AnimatedGeometry::AnimatedGeometry(const std::vector<AnimatedVertex>& vertices,
 	const std::map<std::string, BoneInfo>& boneInfoMap)
 	: vertices(vertices), indices(indices), textures(textures),
 	VAO(0), VBO(0), EBO(0), shader(nullptr),
-	position(glm::vec3(0.0f)), rotationAxis(glm::vec3(1.0f, 0.0f, 0.0f)),
-	rotationAngle(-90.0f), scale(glm::vec3(0.025f)), modelMatrix(glm::mat4(1.0f)),
 	m_BoneInfoMap(boneInfoMap) {
 	setupMesh();
 	calculateAABB();
@@ -56,7 +52,7 @@ void AnimatedGeometry::setupMesh() {
 	glBindVertexArray(0);
 }
 
-void AnimatedGeometry::draw() {
+void AnimatedGeometry::draw(const glm::mat4& transform, Animator* animator) {
 	if (!shader || !shader->Program) {
 		std::cerr << "Shader not set or invalid for geometry, cannot draw." << std::endl;
 		return;
@@ -112,14 +108,11 @@ void AnimatedGeometry::draw() {
 
 	}
 
-	// Update the model matrix based on current position, rotation, and scale.
-	glm::mat4 model = getModelMatrix();
-
 	// Pass the matrices to the shader.
-	shader->setMat4("model", model);
+	shader->setMat4("model", transform);
 
-	if (m_Animator) {
-		auto transforms = m_Animator->GetFinalBoneMatrices();
+	if (animator) {
+		auto transforms = animator->GetFinalBoneMatrices();
 		auto numTransforms = transforms.size();
 
 		//std::cout << "Number of transforms: " << numTransforms << std::endl;
@@ -130,7 +123,7 @@ void AnimatedGeometry::draw() {
 		}
 	}
 	else {
-		std::cout << "m_Animator is null" << std::endl;
+		std::cout << "Animator is null" << std::endl;
 	}
 
 	// Check for errors after setting uniforms
@@ -301,39 +294,12 @@ void AnimatedGeometry::updateModelMatrix() {
 	modelMatrix = glm::translate(modelMatrix, position);
 }
 
-void AnimatedGeometry::setPosition(const glm::vec3& pos) {
-	position = pos;
-	updateModelMatrix();
-}
-
-void AnimatedGeometry::setRotation(float angle, const glm::vec3& axis) {
-	rotationAngle = angle;
-	rotationAxis = axis;
-	updateModelMatrix();
-}
-
-void AnimatedGeometry::setScale(const glm::vec3& scl) {
-	scale = scl;
-	updateModelMatrix();
-}
-
 void AnimatedGeometry::setShader(std::shared_ptr<Shader> newShader) {
 	shader = std::move(newShader); // Use std::move if you're transferring ownership
 }
 
 std::shared_ptr<Shader> AnimatedGeometry::getShader() const {
 	return shader; // Directly return the std::shared_ptr<Shader>
-}
-
-void AnimatedGeometry::setAnimator(std::unique_ptr<Animator> animator) {
-	m_Animator = std::move(animator);
-}
-
-// This rotate method is for the game engine to rotate the animated geometry
-// Not used for the bone calculations ieg: setRotation above
-void AnimatedGeometry::rotate(float angle, const glm::vec3& axis) {
-	// Accumulate the rotation by rotating the existing modelMatrix
-	modelMatrix = glm::rotate(modelMatrix, angle, axis);
 }
 
 

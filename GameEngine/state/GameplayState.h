@@ -24,9 +24,7 @@ public:
     void render() override;
 
 private:
-    std::vector<std::shared_ptr<StaticGeometry>> staticGeometry;
-    std::vector<std::shared_ptr<AnimatedGeometry>> animatedMeshes;
-    std::vector<std::shared_ptr<StaticGeometry>> testCube;
+    std::unique_ptr<Node> sceneRoot;
 };
 
 #endif // GAMEPLAY_STATE_H

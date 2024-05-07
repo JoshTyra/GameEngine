@@ -1,20 +1,14 @@
 #include "StaticGeometry.h"
 
 StaticGeometry::StaticGeometry()
-	: VAO(0), VBO(0), EBO(0), shader(nullptr), modelMatrix(glm::mat4(1.0f)),
-	position(glm::vec3(0.0f)), rotationAxis(glm::vec3(0.0f, 0.0f, 0.0f)),
-	rotationAngle(0.0f), scale(glm::vec3(0.025f)) {
+	: VAO(0), VBO(0), EBO(0), shader(nullptr) {
 }
 
-// Overloaded constructor for initializing with mesh data
 StaticGeometry::StaticGeometry(const std::vector<StaticVertex>& vertices,
 	const std::vector<unsigned int>& indices,
 	const std::vector<Texture>& textures)
 	: vertices(vertices), indices(indices), textures(textures),
-	VAO(0), VBO(0), EBO(0), shader(nullptr),
-	position(glm::vec3(0.0f)), rotationAxis(glm::vec3(1.0f, 0.0f, 0.0f)),
-	rotationAngle(-90.0f), scale(glm::vec3(0.025f)), modelMatrix(glm::mat4(1.0f))
-{
+	VAO(0), VBO(0), EBO(0), shader(nullptr) {
 	setupMesh();
 	calculateAABB();
 }
@@ -56,7 +50,7 @@ void StaticGeometry::setupMesh() {
 	glBindVertexArray(0);
 }
 
-void StaticGeometry::draw() {
+void StaticGeometry::draw(const glm::mat4& transform) {
 	if (!shader || !shader->Program) {
 		std::cerr << "Shader not set or invalid for geometry, cannot draw." << std::endl;
 		return;
@@ -117,14 +111,11 @@ void StaticGeometry::draw() {
 		}
 	}
 
-	// Update the model matrix based on current position, rotation, and scale.
-	glm::mat4 model = getModelMatrix();
-
 	// Pass the matrices to the shader.
-	shader->setMat4("model", model);
+	shader->setMat4("model", transform);
 
 	if (shader->hasUniform("normalMatrix")) {
-		glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(model)));
+		glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(transform)));
 		shader->setMat3("normalMatrix", normalMatrix);
 	}
 
@@ -294,22 +285,6 @@ void StaticGeometry::updateModelMatrix() {
 	modelMatrix = glm::rotate(modelMatrix, glm::radians(rotationAngle), rotationAxis);
 	// Finally, apply translation
 	modelMatrix = glm::translate(modelMatrix, position);
-}
-
-void StaticGeometry::setPosition(const glm::vec3& pos) {
-	position = pos;
-	updateModelMatrix();
-}
-
-void StaticGeometry::setRotation(float angle, const glm::vec3& axis) {
-	rotationAngle = angle;
-	rotationAxis = axis;
-	updateModelMatrix();
-}
-
-void StaticGeometry::setScale(const glm::vec3& scl) {
-	scale = scl;
-	updateModelMatrix();
 }
 
 void StaticGeometry::setShader(std::shared_ptr<Shader> newShader) {
