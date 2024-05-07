@@ -153,7 +153,7 @@
     <ClCompile Include="animations\Animator.cpp" />
     <ClCompile Include="animations\Bone.cpp" />
     <ClCompile Include="AudioManager.cpp" />
-    <ClCompile Include="camera\CameraController.cpp" />
+    <ClCompile Include="camera\CameraNode.cpp" />
     <ClCompile Include="camera\FrameTimer.cpp" />
     <ClCompile Include="GameEngine.cpp" />
     <ClCompile Include="geometry\AnimatedGeometry.cpp" />
@@ -197,7 +197,7 @@
     <ClInclude Include="animations\Animator.h" />
     <ClInclude Include="animations\Bone.h" />
     <ClInclude Include="AudioManager.h" />
-    <ClInclude Include="CameraController.h" />
+    <ClInclude Include="CameraNode.h" />
     <ClInclude Include="Debug.h" />
     <ClInclude Include="FileSystemUtils.h" />
     <ClInclude Include="FrameTimer.h" />

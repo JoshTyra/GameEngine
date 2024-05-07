@@ -4,7 +4,7 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include "Renderer.h"
-#include "CameraController.h"
+#include "CameraNode.h"
 #include "GameState.h"
 #include "rendering/Skybox.h"
 #include "AudioManager.h"
@@ -23,8 +23,8 @@ public:
     void setWindowContext(GLFWwindow* window);
     GLFWwindow* getWindowContext() const;
 
-    void setCameraController(std::shared_ptr<CameraController> cameraController);
-    std::shared_ptr<CameraController> getCameraController() const;
+    void setCameraController(std::shared_ptr<CameraNode> cameraController);
+    std::shared_ptr<CameraNode> getCameraController() const;
 
     void setSkybox(std::shared_ptr<Skybox> newSkybox);
     Skybox* getSkybox() const;
@@ -46,7 +46,7 @@ private:
     std::unique_ptr<GameState> currentState;
     bool exitRequested = false;
     GLFWwindow* window = nullptr;
-    std::shared_ptr<CameraController> cameraController;
+    std::shared_ptr<CameraNode> cameraController;
     std::shared_ptr<Skybox> skybox;
     std::shared_ptr<Renderer> renderer;
     std::shared_ptr<AudioManager> audioManager;

@@ -5,7 +5,7 @@
 #include <memory>
 #include "GameState.h"
 #include "StaticGeometry.h"
-#include "CameraController.h"
+#include "CameraNode.h"
 #include "Renderer.h"
 #include "GameStateManager.h"
 #include "FileSystemUtils.h"

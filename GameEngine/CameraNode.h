@@ -6,10 +6,11 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include "AudioManager.h"
 #include "irrklang.h"
+#include <node/Node.h>
 
-class CameraController {
+class CameraNode : public Node {
 public:
-    CameraController(GLFWwindow* window, glm::vec3 cameraPos, glm::vec3 cameraFront, glm::vec3 cameraUp, float cameraSpeed, std::shared_ptr<AudioManager> audioManager);
+    CameraNode(GLFWwindow* window, glm::vec3 cameraPos, glm::vec3 cameraFront, glm::vec3 cameraUp, float cameraSpeed, std::shared_ptr<AudioManager> audioManager);
 
     static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
     static void mouseCallbackStatic(GLFWwindow* window, double xpos, double ypos); // Static wrapper for mouse callback

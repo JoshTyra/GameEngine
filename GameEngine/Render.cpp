@@ -49,7 +49,7 @@ void Renderer::updateUniformBufferObject() {
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
 
-void Renderer::setCameraController(std::shared_ptr<CameraController> cameraController) {
+void Renderer::setCameraController(std::shared_ptr<CameraNode> cameraController) {
     this->cameraController = cameraController;
 }
 

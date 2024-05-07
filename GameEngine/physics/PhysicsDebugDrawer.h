@@ -8,12 +8,12 @@
 #include "shader.h"
 #include "FileSystemUtils.h"
 #include "Renderer.h" // For accessing the Renderer
-#include "CameraController.h" // For accessing the CameraController
+#include "CameraNode.h" // For accessing the CameraNode
 
 class PhysicsDebugDrawer : public btIDebugDraw {
 public:
-    // Update the constructor to take both Renderer and CameraController
-    PhysicsDebugDrawer(const std::string& vertexShaderPath, const std::string& fragmentShaderPath, Renderer* renderer, CameraController* cameraController);
+    // Update the constructor to take both Renderer and CameraNode
+    PhysicsDebugDrawer(const std::string& vertexShaderPath, const std::string& fragmentShaderPath, Renderer* renderer, CameraNode* cameraController);
     virtual ~PhysicsDebugDrawer();
 
     // Implementation of btIDebugDraw's pure virtual methods...
@@ -39,7 +39,7 @@ private:
     GLuint VAO, VBO;
     Shader debugShader;
     Renderer* renderer; // Renderer instance for projection matrix
-    CameraController* cameraController; // CameraController instance for view matrix
+    CameraNode* cameraController; // CameraNode instance for view matrix
 
     // Additional private methods or member variables...
 };
