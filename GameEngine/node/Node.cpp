@@ -115,16 +115,21 @@ void Node::update(float deltaTime) {
     }
 }
 
-void Node::render(const glm::mat4& parentTransform) {
-    if (!m_IsVisible) {
+void Node::render(const glm::mat4& parentTransform, const Frustum& frustum) {
+    if (!m_IsVisible || !isInFrustum(frustum)) {
         return;
     }
 
     glm::mat4 nodeTransform = parentTransform * getTransform();
 
     for (const auto& child : m_Children) {
-        child->render(nodeTransform);
+        child->render(nodeTransform, frustum);
     }
+}
+
+bool Node::isInFrustum(const Frustum& frustum) const {
+    // Provide a default implementation that always returns true
+    return true;
 }
 
 // Misc
@@ -135,3 +140,4 @@ const std::string& Node::getName() const {
 void Node::setName(const std::string& name) {
     m_Name = name;
 }
+

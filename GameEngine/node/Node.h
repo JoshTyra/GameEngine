@@ -6,6 +6,7 @@
 #include <memory>
 #include <animations/Animation.h>
 #include <animations/Animator.h>
+#include "Rendering/Frustum.h"
 
 class Node {
 public:
@@ -40,7 +41,8 @@ public:
     bool isVisible() const;
     void setVisible(bool visible);
     virtual void update(float deltaTime);
-    virtual void render(const glm::mat4& parentTransform);
+    virtual void render(const glm::mat4& parentTransform, const Frustum& frustum);
+    virtual bool isInFrustum(const Frustum& frustum) const;
 
     // Misc
     const std::string& getName() const;

@@ -77,7 +77,7 @@ void Renderer::renderFrame(Node* rootNode) {
     updateUniformBufferObject();
 
     // Traverse the scene graph and render each node
-    rootNode->render(glm::mat4(1.0f));
+    rootNode->render(glm::mat4(1.0f), frustum);
 
     // Unbind the framebuffer and revert to the default framebuffer
     frameBufferManager->unbindFrameBuffer();

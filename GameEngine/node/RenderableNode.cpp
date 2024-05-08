@@ -8,8 +8,8 @@ RenderableNode::RenderableNode(const std::string& name, std::unique_ptr<Animated
 
 RenderableNode::~RenderableNode() {}
 
-void RenderableNode::render(const glm::mat4& parentTransform) {
-    if (!isVisible()) {
+void RenderableNode::render(const glm::mat4& parentTransform, const Frustum& frustum) {
+    if (!isVisible() || !isInFrustum(frustum)) {
         return;
     }
 
@@ -23,10 +23,20 @@ void RenderableNode::render(const glm::mat4& parentTransform) {
     }
 
     for (const auto& child : getChildren()) {
-        child->render(nodeTransform);
+        child->render(nodeTransform, frustum);
     }
 }
 
 void RenderableNode::setAnimator(std::shared_ptr<Animator> animator) {
     m_Animator = animator;
+}
+
+bool RenderableNode::isInFrustum(const Frustum& frustum) const {
+    if (m_StaticGeometry) {
+        return m_StaticGeometry->isInFrustum(frustum);
+    }
+    else if (m_AnimatedGeometry) {
+        return m_AnimatedGeometry->isInFrustum(frustum);
+    }
+    return false;
 }
