@@ -9,17 +9,19 @@ RenderableNode::RenderableNode(const std::string& name, std::unique_ptr<Animated
 RenderableNode::~RenderableNode() {}
 
 void RenderableNode::render(const glm::mat4& parentTransform, const Frustum& frustum) {
-    if (!isVisible() || !isInFrustum(frustum)) {
+    if (!isVisible()) {
         return;
     }
 
     glm::mat4 nodeTransform = parentTransform * getTransform();
 
     if (m_StaticGeometry) {
-        m_StaticGeometry->draw(nodeTransform);
+        if (m_StaticGeometry->isInFrustum(frustum)) {
+            m_StaticGeometry->draw(nodeTransform);
+        }
     }
     else if (m_AnimatedGeometry) {
-        m_AnimatedGeometry->draw(nodeTransform, m_Animator.get());
+        m_AnimatedGeometry->draw(nodeTransform, m_Animator.get(), frustum);
     }
 
     for (const auto& child : getChildren()) {

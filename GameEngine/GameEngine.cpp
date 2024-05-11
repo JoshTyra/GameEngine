@@ -25,22 +25,6 @@ void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum se
         << ", message = " << message << "\n";
 }
 
-void framebufferSizeCallback(GLFWwindow* window, int width, int height) {
-    // Retrieve the GameEngine instance from the window user pointer
-    auto* engine = static_cast<GameEngine*>(glfwGetWindowUserPointer(window));
-    if (!engine) return; // Safety check
-
-    // Update the viewport to match the new window dimensions
-    glViewport(0, 0, width, height);
-
-    // Recalculate the aspect ratio and update the projection matrix
-    float aspectRatio = static_cast<float>(width) / static_cast<float>(height);
-    auto projectionMatrix = glm::perspective(glm::radians(45.0f), aspectRatio, engine->nearPlane, engine->farPlane);
-
-    // Update the renderer's projection matrix
-    engine->getRenderer()->setProjectionMatrix(projectionMatrix, engine->nearPlane, engine->farPlane);
-}
-
 void GameEngine::initialize() {
     initializeGLFW();
     initializeOpenGL();
@@ -101,7 +85,7 @@ void GameEngine::initializeGLFW() {
     }
 
     // Create a fullscreen window using the screen resolution
-    window = glfwCreateWindow(mode->width, mode->height, "OpenGL Application", NULL, NULL);
+    window = glfwCreateWindow(mode->width, mode->height, "OpenGL Application", monitor, NULL);
     if (!window) {
         glfwTerminate();
         throw std::runtime_error("Failed to create GLFW window");
@@ -109,8 +93,6 @@ void GameEngine::initializeGLFW() {
 
     // Set 'this' as the user pointer for the GLFW window
     glfwSetWindowUserPointer(window, this);
-    // Set the framebuffer size callback
-    glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1); // Enable VSync to cap frame rate to monitor's refresh rate
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED); // Disable cursor by default
@@ -166,7 +148,7 @@ void GameEngine::initializeImGui() {
 
     // Setup Platform/Renderer backends
     ImGui_ImplGlfw_InitForOpenGL(window, true);
-    ImGui_ImplOpenGL3_Init("#version 420 core");
+    ImGui_ImplOpenGL3_Init("#version 430 core");
 }
 
 void GameEngine::initializeCameraController() {

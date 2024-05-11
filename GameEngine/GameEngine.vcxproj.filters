@@ -228,6 +228,9 @@
     <ClCompile Include="node\RenderableNode.cpp">
       <Filter>Source Files\node</Filter>
     </ClCompile>
+    <ClCompile Include="rendering\FrustumNode.cpp">
+      <Filter>Source Files\rendering</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CameraNode.h">
@@ -352,6 +355,9 @@
     </ClInclude>
     <ClInclude Include="node\RenderableNode.h">
       <Filter>Header Files\node</Filter>
+    </ClInclude>
+    <ClInclude Include="rendering\FrustumNode.h">
+      <Filter>Header Files\rendering</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -1,7 +1,10 @@
 #include "AnimatedGeometry.h"
 
 AnimatedGeometry::AnimatedGeometry()
-	: VAO(0), VBO(0), EBO(0), shader(nullptr) {
+	: VAO(0), VBO(0), EBO(0), shader(nullptr),
+	wireframeCubeVAO(0), wireframeCubeVBO(0), wireframeCubeEBO(0),
+	wireframeCubeShader(FileSystemUtils::getAssetFilePath("shaders/wireframe_cube.vert"),
+		FileSystemUtils::getAssetFilePath("shaders/wireframe_cube.frag")) {
 }
 
 AnimatedGeometry::AnimatedGeometry(const std::vector<AnimatedVertex>& vertices,
@@ -10,15 +13,31 @@ AnimatedGeometry::AnimatedGeometry(const std::vector<AnimatedVertex>& vertices,
 	const std::map<std::string, BoneInfo>& boneInfoMap)
 	: vertices(vertices), indices(indices), textures(textures),
 	VAO(0), VBO(0), EBO(0), shader(nullptr),
-	m_BoneInfoMap(boneInfoMap) {
+	m_BoneInfoMap(boneInfoMap),
+	wireframeCubeVAO(0), wireframeCubeVBO(0), wireframeCubeEBO(0),
+	wireframeCubeShader(FileSystemUtils::getAssetFilePath("shaders/wireframe_cube.vert"),
+		FileSystemUtils::getAssetFilePath("shaders/wireframe_cube.frag")) {
+
+	//for (const auto& vertex : vertices) {
+	//	std::cout << "Vertex position: " << vertex.Position.x << ", " << vertex.Position.y << ", " << vertex.Position.z << std::endl;
+	//	std::cout << "Bone IDs: " << vertex.BoneIDs[0] << ", " << vertex.BoneIDs[1] << ", " << vertex.BoneIDs[2] << ", " << vertex.BoneIDs[3] << std::endl;
+	//	std::cout << "Weights: " << vertex.Weights[0] << ", " << vertex.Weights[1] << ", " << vertex.Weights[2] << ", " << vertex.Weights[3] << std::endl;
+	//}
+
 	setupMesh();
 	calculateAABB();
+	generateWireframeCubeVertices();
+	setupWireframeCube();
 }
 
 AnimatedGeometry::~AnimatedGeometry() {
 	glDeleteVertexArrays(1, &VAO);
 	glDeleteBuffers(1, &VBO);
 	glDeleteBuffers(1, &EBO);
+
+	glDeleteVertexArrays(1, &wireframeCubeVAO);
+	glDeleteBuffers(1, &wireframeCubeVBO);
+	glDeleteBuffers(1, &wireframeCubeEBO);
 }
 
 void AnimatedGeometry::setupMesh() {
@@ -52,13 +71,55 @@ void AnimatedGeometry::setupMesh() {
 	glBindVertexArray(0);
 }
 
-void AnimatedGeometry::draw(const glm::mat4& transform, Animator* animator) {
+void AnimatedGeometry::setupWireframeCube() {
+	glGenVertexArrays(1, &wireframeCubeVAO);
+	glGenBuffers(1, &wireframeCubeVBO);
+	glGenBuffers(1, &wireframeCubeEBO);
+
+	glBindVertexArray(wireframeCubeVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, wireframeCubeVBO);
+	glBufferData(GL_ARRAY_BUFFER, wireframeCubeVertices.size() * sizeof(glm::vec3), wireframeCubeVertices.data(), GL_STATIC_DRAW);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, wireframeCubeEBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, wireframeCubeIndices.size() * sizeof(unsigned int), wireframeCubeIndices.data(), GL_STATIC_DRAW);
+
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (void*)0);
+
+	glBindVertexArray(0);
+}
+
+void AnimatedGeometry::draw(const glm::mat4& transform, Animator* animator, const Frustum& frustum) {
 	if (!shader || !shader->Program) {
 		std::cerr << "Shader not set or invalid for geometry, cannot draw." << std::endl;
 		return;
 	}
 
+	// Update the AABB based on the current animation pose
+	updateAABB(animator);
+
+	 //Perform frustum culling using the updated AABB
+	if (!isInFrustum(frustum)) {
+		return;
+	}
+
+	// Save the current OpenGL states
+	GLint currentShaderProgram;
+	glGetIntegerv(GL_CURRENT_PROGRAM, &currentShaderProgram);
+	GLint currentVAO;
+	glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &currentVAO);
+	// Save other relevant states if necessary
+
+	// Render the wireframe cube
+	renderWireframeCube(transform, animator);
+
+	// Restore the OpenGL states for the animated character rendering
+	glUseProgram(currentShaderProgram);
+	glBindVertexArray(currentVAO);
+
+	// Restore other relevant states if necessary
 	shader->use();
+
 
 	GLenum error;
 	while ((error = glGetError()) != GL_NO_ERROR) {
@@ -176,6 +237,26 @@ void AnimatedGeometry::draw(const glm::mat4& transform, Animator* animator) {
 	}
 }
 
+void AnimatedGeometry::renderWireframeCube(const glm::mat4& transform, Animator* animator) {
+	wireframeCubeShader.use();
+
+	// Update the AABB based on the current animation pose
+	//updateAABB(animator);
+
+	// Calculate the scale and translation based on AABB dimensions
+	glm::vec3 aabbCenter = (aabbMin + aabbMax) * 0.5f;
+	glm::vec3 aabbExtents = (aabbMax - aabbMin);
+
+	// Set the model matrix uniform in the shader
+	glm::mat4 modelMatrix = glm::translate(transform, aabbCenter);
+	modelMatrix = glm::scale(modelMatrix, aabbExtents);
+	wireframeCubeShader.setMat4("model", modelMatrix);
+
+	glBindVertexArray(wireframeCubeVAO);
+	glDrawElements(GL_LINES, wireframeCubeIndices.size(), GL_UNSIGNED_INT, 0);
+	glBindVertexArray(0);
+}
+
 void AnimatedGeometry::addTexture(const Texture& texture) {
 	textures.push_back(texture);
 }
@@ -243,19 +324,51 @@ void AnimatedGeometry::calculateAABB() {
 
 	aabbMin = aabbMax = vertices[0].Position;
 
+	// Determine min and max from vertex positions
 	for (const auto& vertex : vertices) {
+		//std::cout << "Vertex Position: x = " << vertex.Position.x << ", y = " << vertex.Position.y << ", z = " << vertex.Position.z << std::endl;
 		aabbMin = glm::min(aabbMin, vertex.Position);
 		aabbMax = glm::max(aabbMax, vertex.Position);
 	}
 
-	// Optionally, apply the current model matrix to the AABB corners
+	//std::cout << "Pre-Transform AABB Min: " << aabbMin.x << ", " << aabbMin.y << ", " << aabbMin.z << std::endl;
+	//std::cout << "Pre-Transform AABB Max: " << aabbMax.x << ", " << aabbMax.y << ", " << aabbMax.z << std::endl;
+
+	// Apply the current model matrix to the AABB corners
 	glm::mat4 modelMatrix = getModelMatrix();
 	glm::vec4 minCorner = modelMatrix * glm::vec4(aabbMin, 1.0f);
 	glm::vec4 maxCorner = modelMatrix * glm::vec4(aabbMax, 1.0f);
 
+	// Update the aabbMin and aabbMax with the new transformed corners
 	aabbMin = glm::vec3(minCorner);
 	aabbMax = glm::vec3(maxCorner);
+
+	//std::cout << "Post-Transform AABB Min: " << aabbMin.x << ", " << aabbMin.y << ", " << aabbMin.z << std::endl;
+	//std::cout << "Post-Transform AABB Max: " << aabbMax.x << ", " << aabbMax.y << ", " << aabbMax.z << std::endl;
 }
+
+void AnimatedGeometry::updateAABB(Animator* animator) {
+	if (!animator) return;
+
+	const auto& transforms = animator->GetFinalBoneMatrices();
+	glm::vec3 localMin(std::numeric_limits<float>::max()), localMax(std::numeric_limits<float>::lowest());
+
+	for (const auto& vertex : vertices) {
+		glm::vec3 transformedVertex(0.0f);
+		for (int i = 0; i < 4; ++i) {
+			int boneID = vertex.BoneIDs[i];
+			if (boneID >= 0 && boneID < transforms.size()) {
+				transformedVertex += glm::vec3(transforms[boneID] * glm::vec4(vertex.Position, 1.0f)) * vertex.Weights[i];
+			}
+		}
+		localMin = glm::min(localMin, transformedVertex);
+		localMax = glm::max(localMax, transformedVertex);
+	}
+
+	aabbMin = localMin;
+	aabbMax = localMax;
+}
+
 
 bool AnimatedGeometry::isInFrustum(const Frustum& frustum) const {
 	for (int i = 0; i < 6; ++i) {
@@ -300,6 +413,30 @@ void AnimatedGeometry::setShader(std::shared_ptr<Shader> newShader) {
 
 std::shared_ptr<Shader> AnimatedGeometry::getShader() const {
 	return shader; // Directly return the std::shared_ptr<Shader>
+}
+
+void AnimatedGeometry::generateWireframeCubeVertices() {
+	// Generate vertices for a unit cube
+	wireframeCubeVertices = {
+		glm::vec3(-0.5f, -0.5f, -0.5f),
+		glm::vec3(0.5f, -0.5f, -0.5f),
+		glm::vec3(0.5f, 0.5f, -0.5f),
+		glm::vec3(-0.5f, 0.5f, -0.5f),
+		glm::vec3(-0.5f, -0.5f, 0.5f),
+		glm::vec3(0.5f, -0.5f, 0.5f),
+		glm::vec3(0.5f, 0.5f, 0.5f),
+		glm::vec3(-0.5f, 0.5f, 0.5f)
+	};
+
+	wireframeCubeIndices = {
+		0, 1, 1, 2, 2, 3, 3, 0,
+		4, 5, 5, 6, 6, 7, 7, 4,
+		0, 4, 1, 5, 2, 6, 3, 7
+	};
+}
+
+glm::vec3 AnimatedGeometry::getTranslation() const {
+	return position;
 }
 
 

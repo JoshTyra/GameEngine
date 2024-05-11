@@ -10,7 +10,8 @@
 
 class CameraNode : public Node {
 public:
-    CameraNode(GLFWwindow* window, glm::vec3 cameraPos, glm::vec3 cameraFront, glm::vec3 cameraUp, float cameraSpeed, std::shared_ptr<AudioManager> audioManager);
+    CameraNode(GLFWwindow* window, glm::vec3 cameraPos, glm::vec3 cameraFront, glm::vec3 cameraUp, float cameraSpeed, std::shared_ptr<AudioManager> audioManager, 
+        float aspectRatio, float fov);
 
     static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
     static void mouseCallbackStatic(GLFWwindow* window, double xpos, double ypos); // Static wrapper for mouse callback
@@ -25,7 +26,10 @@ public:
     glm::vec3 getCameraPosition() const;
     glm::vec3 getCameraFront() const;
     glm::vec3 getCameraUp() const;
+    glm::vec3 getCameraRight() const;
     float getCameraSpeed() const;
+    float getFOV() const;
+    float getAspectRatio() const;
 
 private:
     GLFWwindow* window;
@@ -33,6 +37,8 @@ private:
     glm::vec3 cameraFront;
     glm::vec3 cameraUp;
     float cameraSpeed;
+    float fov;
+    float aspectRatio;
     float lastX = 2560.0f / 2.0;
     float lastY = 1080.0f / 2.0;
     bool firstMouse = true;

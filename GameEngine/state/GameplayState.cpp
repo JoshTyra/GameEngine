@@ -23,6 +23,7 @@ void GameplayState::enter() {
     const float staticNodeRotationAngle = glm::radians(-90.0f);
 
     for (auto& renderable : staticRenderables) {
+        renderable->setVisible(false);
         renderable->setScale(staticNodeScale);
         renderable->setRotation(glm::angleAxis(staticNodeRotationAngle, staticNodeRotationAxis));
         sceneRoot->addChild(std::move(renderable));
@@ -36,6 +37,7 @@ void GameplayState::enter() {
     for (auto& renderable : animatedRenderables) {
         renderable->setScale(animatedNodeScale);
         renderable->setRotation(glm::angleAxis(animatedNodeRotationAngle, animatedNodeRotationAxis));
+        renderable->setVisible(true);
 
         // Load the animation file based on the mesh name
         std::string animationPath = FileSystemUtils::getAssetFilePath("models/combat_sword_idle.fbx");

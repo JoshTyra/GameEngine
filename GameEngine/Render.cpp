@@ -62,7 +62,7 @@ void Renderer::setProjectionMatrix(const glm::mat4& projectionMatrix, float near
 
 void Renderer::renderFrame(Node* rootNode) {
     // Update the frustum for culling using the latest view and projection matrices
-    updateFrustum(projectionMatrix * cameraController->getViewMatrix());
+    //updateFrustum(projectionMatrix * cameraController->getViewMatrix());
 
     // Bind the main framebuffer for rendering
     frameBufferManager->bindFrameBuffer(0);
@@ -71,13 +71,23 @@ void Renderer::renderFrame(Node* rootNode) {
     prepareFrame();
 
     // Render the skybox
-    renderSkybox();
+    //renderSkybox();
 
     // Update all relevant UBOs with current frame data
     updateUniformBufferObject();
 
+    // Update the frustum node with the current camera parameters
+    frustumNode.update(*cameraController,
+        cameraController->getAspectRatio(),
+        cameraController->getFOV(),
+        nearPlane,
+        farPlane);
+
     // Traverse the scene graph and render each node
     rootNode->render(glm::mat4(1.0f), frustum);
+
+    // Update the frustum node with the current view-projection matrix
+
 
     // Unbind the framebuffer and revert to the default framebuffer
     frameBufferManager->unbindFrameBuffer();
@@ -124,6 +134,15 @@ void Renderer::finalizeFrame() {
     GLuint sceneTexture = frameBufferManager->getSceneTexture();
     frameBufferManager->applyPostProcessingEffects(sceneTexture);
 
+    // Disable depth testing
+    glDisable(GL_DEPTH_TEST);
+
+    // Draw the frustum wireframe
+    frustumNode.draw(cameraController->getViewMatrix(), getProjectionMatrix());
+
+    // Re-enable depth testing
+    glEnable(GL_DEPTH_TEST);
+
     // Re-enable depth testing for the next frame's regular rendering
     glEnable(GL_DEPTH_TEST);
 }
@@ -133,7 +152,23 @@ void Renderer::setSkybox(std::shared_ptr<SkyboxNode> skybox) {
 }
 
 void Renderer::updateFrustum(const glm::mat4& viewProjection) {
+    std::cout << "View-Projection Matrix:" << std::endl;
+    for (int i = 0; i < 4; ++i) {
+        std::cout << viewProjection[i].x << "\t" << viewProjection[i].y << "\t"
+            << viewProjection[i].z << "\t" << viewProjection[i].w << std::endl;
+    }
+    std::cout << std::endl;
+
     frustum.update(viewProjection);
+
+    std::cout << "Updated Frustum Planes:" << std::endl;
+    for (int i = 0; i < 6; ++i) {
+        const Plane& plane = frustum.planes[i];
+        std::cout << "Plane " << i << ":" << std::endl;
+        std::cout << "  Normal: (" << plane.normal.x << ", " << plane.normal.y << ", " << plane.normal.z << ")" << std::endl;
+        std::cout << "  Distance: " << plane.distance << std::endl;
+    }
+    std::cout << std::endl;
 }
 
 const glm::mat4& Renderer::getProjectionMatrix() const {

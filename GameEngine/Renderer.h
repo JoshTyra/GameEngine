@@ -11,6 +11,7 @@
 #include "post-processing/FrameBufferManager.h"
 #include "rendering/IRenderable.h"
 #include "node/Node.h"
+#include "rendering/FrustumNode.h"
 
 struct Camera {
     glm::vec3 cameraPositionWorld;
@@ -71,5 +72,6 @@ private:
     GLFWwindow* window;
     float nearPlane;
     float farPlane;
+    FrustumNode frustumNode;
 };
 

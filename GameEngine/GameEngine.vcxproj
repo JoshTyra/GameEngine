@@ -180,6 +180,7 @@
     <ClCompile Include="post-processing\ScreenQuad.cpp" />
     <ClCompile Include="Render.cpp" />
     <ClCompile Include="rendering\Frustum.cpp" />
+    <ClCompile Include="rendering\FrustumNode.cpp" />
     <ClCompile Include="rendering\LODManager.cpp" />
     <ClCompile Include="rendering\SkyboxNode.cpp" />
     <ClCompile Include="state\GameplayState.cpp" />
@@ -218,6 +219,7 @@
     <ClInclude Include="post-processing\ScreenQuad.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="rendering\Frustum.h" />
+    <ClInclude Include="rendering\FrustumNode.h" />
     <ClInclude Include="rendering\LODManager.h" />
     <ClInclude Include="rendering\SkyboxNode.h" />
     <ClInclude Include="shader.h" />

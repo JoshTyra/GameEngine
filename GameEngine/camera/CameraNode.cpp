@@ -8,8 +8,9 @@ bool CameraNode::keyAPressed = false;
 bool CameraNode::keyDPressed = false;
 
 // Correctly defined constructor
-CameraNode::CameraNode(GLFWwindow* window, glm::vec3 cameraPos, glm::vec3 cameraFront, glm::vec3 cameraUp, float cameraSpeed, std::shared_ptr<AudioManager> audioManager)
-    : window(window), cameraPos(cameraPos), cameraFront(cameraFront), cameraUp(cameraUp), cameraSpeed(cameraSpeed), audioManager(audioManager)
+CameraNode::CameraNode(GLFWwindow* window, glm::vec3 cameraPos, glm::vec3 cameraFront, glm::vec3 cameraUp, float cameraSpeed, std::shared_ptr<AudioManager> audioManager, 
+    float aspectRatio, float fov)
+    : window(window), cameraPos(cameraPos), cameraFront(cameraFront), cameraUp(cameraUp), cameraSpeed(cameraSpeed), audioManager(audioManager), aspectRatio(aspectRatio), fov(fov)
 {
 }
 
@@ -27,6 +28,18 @@ glm::vec3 CameraNode::getCameraFront() const {
 
 glm::vec3 CameraNode::getCameraUp() const {
     return cameraUp;
+}
+
+glm::vec3 CameraNode::getCameraRight() const {
+    return glm::normalize(glm::cross(cameraFront, cameraUp));
+}
+
+float CameraNode::getFOV() const {
+    return fov;
+}
+
+float CameraNode::getAspectRatio() const {
+    return aspectRatio;
 }
 
 void CameraNode::keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {

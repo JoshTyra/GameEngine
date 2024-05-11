@@ -1,21 +1,34 @@
 // Frustum.h
 #pragma once
 #include <glm/glm.hpp>
+#include "CameraNode.h"
 
-struct Plane {
-    glm::vec3 normal;
-    float distance;
+struct Plane
+{
+	glm::vec3 normal = { 0.f, 1.f, 0.f }; // unit vector
+	float     distance = 0.f;        // Distance with origin
 
-    void normalize() {
-        float mag = glm::length(normal);
-        normal = normal / mag;
-        distance = distance / mag;
-    }
+	Plane() = default;
+
+	Plane(const glm::vec3& p1, const glm::vec3& norm)
+		: normal(glm::normalize(norm)),
+		distance(glm::dot(normal, p1))
+	{}
+
+	float getSignedDistanceToPlane(const glm::vec3& point) const
+	{
+		return glm::dot(normal, point) - distance;
+	}
 };
 
 struct Frustum {
-    Plane planes[6];
-
-    void update(const glm::mat4& VPMatrix);
+	Plane leftFace;
+	Plane rightFace;
+	Plane topFace;
+	Plane bottomFace;
+	Plane nearFace;
+	Plane farFace;
 };
+
+Frustum createFrustumFromCamera(const CameraNode& cam, float aspect, float fov, float zNear, float zFar);
 

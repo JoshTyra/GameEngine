@@ -13,6 +13,7 @@
 #include "Debug.h"
 #include "animations/Animation.h"
 #include "animations/Animator.h"
+#include "FileSystemUtils.h"
 
 // StaticGeometry class
 class AnimatedGeometry {
@@ -25,7 +26,7 @@ public:
         const std::map<std::string, BoneInfo>& boneInfoMap);
 
     virtual ~AnimatedGeometry();
-    void draw(const glm::mat4& transform, Animator* animator = nullptr);
+    void draw(const glm::mat4& transform, Animator* animator, const Frustum& frustum);
     void addTexture(const Texture& texture);
     btCollisionShape* createBulletCollisionShape() const; // Creates and returns the Bullet collision shape
     void addToPhysicsWorld(btDiscreteDynamicsWorld* dynamicsWorld); // Adds the geometry to the specified Bullet dynamics world
@@ -35,6 +36,8 @@ public:
     glm::vec3 getAABBMin() const { return aabbMin; }
 
     glm::vec3 getAABBMax() const { return aabbMax; }
+
+    glm::vec3 getTranslation() const;
 
     // Getter function for textures
     const std::vector<Texture>& getTextures() const {
@@ -77,11 +80,15 @@ public:
     }
 
     void calculateAABB();
+    void updateAABB(Animator* animator);
     bool isInFrustum(const Frustum& frustum) const;
 
     void setModelMatrix(const glm::mat4& model) { modelMatrix = model; }
     glm::mat4 getModelMatrix() const;
     void updateModelMatrix();
+    void generateWireframeCubeVertices();
+    void setupWireframeCube();
+    void renderWireframeCube(const glm::mat4& transform, Animator* animator);
 
 private:
     std::vector<AnimatedVertex> vertices;
@@ -97,6 +104,12 @@ private:
     glm::mat4 modelMatrix;
     std::unique_ptr<Animation> animation;
     std::map<std::string, BoneInfo> m_BoneInfoMap;
+
+    // Wireframe cube rendering
+    GLuint wireframeCubeVAO, wireframeCubeVBO, wireframeCubeEBO;
+    std::vector<glm::vec3> wireframeCubeVertices;
+    std::vector<unsigned int> wireframeCubeIndices;
+    Shader wireframeCubeShader;
 
     void setupMesh();
 };
